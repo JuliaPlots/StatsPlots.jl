@@ -1,6 +1,6 @@
 # StatPlots
 
-[![Build Status](https://travis-ci.org/tbreloff/StatPlots.jl.svg?branch=master)](https://travis-ci.org/tbreloff/StatPlots.jl)
+[![Build Status](https://travis-ci.org/JuliaPlots/StatPlots.jl.svg?branch=master)](https://travis-ci.org/tbreloff/StatPlots.jl)
 
 
 ### Primary author: Thomas Breloff (@tbreloff)
