@@ -16,3 +16,52 @@ This package contains many statistical recipes for concepts and types introduced
     - violin
     - marginalhist
     - corrplot
+
+Initialize:
+
+```julia
+#Pkg.clone("git@github.com:JuliaPlots/StatPlots.jl.git")
+using StatPlots
+gr(size=(400,300))
+```
+
+---
+
+## marginalhist with DataFrames
+
+```julia
+using RDatasets
+iris = dataset("datasets","iris")
+marginalhist(iris, :PetalLength, :PetalWidth, bins=10)
+```
+
+![](https://cloud.githubusercontent.com/assets/933338/16709018/81c4da34-45d2-11e6-9e08-bb557541e144.png)
+
+---
+
+## corrplot
+
+
+```julia
+M = randn(1000,4)
+M[:,2] += 0.8sqrt(abs(M[:,1])) - 0.5M[:,3] + 5
+M[:,3] -= 0.7M[:,1].^2 + 2
+corrplot(M, label = ["x$i" for i=1:4])
+```
+
+![](https://cloud.githubusercontent.com/assets/933338/16030833/3c84e6bc-31c3-11e6-9a04-4cee531440a4.png)
+
+---
+
+## boxplot and violin
+
+```julia
+import RDatasets
+singers = RDatasets.dataset("lattice","singer")
+violin(singers,:VoicePart,:Height,marker=(0.2,:blue,stroke(0)))
+boxplot!(singers,:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
+```
+
+![](https://juliaplots.github.io/examples/img/pyplot/pyplot_example_30.png)
+
+
