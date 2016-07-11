@@ -32,7 +32,7 @@ gr(size=(400,300))
 ```julia
 using RDatasets
 iris = dataset("datasets","iris")
-marginalhist(iris, :PetalLength, :PetalWidth, bins=10)
+marginalhist(iris, :PetalLength, :PetalWidth)
 ```
 
 ![](https://cloud.githubusercontent.com/assets/933338/16709018/81c4da34-45d2-11e6-9e08-bb557541e144.png)
@@ -63,5 +63,21 @@ boxplot!(singers,:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
 ```
 
 ![](https://juliaplots.github.io/examples/img/pyplot/pyplot_example_30.png)
+
+---
+
+```julia
+using Distributions
+plot(Normal(3,5), fill=(.5,:orange))
+
+![](https://cloud.githubusercontent.com/assets/933338/16718702/561510f6-46f0-11e6-834a-3cf17a5b77d6.png)
+
+```julia
+dist = Gamma(2)
+scatter(dist, leg=false)
+bar!(dist, func=cdf, alpha=0.3)
+```
+
+![](https://cloud.githubusercontent.com/assets/933338/16718720/729b6fea-46f0-11e6-9bff-fdf2541ce305.png)
 
 
