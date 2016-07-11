@@ -69,6 +69,7 @@ boxplot!(singers,:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
 ```julia
 using Distributions
 plot(Normal(3,5), fill=(.5,:orange))
+```
 
 ![](https://cloud.githubusercontent.com/assets/933338/16718702/561510f6-46f0-11e6-834a-3cf17a5b77d6.png)
 
