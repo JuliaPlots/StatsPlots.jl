@@ -29,7 +29,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         end
 
         # make the shape
-        center = discrete_value!(d[:subplot][:xaxis], glabel)[1]
+        center = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
         hw = d[:bar_width] == nothing ? _box_halfwidth : 0.5cycle(d[:bar_width], i)
         l, m, r = center - hw, center, center + hw
         
@@ -85,6 +85,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         markeralpha := d[:fillalpha]
         markerstrokecolor := d[:linecolor]
         markerstrokealpha := d[:linealpha]
+        fillrange   := nothing
         x           := outliers_x
         y           := outliers_y
         primary     := false

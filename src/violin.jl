@@ -28,7 +28,7 @@ end
         widths = _box_halfwidth * widths / maximum(widths)
 
         # make the violin
-        xcenter = discrete_value!(d[:subplot][:xaxis], glabel)[1]
+        xcenter = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
         xcoords = vcat(widths, -reverse(widths)) + xcenter
         ycoords = vcat(centers, reverse(centers))
 

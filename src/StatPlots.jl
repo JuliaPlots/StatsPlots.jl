@@ -8,6 +8,7 @@ using Reexport
 using StatsBase
 using Distributions
 using DataFrames
+import KernelDensity
 
 include("dataframes.jl")
 include("corrplot.jl")
