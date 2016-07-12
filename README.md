@@ -15,7 +15,7 @@ This package contains many statistical recipes for concepts and types introduced
     - boxplot
     - violin
     - marginalhist
-    - corrplot
+    - corrplot/cornerplot
 
 Initialize:
 
@@ -39,7 +39,7 @@ marginalhist(iris, :PetalLength, :PetalWidth)
 
 ---
 
-## corrplot
+## corrplot and cornerplot
 
 
 ```julia
@@ -50,6 +50,12 @@ corrplot(M, label = ["x$i" for i=1:4])
 ```
 
 ![](https://cloud.githubusercontent.com/assets/933338/16030833/3c84e6bc-31c3-11e6-9a04-4cee531440a4.png)
+
+```julia
+cornerplot(M, label = ["x$i" for i=1:4], compact=true)
+```
+
+![](https://cloud.githubusercontent.com/assets/4098145/16762241/f924c8ac-4823-11e6-8720-83025606b5e1.png)
 
 ---
 
@@ -80,5 +86,3 @@ bar!(dist, func=cdf, alpha=0.3)
 ```
 
 ![](https://cloud.githubusercontent.com/assets/933338/16718720/729b6fea-46f0-11e6-9bff-fdf2541ce305.png)
-
-
