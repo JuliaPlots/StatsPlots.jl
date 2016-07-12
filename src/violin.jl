@@ -4,8 +4,6 @@
 
 const _violin_warned = [false]
 
-# if the user has KernelDensity installed, use this for violin plots.
-# otherwise, just use a histogram
 function violin_coords(y; trim::Bool=false)
     kd = KernelDensity.kde(y, npoints = 200)
     if trim

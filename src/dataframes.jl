@@ -17,8 +17,8 @@ function handle_dfs(df::AbstractDataFrame, d::KW, letter, anything)
 end
 
 # handle grouping by DataFrame column
-function extractGroupArgs(group::Symbol, df::AbstractDataFrame, args...)
-    extractGroupArgs(collect(df[group]))
+function Plots.extractGroupArgs(group::Symbol, df::AbstractDataFrame, args...)
+    Plots.extractGroupArgs(collect(df[group]))
 end
 
 # if a DataFrame is the first arg, lets swap symbols out for columns
