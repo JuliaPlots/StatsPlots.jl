@@ -11,6 +11,7 @@ using DataFrames
 
 include("dataframes.jl")
 include("corrplot.jl")
+include("cornerplot.jl")
 include("distributions.jl")
 include("boxplot.jl")
 include("violin.jl")
