@@ -21,7 +21,7 @@ end
     titlefont := font(11)
     fillcolor := :black
     markeralpha := 0.4
-    grad = ColorGradient(get(d, :markercolor, Plots.default_gradient()))
+    grad = cgrad(get(d, :markercolor, cgrad()))
     indices = reshape(1:n^2, n, n)'
 
     # histograms on the diagonal
@@ -48,7 +48,7 @@ end
                 #below diag... scatter
                 @series begin
                     seriestype := :scatter
-                    markercolor := getColorZ(grad, 0.5 + 0.5C[i,j])
+                    markercolor := grad[0.5 + 0.5C[i,j]]
                     smooth := true
                     vj, vi
                 end
