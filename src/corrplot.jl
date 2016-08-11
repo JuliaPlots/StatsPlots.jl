@@ -31,17 +31,17 @@ end
             subplot := indices[i,i]
             grid := false
             update_ticks_guides(d, labs, i, i, n)
-            sub(mat,:,i)
+            view(mat,:,i)
         end
     end
 
     # scatters
     for i=1:n
         ylink := setdiff(vec(indices[i,:]), indices[i,i])
-        vi = sub(mat,:,i)
+        vi = view(mat,:,i)
         for j = 1:n
             j==i && continue
-            vj = sub(mat,:,j)
+            vj = view(mat,:,j)
             subplot := indices[i,j]
             update_ticks_guides(d, labs, i, j, n)
             if i > j
