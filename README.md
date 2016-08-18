@@ -52,10 +52,17 @@ corrplot(M, label = ["x$i" for i=1:4])
 ![](https://cloud.githubusercontent.com/assets/933338/16030833/3c84e6bc-31c3-11e6-9a04-4cee531440a4.png)
 
 ```julia
-cornerplot(M, label = ["x$i" for i=1:4], compact=true)
+cornerplot(M)
 ```
 
-![](https://cloud.githubusercontent.com/assets/4098145/16762241/f924c8ac-4823-11e6-8720-83025606b5e1.png)
+![](https://cloud.githubusercontent.com/assets/933338/17787905/2e161b7c-6559-11e6-937a-20209301905b.png)
+
+
+```julia
+cornerplot(M, compact=true)
+```
+
+![](https://cloud.githubusercontent.com/assets/933338/17787917/3af9b0e2-6559-11e6-8613-c177efb0b038.png)
 
 ---
 
