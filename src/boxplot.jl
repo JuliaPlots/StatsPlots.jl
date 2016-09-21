@@ -2,12 +2,9 @@
 # ---------------------------------------------------------------------------
 # Box Plot
 
-const _box_halfwidth = 0.4
-
 notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
-
-@recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5)
+@recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, boxwidth=0.8)
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     warning = false
@@ -30,7 +27,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
         # make the shape
         center = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
-        hw = d[:bar_width] == nothing ? _box_halfwidth : 0.5cycle(d[:bar_width], i)
+        hw = d[:bar_width] == nothing ? boxwidth/2 : 0.5cycle(d[:bar_width], i)
         l, m, r = center - hw, center, center + hw
         
         # internal nodes for notches
