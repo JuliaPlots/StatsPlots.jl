@@ -97,7 +97,7 @@
                 end
                 seriestype := :scatter
                 subplot := indices[i+1-k, j]
-                smooth := true
+                smooth --> true
                 markerstrokewidth --> 0
                 vj, vi
             end
