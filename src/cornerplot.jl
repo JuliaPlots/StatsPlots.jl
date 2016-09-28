@@ -1,6 +1,9 @@
 @userplot CornerPlot
 
-@recipe function f(cp::CornerPlot; compact=false, maxvariables=30, histpct = 0.1)
+@recipe function f(cp::CornerPlot; compact=false, maxvariables=30, histpct = 0.1, smooth=true)
+    smoothval = d[:smooth]
+    d[:smooth] = false
+
     mat = cp.args[1]
     @assert typeof(mat) <: AbstractMatrix
     N = size(mat,2)
@@ -75,6 +78,8 @@
         end
     end
 
+    d[:smooth] = smoothval
+
     # scatters
     for i=1:N
         vi = view(mat,:,i)
@@ -97,7 +102,6 @@
                 end
                 seriestype := :scatter
                 subplot := indices[i+1-k, j]
-                smooth := true
                 markerstrokewidth --> 0
                 vj, vi
             end
