@@ -23,5 +23,6 @@ include("boxplot.jl")
 include("violin.jl")
 include("hist.jl")
 include("marginalhist.jl")
+include("bar.jl")
 
 end # module

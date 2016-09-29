@@ -93,3 +93,21 @@ bar!(dist, func=cdf, alpha=0.3)
 ```
 
 ![](https://cloud.githubusercontent.com/assets/933338/16718720/729b6fea-46f0-11e6-9bff-fdf2541ce305.png)
+
+## Grouped Bar plots
+
+```julia
+using StatPlots
+groupedbar(rand(10,3), bar_position = :stack, bar_width=0.7, alpha=0.5)
+```
+
+![tmp](https://cloud.githubusercontent.com/assets/933338/18962081/58a2a5e0-863d-11e6-8638-94f88ecc544d.png)
+
+This is the default:
+
+```julia
+using StatPlots
+groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7, alpha=0.5)
+```
+
+![tmp](https://cloud.githubusercontent.com/assets/933338/18962092/673f6c78-863d-11e6-9ee9-8ca104e5d2a3.png)
