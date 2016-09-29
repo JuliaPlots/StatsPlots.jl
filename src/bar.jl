@@ -8,8 +8,22 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
 
     nr, nc = size(y)
     isstack = pop!(d, :bar_position, :dodge) == :stack
-    bar_width --> (0.8 * mean(diff(x)))
 
+    # extract xnums and set default bar width.
+    # might need to set xticks as well
+    xnums = if eltype(x) <: Number
+        bar_width --> (0.8 * mean(diff(x)))
+        x
+    else
+        bar_width --> 0.8
+        ux = unique(x)
+        xnums = (1:length(ux)) - 0.5
+        xticks --> (xnums, ux)
+        xnums
+    end
+    @assert length(xnums) == nr
+
+    # compute the x centers.  for dodge, make a matrix for each column
     x = if isstack
         x
     else
@@ -18,7 +32,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
         xmat = zeros(nr,nc)
         for r=1:nr
             bw = cycle(bws, r)
-            farleft = x[r] - 0.5 * (bw * nc)
+            farleft = xnums[r] - 0.5 * (bw * nc)
             for c=1:nc
                 xmat[r,c] = farleft + 0.5bw + (c-1)*bw
             end
@@ -26,7 +40,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
         xmat
     end
 
-    # update
+    # compute fillrange
     fillrange := if isstack
         # shift y/fillrange up
         fr = zeros(nr, nc)
