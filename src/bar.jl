@@ -7,7 +7,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
     x, y = grouped_xy(g.args...)
 
     nr, nc = size(y)
-    isstack = get(d, :bar_position, :dodge) == :stack
+    isstack = pop!(d, :bar_position, :dodge) == :stack
     bar_width --> (0.8 * mean(diff(x)))
 
     x = if isstack
