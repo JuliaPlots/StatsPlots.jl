@@ -19,7 +19,7 @@ end
     foreground_color_border := nothing
     margin := 1mm
     titlefont := font(11)
-    fillcolor := :black
+    fillcolor --> Plots.fg_color(d)
     markeralpha := 0.4
     grad = cgrad(get(d, :markercolor, cgrad()))
     indices = reshape(1:n^2, n, n)'
