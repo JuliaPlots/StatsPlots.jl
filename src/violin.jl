@@ -18,12 +18,15 @@ end
 @recipe function f(::Type{Val{:violin}}, x, y, z; trim=true)
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
-    for glabel in glabels
+    bw = d[:bar_width]
+    bw == nothing && (bw = 0.8)
+    for (i,glabel) in enumerate(glabels)
         widths, centers = violin_coords(y[filter(i -> cycle(x,i) == glabel, 1:length(y))], trim=trim)
         isempty(widths) && continue
 
         # normalize
-        widths = _box_halfwidth * widths / maximum(widths)
+        hw = 0.5cycle(bw, i)
+        widths = hw * widths / maximum(widths)
 
         # make the violin
         xcenter = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]

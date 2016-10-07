@@ -4,18 +4,20 @@
 
 notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
-@recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, boxwidth=0.8)
+@recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5)
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     warning = false
     outliers_x, outliers_y = zeros(0), zeros(0)
+    bw = d[:bar_width]
+    bw == nothing && (bw = 0.8)
     for (i,glabel) in enumerate(glabels)
         # filter y
         values = y[filter(i -> cycle(x,i) == glabel, 1:length(y))]
 
         # compute quantiles
         q1,q2,q3,q4,q5 = quantile(values, linspace(0,1,5))
-        
+
         # notch
         n = notch_width(q2, q4, length(values))
 
@@ -27,12 +29,12 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
         # make the shape
         center = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
-        hw = d[:bar_width] == nothing ? boxwidth/2 : 0.5cycle(d[:bar_width], i)
+        hw = 0.5cycle(bw, i)
         l, m, r = center - hw, center, center + hw
-        
+
         # internal nodes for notches
         L, R = center - 0.5 * hw, center + 0.5 * hw
-        
+
         # outliers
         if Float64(range) != 0.0  # if the range is 0.0, the whiskers will extend to the data
             limit = range*(q4-q2)
