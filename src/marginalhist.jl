@@ -2,7 +2,6 @@
 
 @recipe function f(::Type{Val{:marginalhist}}, plt::Plot; density = false)
     x, y = d[:x], d[:y]
-    delete!(d, :density)
 
     # set up the subplots
     legend --> false
@@ -24,7 +23,7 @@
     # these are common to both marginal histograms
     ticks := nothing
     guide := ""
-    foreground_color_subplot := RGBA(0,0,0,0)
+    foreground_color_border := nothing
     fillcolor --> Plots.fg_color(d)
     linecolor --> Plots.fg_color(d)
 
