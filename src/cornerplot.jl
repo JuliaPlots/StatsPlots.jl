@@ -40,7 +40,7 @@
     margin    --> 1mm
     titlefont --> font(11)
     fillcolor --> Plots.fg_color(d)
-    fillcolor --> Plots.fg_color(d)
+    linecolor --> Plots.fg_color(d)
     grid      --> true
     ticks     := nothing
     formatter := v->""
