@@ -1,8 +1,9 @@
 @userplot CorrPlot
 
 function update_ticks_guides(d::KW, labs, i, j, n)
-    d[:title]  = (i==1 ? cycle(labs,j) : "")
+    # d[:title]  = (i==1 ? cycle(labs,j) : "")
     d[:xticks] = (i==n)
+    d[:xguide] = (i==n ? cycle(labs,j) : "")
     d[:yticks] = (j==1)
     d[:yguide] = (j==1 ? cycle(labs,i) : "")
 end
@@ -23,6 +24,8 @@ end
     markeralpha := 0.4
     grad = cgrad(get(d, :markercolor, cgrad()))
     indices = reshape(1:n^2, n, n)'
+    title = get(d,:title,"")
+    title := ""
 
     # histograms on the diagonal
     for i=1:n
@@ -56,6 +59,9 @@ end
                 #above diag... hist2d
                 @series begin
                     seriestype := get(d, :seriestype, :histogram2d)
+                    if title != "" && i == 1 && j == div(n,2)+1
+                        title := title
+                    end
                     vj, vi
                 end
             end
