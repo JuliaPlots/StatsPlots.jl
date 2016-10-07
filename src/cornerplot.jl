@@ -39,8 +39,8 @@
     foreground_color_border := nothing
     margin    --> 1mm
     titlefont --> font(11)
-    fillcolor --> :black
-    linecolor --> :black
+    fillcolor --> Plots.fg_color(d)
+    fillcolor --> Plots.fg_color(d)
     grid      --> true
     ticks     := nothing
     formatter := v->""
