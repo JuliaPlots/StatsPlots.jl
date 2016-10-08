@@ -35,7 +35,7 @@ iris = dataset("datasets","iris")
 marginalhist(iris, :PetalLength, :PetalWidth)
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/16709018/81c4da34-45d2-11e6-9e08-bb557541e144.png)
+![](https://cloud.githubusercontent.com/assets/933338/19213780/a82e34a6-8d42-11e6-8846-80c9f4c48b9c.png)
 
 ---
 
@@ -49,20 +49,20 @@ M[:,3] -= 0.7M[:,1].^2 + 2
 corrplot(M, label = ["x$i" for i=1:4])
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/16030833/3c84e6bc-31c3-11e6-9a04-4cee531440a4.png)
+![](https://cloud.githubusercontent.com/assets/933338/19213784/c5e09fde-8d42-11e6-8bda-b339ebfa8bd6.png)
 
 ```julia
 cornerplot(M)
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/17787905/2e161b7c-6559-11e6-937a-20209301905b.png)
+![](https://cloud.githubusercontent.com/assets/933338/19213788/de307db6-8d42-11e6-917a-5de3ff6a8666.png)
 
 
 ```julia
 cornerplot(M, compact=true)
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/17787917/3af9b0e2-6559-11e6-8613-c177efb0b038.png)
+![](https://cloud.githubusercontent.com/assets/933338/19213790/ec530b52-8d42-11e6-9139-e674558c65e9.png)
 
 ---
 
