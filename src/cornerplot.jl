@@ -2,6 +2,7 @@
 
 @recipe function f(cp::CornerPlot; compact=false, maxvariables=30, histpct = 0.1)
     mat = cp.args[1]
+    C = cor(mat)
     @assert typeof(mat) <: AbstractMatrix
     N = size(mat,2)
     if N > maxvariables
@@ -45,6 +46,7 @@
     ticks     := nothing
     formatter := v->""
     link      := :both
+    grad = cgrad(get(d, :markercolor, cgrad()))
 
     # figure out good defaults for scatter plot dots:
     pltarea = 1 / (2n)
@@ -97,6 +99,7 @@
                 end
                 seriestype := :scatter
                 subplot := indices[i+1-k, j]
+                markercolor := grad[0.5 + 0.5C[i,j]]
                 smooth --> true
                 markerstrokewidth --> 0
                 vj, vi
