@@ -21,6 +21,7 @@ end
     margin := 1mm
     titlefont := font(11)
     fillcolor --> Plots.fg_color(d)
+    linecolor --> Plots.fg_color(d)
     markeralpha := 0.4
     grad = cgrad(get(d, :markercolor, cgrad()))
     indices = reshape(1:n^2, n, n)'
@@ -53,6 +54,7 @@ end
                     seriestype := :scatter
                     markercolor := grad[0.5 + 0.5C[i,j]]
                     smooth := true
+                    markerstrokewidth --> 0
                     vj, vi
                 end
             else
