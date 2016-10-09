@@ -8,7 +8,7 @@
     @assert length(g.args) == 1 && typeof(g.args[1]) <: AbstractMatrix
     seriestype := :spy
     mat = g.args[1]
-    m,n = size(mat)
+    n,m = size(mat)
     Plots.SliceIt, 1:m, 1:n, Surface(mat)
 end
 
