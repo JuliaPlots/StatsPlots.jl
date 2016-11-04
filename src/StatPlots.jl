@@ -1,10 +1,9 @@
 
-__precompile__()
-
 module StatPlots
 
 using Reexport
 @reexport using Plots
+import Plots: Plot
 using StatsBase
 using Distributions
 using DataFrames
