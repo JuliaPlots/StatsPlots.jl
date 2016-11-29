@@ -25,6 +25,17 @@ using StatPlots
 gr(size=(400,300))
 ```
 
+The `DataFrames` support allows passing `DataFrame` columns as symbols, e.g.
+```julia
+using DataFrames
+df = DataFrame(a = 1:10, b = randn(10), c = randn(10))
+plot(df, :a, :b)
+```
+Some operations from Plots are not yet implemented. As a workaround, the inbuilt `DataFrame` support can be circumvented by using a package such as [DataFramesMeta](https://github.com/JuliaStats/DataFramesMeta.jl). Symbols must be escaped by `^()` e.g.
+```julia
+using DataFramesMeta
+@with(df, plot(:a, [:b :c], colour = ^([:red :blue])))
+```
 ---
 
 ## marginalhist with DataFrames
