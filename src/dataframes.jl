@@ -21,12 +21,31 @@ function Plots.extractGroupArgs(group::Symbol, df::AbstractDataFrame, args...)
     Plots.extractGroupArgs(collect(df[group]))
 end
 
+# allows the passing of expressions including DataFrame columns as symbols
+function processExpr(expr, df)
+    arg = map(expr.args) do x
+        isa(x, Expr) && return processExpr(x, df)
+        if isa(x, QuoteNode) && isa(x.value, Symbol)
+            return collect(df[x.value])
+        end
+        x
+    end
+    expr.args = arg
+    eval(expr)
+end
+
 # if a DataFrame is the first arg, lets swap symbols out for columns
 @recipe function f(df::AbstractDataFrame, args...)
     # if any of these attributes are symbols, swap out for the df column
     for k in (:fillrange, :line_z, :marker_z, :markersize, :ribbon, :weights, :xerror, :yerror)
-        if haskey(d, k) && isa(d[k], Symbol)
-            d[k] = collect(df[d[k]])
+        if haskey(d, k)
+            if isa(d[k], Expr)
+                d[k] = processExpr(d[k], df)
+            end
+
+            if isa(d[k], Symbol)
+                d[k] = collect(df[d[k]])
+            end
         end
     end
 
