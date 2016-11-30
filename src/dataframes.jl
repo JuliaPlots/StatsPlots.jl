@@ -38,7 +38,7 @@ end
 # if a DataFrame is the first arg, lets swap symbols out for columns
 @recipe function f(df::AbstractDataFrame, args...)
     # if any of these attributes are symbols, swap out for the df column
-    for k in (:fillrange, :line_z, :marker_z, :markersize, :ribbon, :weights, :xerror, :yerror)
+    for k in (:fillrange, :line_z, :marker_z, :markersize, :ribbon, :weights, :xerror, :yerror, :hover)
         if haskey(d, k)
             if isa(d[k], Expr)
                 d[k] = eval(processExpr!(d[k], df))
