@@ -23,5 +23,6 @@ include("violin.jl")
 include("hist.jl")
 include("marginalhist.jl")
 include("bar.jl")
+include("shadederror.jl")
 
 end # module
