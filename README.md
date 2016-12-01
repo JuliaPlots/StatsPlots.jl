@@ -28,9 +28,9 @@ gr(size=(400,300))
 The `DataFrames` support allows passing `DataFrame` columns as symbols. Operations on DataFrame column can be specified using quoted expressions, e.g.
 ```julia
 using DataFrames
-df = DataFrame(a = 1:10, b = randn(10), c = abs(randn(10)))
+df = DataFrame(a = 1:100, b = randn(100), c = abs(randn(100)))
 plot(df, :a, [:b :c])
-plot(df, :a, :b, markersize = :(log(:c + 0.1)))
+scatter(df, :a, :b, markersize = :(4 * log(:c + 0.1)))
 ```
 If you find an operation not supported by DataFrames, please open an issue. An alternative approach to the `StatPlots` syntax is to use the [DataFramesMeta](https://github.com/JuliaStats/DataFramesMeta.jl) macro `@with`. Symbols not referring to DataFrame columns must be escaped by `^()` e.g.
 ```julia
