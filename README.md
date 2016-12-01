@@ -25,13 +25,14 @@ using StatPlots
 gr(size=(400,300))
 ```
 
-The `DataFrames` support allows passing `DataFrame` columns as symbols, e.g.
+The `DataFrames` support allows passing `DataFrame` columns as symbols. Operations on DataFrame column can be specified using quoted expressions, e.g.
 ```julia
 using DataFrames
-df = DataFrame(a = 1:10, b = randn(10), c = randn(10))
-plot(df, :a, :b)
+df = DataFrame(a = 1:10, b = randn(10), c = abs(randn(10)))
+plot(df, :a, [:b :c])
+plot(df, :a, :b, markersize = :(log(:c + 0.1)))
 ```
-Some operations from Plots are not yet implemented. As a workaround, the inbuilt `DataFrame` support can be circumvented by using a package such as [DataFramesMeta](https://github.com/JuliaStats/DataFramesMeta.jl). Symbols must be escaped by `^()` e.g.
+If you find an operation not supported by DataFrames, please open an issue. An alternative approach to the `StatPlots` syntax is to use the [DataFramesMeta](https://github.com/JuliaStats/DataFramesMeta.jl) macro `@with`. Symbols not referring to DataFrame columns must be escaped by `^()` e.g.
 ```julia
 using DataFramesMeta
 @with(df, plot(:a, [:b :c], colour = ^([:red :blue])))
