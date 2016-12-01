@@ -3,7 +3,7 @@ module StatPlots
 
 using Reexport
 @reexport using Plots
-import Plots: Plot, cycle
+import Plots: Plot, cycle, bar, bar!, scatter, scatter!
 using StatsBase
 using Distributions
 using DataFrames
@@ -24,5 +24,6 @@ include("hist.jl")
 include("marginalhist.jl")
 include("bar.jl")
 include("shadederror.jl")
+include("populationanalysis.jl")
 
 end # module
