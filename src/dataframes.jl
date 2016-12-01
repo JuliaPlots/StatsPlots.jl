@@ -8,7 +8,8 @@ end
 # if it's an array of symbols, set the labels and return a Vector{Any} of columns
 function handle_dfs(df::AbstractDataFrame, d::KW, letter, syms::AbstractArray{Symbol})
     get!(d, :label, reshape(syms, 1, length(syms)))
-    Any[collect(df[s]) for s in syms]
+    ret = Any[collect(df[s]) for s in syms]
+    hcat(ret...)
 end
 
 # for anything else, no-op
