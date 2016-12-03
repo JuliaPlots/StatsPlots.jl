@@ -43,6 +43,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
     # compute fillrange
     fillrange := if isstack
         # shift y/fillrange up
+        y = copy(y)
         fr = zeros(nr, nc)
         for c=2:nc
             for r=1:nr
