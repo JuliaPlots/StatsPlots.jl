@@ -16,63 +16,64 @@ function get_mean_sem(f, df, x, population)
     # define points on x axis
     xvalues = get_axis(df[x])
 
-    # get mean value and sem of function of interest
-    splitdata = groupby(df, population)
-    v = DataArray(Float64, length(xvalues), length(splitdata));
-    for i in 1:length(splitdata)
-        v[:,i] = f(splitdata[i],x, xvalues)
-    end
+    if population == []
+        mean_across_pop = f(df,x, xvalues)
+        sem_across_pop = zeros(length(xvalues));
+        valid = ~isna(mean_across_pop)
+    else
+        # get mean value and sem of function of interest
+        splitdata = groupby(df, population)
+        v = DataArray(Float64, length(xvalues), length(splitdata));
+        for i in 1:length(splitdata)
+            v[:,i] = f(splitdata[i],x, xvalues)
+        end
 
-    mean_across_pop = DataArray(Float64, length(xvalues));
-    sem_across_pop = DataArray(Float64, length(xvalues));
-    valid = Array(Bool, length(xvalues));
-    for j in 1:length(xvalues)
-        mean_across_pop[j] = mean(dropna(v[j,:]))
-        sem_across_pop[j] = sem(dropna(v[j,:]))
-        valid[j] = (length(dropna(v[j,:]))>1)
+        mean_across_pop = DataArray(Float64, length(xvalues));
+        sem_across_pop = DataArray(Float64, length(xvalues));
+        valid = Array(Bool, length(xvalues));
+        for j in 1:length(xvalues)
+            mean_across_pop[j] = mean(dropna(v[j,:]))
+            sem_across_pop[j] = sem(dropna(v[j,:]))
+            valid[j] = (length(dropna(v[j,:]))>1)
+        end
     end
 
     return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
 end
 
-funcs = [:shadederror,:shadederror!, :(Plots.scatter), :(Plots.scatter!),
-        :(Plots.bar),:(Plots.bar!)]
-kws = [:shade, :shade, :err, :err, :err, :err]
+funcs = [:shadederror, :(Plots.scatter),:(Plots.bar)]
+funcs! = [:shadederror!, :(Plots.scatter!),:(Plots.bar!)]
+kws = [:shade, :err, :err]
 
-for t in 1:6
-    @eval begin function $(funcs[t])(f, df, x, population; kwargs...)
-        x,y,shade = get_mean_sem(f, df, x, population)
-        s = $(funcs[t])(x, y; $(kws[t]) = shade, kwargs...)
-        return s
+for t in 1:3
+    @eval begin
+        function $(funcs![t])(f::Function, df::AbstractDataFrame, x;
+                                across = [], group = [], kwargs...)
+            if group == []
+                x,y,shade = get_mean_sem(f, df, x, across)
+                $(funcs![t])(x, y; $(kws[t]) = shade, kwargs...)
+                return
+            else
+                group_array = isa(group, AbstractArray) ? group : [group]
+                counter = fill(0,())
+                by(df,group) do dd
+                    label = mapreduce(column-> "$column = $(dd[1,column]) ",string,"",group_array)
+                    counter[] += 1
+                    cycled_kwargs = [(kw[1], cycle(kw[2], counter[])) for kw in kwargs]
+                    $(funcs![t])(f,dd,x; across = across, label = label, cycled_kwargs...)
+                    return
+                end
+            end
+        end
     end
 end
+
+for t in 1:3
+    @eval begin
+        function $(funcs[t])(f::Function, df::AbstractDataFrame, x; kwargs...)
+            s = plot()
+            $(funcs![t])(f::Function, df::AbstractDataFrame, x; kwargs...)
+            return s
+        end
+    end
 end
-
-# function shadederror(f, df, x, population; kwargs...)
-#     x,y, shade = get_mean_sem(f, df, x, population)
-#     shadederror(x,y; shade = shade, kwargs...)
-# end
-#
-# function shadederror!(f, df, x, population; kwargs...)
-#     x,y, shade = get_mean_sem(f, df, x, population)
-#     shadederror!(x,y; shade = shade, kwargs...)
-#     return
-# end
-
-# function shadederror(f, df, x, population, conditioned; kwargs...)
-#     s = plot()
-#     shadederror!(f, df, x, population, conditioned; kwargs...)
-#     return s
-# end
-#
-# function shadederror!(f, df, x, population, conditioned; kwargs...)
-#     if isempty(conditioned)
-#         shadederror!(f, df, x, population; kwargs...)
-#     else
-#         by(df,conditioned) do dd
-#             shadederror!(f,dd,x,population; kwargs...)
-#             return
-#         end
-#     end
-#     return
-# end
