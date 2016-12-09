@@ -5,7 +5,7 @@
 ## - the categorical variable used to compute s.e.m. across population
 ## - optionally, another categorical variable used to split the data
 
-get_axis(column::PooledDataArray) = sort!(union(column))
+get_axis(column::PooledDataArray) = sort!(column.pool)
 get_axis(column::AbstractArray) = linspace(minimum(column),maximum(column),100)
 
 # f is the function used to analyze dataset: define it as NA when it is not defined,
@@ -17,7 +17,7 @@ function get_mean_sem(f, df, x, population)
     xvalues = get_axis(df[x])
 
     if population == []
-        mean_across_pop = f(df,x, xvalues)
+        mean_across_pop = f(df,x,xvalues)
         sem_across_pop = zeros(length(xvalues));
         valid = ~isna(mean_across_pop)
     else
@@ -75,5 +75,12 @@ for t in 1:3
             $(funcs![t])(f::Function, df::AbstractDataFrame, x; kwargs...)
             return s
         end
+    end
+end
+
+for func in vcat(funcs, funcs!)
+    @eval begin
+        $func(f::Function, df::AbstractDataFrame, x, args...; kwargs...) =
+        $func((a,b,c) -> f(a,b,c,args...),  df::AbstractDataFrame, x; kwargs...)
     end
 end

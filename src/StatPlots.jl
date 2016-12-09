@@ -9,6 +9,7 @@ using Distributions
 using DataFrames
 
 import KernelDensity
+import KernelEstimator
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
 @recipe f(k::KernelDensity.BivariateKDE) = k.x, k.y, k.density
 
@@ -25,5 +26,7 @@ include("marginalhist.jl")
 include("bar.jl")
 include("shadederror.jl")
 include("populationanalysis.jl")
+include("analysisfunctions.jl")
+
 
 end # module
