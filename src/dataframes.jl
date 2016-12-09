@@ -30,17 +30,18 @@ end
 # allows the passing of expressions including DataFrame columns as symbols
 processDFarg(df::AbstractDataFrame, sym::Symbol) = collect(df[sym])
 processDFarg(df::AbstractDataFrame, syms::AbstractArray) = vec(Any[processDFarg(df, s) for s in syms])
-processDFarg(df::AbstractDataFrame, expr::Expr) = eval(processDFsym!(df, expr))
+processDFarg(df::AbstractDataFrame, expr::Expr) = eval(processDFsym(df, expr))
 
 # the processDFsym! functions work with expressions and pass results to processDFarg for final eval - this to allow recursion without eval
-processDFsym!(df::AbstractDataFrame, s::Symbol) = haskey(df,s) ? :(collect($(df)[$s])) : :($s)
-processDFsym!(df::AbstractDataFrame, s::QuoteNode) = haskey(df,s.value) ? :(collect($(df)[$s])) : :($s)
-processDFsym!(df::AbstractDataFrame, s) = :($s)
+processDFsym(df::AbstractDataFrame, s::Symbol) = haskey(df,s) ? :(collect($(df)[$s])) : :($s)
+processDFsym(df::AbstractDataFrame, s::QuoteNode) = haskey(df,s.value) ? :(collect($(df)[$s])) : :($s)
+processDFsym(df::AbstractDataFrame, s) = :($s)
 
-function processDFsym!(df::AbstractDataFrame, expr::Expr)
-    arg = map(_->processDFsym!(df,_), expr.args)
-    expr.args = arg
-    return expr
+function processDFsym(df::AbstractDataFrame, expr::Expr)
+    arg = map(_->processDFsym(df,_), expr.args)
+    ret = copy(expr)
+    ret.args = arg
+    return ret
 end
 
 
