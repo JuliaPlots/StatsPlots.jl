@@ -7,7 +7,7 @@
 ## - the categorical variable(s) used to compute s.e.m. across population
 ## - the categorical variable(s) used to split the data
 
-get_axis(column::PooledDataArray) = sort!(column.pool)
+get_axis(column::PooledDataArray) = sort!(union(column))
 get_axis(column::AbstractArray) = linspace(minimum(column),maximum(column),100)
 
 # f is the function used to analyze dataset: define it as NA when it is not defined,
