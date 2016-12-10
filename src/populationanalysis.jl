@@ -2,8 +2,10 @@
 ## - a function to be applied to your dataframe
 ## - a dataframe
 ## - the x-variable of the plot
-## - the categorical variable used to compute s.e.m. across population
-## - optionally, another categorical variable used to split the data
+## - Optional arguments: all the extra arguments of the function to be applied
+## Keywords:
+## - the categorical variable(s) used to compute s.e.m. across population
+## - the categorical variable(s) used to split the data
 
 get_axis(column::PooledDataArray) = sort!(column.pool)
 get_axis(column::AbstractArray) = linspace(minimum(column),maximum(column),100)
@@ -17,7 +19,8 @@ function get_mean_sem(f, df, x, population)
     xvalues = get_axis(df[x])
 
     if population == []
-        mean_across_pop = f(df,x,xvalues)
+        mean_across_pop = convert(DataArray,f(df,x,xvalues))
+        mean_across_pop[!isna(mean_across_pop) & isnan(mean_across_pop)] = NA
         sem_across_pop = zeros(length(xvalues));
         valid = ~isna(mean_across_pop)
     else
@@ -27,7 +30,7 @@ function get_mean_sem(f, df, x, population)
         for i in 1:length(splitdata)
             v[:,i] = f(splitdata[i],x, xvalues)
         end
-
+        v[!isna(v) & isnan(v)] = NA
         mean_across_pop = DataArray(Float64, length(xvalues));
         sem_across_pop = DataArray(Float64, length(xvalues));
         valid = Array(Bool, length(xvalues));
