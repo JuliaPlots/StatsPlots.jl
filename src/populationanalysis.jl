@@ -87,3 +87,14 @@ for func in vcat(funcs, funcs!)
         $func((a,b,c) -> f(a,b,c,args...),  df::AbstractDataFrame, x; kwargs...)
     end
 end
+
+builtin_funcs = Dict(zip([:locreg, :kdensity, :cumulative], [locreg, kdensity, cumulative]))
+
+for func in vcat(funcs, funcs!)
+    @eval begin
+        function $func(s::Symbol, df::AbstractDataFrame, x, args...; kwargs...)
+            analysisfunction = get(builtin_funcs,s,((df, x, xaxis) -> locreg(df, x, xaxis, s)))
+            return $func(analysisfunction, df::AbstractDataFrame, x, args...; kwargs...)
+        end
+    end
+end

@@ -9,7 +9,7 @@ using Distributions
 using DataFrames
 
 import KernelDensity
-import KernelEstimator
+import Loess
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
 @recipe f(k::KernelDensity.BivariateKDE) = k.x, k.y, k.density
 
@@ -25,8 +25,9 @@ include("hist.jl")
 include("marginalhist.jl")
 include("bar.jl")
 include("shadederror.jl")
-include("populationanalysis.jl")
 include("analysisfunctions.jl")
+include("populationanalysis.jl")
+
 
 
 end # module

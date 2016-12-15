@@ -6,4 +6,4 @@ StatsBase
 Distributions
 DataFrames
 KernelDensity
-KernelEstimator
+Loess

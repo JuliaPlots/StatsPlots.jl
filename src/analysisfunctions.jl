@@ -1,7 +1,15 @@
-nlreg(df, x, xaxis::LinSpace, y) = KernelEstimator.locallinear(df[x], df[y]; xeval = xaxis)
-nlreg(df, x, xaxis::LinSpace, y, bw) = KernelEstimator.locallinear(df[x], df[y]; xeval = xaxis, h = bw)
+#nlreg(df, x, xaxis::LinSpace, y) = KernelEstimator.locallinear(df[x], df[y]; xeval = xaxis)
+#nlreg(df, x, xaxis::LinSpace, y, bw) = KernelEstimator.locallinear(df[x], df[y]; xeval = xaxis, h = bw)
 
-function nlreg(df, x, xaxis, y)
+function locreg(df, x, xaxis::LinSpace, y)
+    model = Loess.loess(convert(Array{Float64,1},df[x]),convert(Array{Float64,1},df[y]))
+    predicted = DataArray(Float64,length(xaxis))
+    within = minimum(df[x]).< xaxis .<maximum(df[x])
+    predicted[within] = Loess.predict(model,collect(xaxis)[within])
+    return predicted
+end
+
+function locreg(df, x, xaxis, y)
   ymean = by(df, x) do dd
       DataFrame(m = mean(dd[y]))
   end
@@ -12,8 +20,7 @@ function nlreg(df, x, xaxis, y)
   return ymean_extended[:m]
 end
 
-kdensity(df,x,xaxis::LinSpace) = KernelEstimator.kerneldensity(df[x]; xeval = xaxis)
-kdensity(df,x,xaxis::LinSpace, bw) = KernelEstimator.kerneldensity(df[x]; xeval = xaxis, h = bw)
+kdensity(df,x,xaxis::LinSpace) = pdf(KernelDensity.kde(df[x]),xaxis)
 
 function kdensity(df,x,xaxis)
     xhist = by(df, x) do dd
@@ -25,9 +32,9 @@ function kdensity(df,x,xaxis)
     return convert(Array, xhist_extended[:length], 0)/size(df,1)
 end
 
-cumulative(df, x, xaxis::LinSpace) = ecdf(df[x])(xaxis)
-
-function cumulative(df, x, xaxis)
-  vect = kdensity(df, x, xaxis)
-  return cumsum(vect)
-end
+cumulative(df, x, xaxis) = ecdf(df[x])(xaxis)
+#
+# function cumulative(df, x, xaxis)
+#   vect = kdensity(df, x, xaxis)
+#   return cumsum(vect)
+# end
