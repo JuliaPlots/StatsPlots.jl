@@ -3,7 +3,7 @@ module StatPlots
 
 using Reexport
 @reexport using Plots
-import Plots: Plot, cycle, bar, bar!, scatter, scatter!
+import Plots: Plot, cycle
 using StatsBase
 using Distributions
 using DataFrames

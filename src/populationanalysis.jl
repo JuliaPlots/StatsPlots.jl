@@ -14,12 +14,12 @@ get_axis(column::AbstractArray) = linspace(minimum(column),maximum(column),100)
 # the input is: dataframe used, x variable and points chosen on the x axis
 # the output is the y value for the given xvalues
 
-function get_mean_sem(f, df, x, population)
+function get_mean_sem(f, df, population, args...; kwargs...)
     # define points on x axis
-    xvalues = get_axis(df[x])
+    xvalues = get_axis(df[args[1]])
 
     if population == []
-        mean_across_pop = convert(DataArray,f(df,x,xvalues))
+        mean_across_pop = convert(DataArray,f(df,xvalues, args...; kwargs...))
         mean_across_pop[!isna(mean_across_pop) & isnan(mean_across_pop)] = NA
         sem_across_pop = zeros(length(xvalues));
         valid = ~isna(mean_across_pop)
@@ -28,7 +28,7 @@ function get_mean_sem(f, df, x, population)
         splitdata = groupby(df, population)
         v = DataArray(Float64, length(xvalues), length(splitdata));
         for i in 1:length(splitdata)
-            v[:,i] = f(splitdata[i],x, xvalues)
+            v[:,i] = f(splitdata[i],xvalues, args...; kwargs...)
         end
         v[!isna(v) & isnan(v)] = NA
         mean_across_pop = DataArray(Float64, length(xvalues));
@@ -44,57 +44,27 @@ function get_mean_sem(f, df, x, population)
     return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
 end
 
-funcs = [:shadederror, :(Plots.scatter),:(Plots.bar)]
-funcs! = [:shadederror!, :(Plots.scatter!),:(Plots.bar!)]
-kws = [:shade, :err, :err]
-
-for t in 1:3
-    @eval begin
-        function $(funcs![t])(f::Function, df::AbstractDataFrame, x;
-                                across = [], group = [], kwargs...)
-            if group == []
-                x,y,shade = get_mean_sem(f, df, x, across)
-                $(funcs![t])(x, y; $(kws[t]) = shade, kwargs...)
-                return
-            else
-                group_array = isa(group, AbstractArray) ? group : [group]
-                counter = fill(0,())
-                by(df,group) do dd
-                    label = mapreduce(column-> "$column = $(dd[1,column]) ",string,"",group_array)
-                    counter[] += 1
-                    cycled_kwargs = [(kw[1], cycle(kw[2], counter[])) for kw in kwargs]
-                    $(funcs![t])(f,dd,x; across = across, label = label, cycled_kwargs...)
-                    return
-                end
-            end
+function groupapply(f::Function, df::AbstractDataFrame, args...;
+                        across = [], group = [], kwargs...)
+    if group == []
+        xvalues,yvalues,shade = get_mean_sem(f, df, across, args...; kwargs...)
+        return DataFrame(x = xvalues, y = yvalues, err = shade, group = "")
+    else
+        group_array = isa(group, AbstractArray) ? group : [group]
+        by(df,group) do dd
+            label = mapreduce(column-> "$column = $(dd[1,column]) ",string,"",group_array)
+            xvalues,yvalues,shade = get_mean_sem(f, dd, across, args...; kwargs...)
+            return DataFrame(x = xvalues, y = yvalues, err = shade, group = label)
         end
     end
 end
 
-for t in 1:3
-    @eval begin
-        function $(funcs[t])(f::Function, df::AbstractDataFrame, x; kwargs...)
-            s = plot()
-            $(funcs![t])(f::Function, df::AbstractDataFrame, x; kwargs...)
-            return s
-        end
-    end
+builtin_funcs = Dict(zip(["locreg", "kdensity", "cumulative"], [locreg, kdensity, cumulative]))
+
+function groupapply(s::AbstractString, df::AbstractDataFrame, args...; kwargs...)
+    analysisfunction = builtin_funcs[s]
+    return groupapply(analysisfunction, df::AbstractDataFrame, args...; kwargs...)
 end
 
-for func in vcat(funcs, funcs!)
-    @eval begin
-        $func(f::Function, df::AbstractDataFrame, x, args...; kwargs...) =
-        $func((a,b,c) -> f(a,b,c,args...),  df::AbstractDataFrame, x; kwargs...)
-    end
-end
-
-builtin_funcs = Dict(zip([:locreg, :kdensity, :cumulative], [locreg, kdensity, cumulative]))
-
-for func in vcat(funcs, funcs!)
-    @eval begin
-        function $func(s::Symbol, df::AbstractDataFrame, x, args...; kwargs...)
-            analysisfunction = get(builtin_funcs,s,((df, x, xaxis) -> locreg(df, x, xaxis, s)))
-            return $func(analysisfunction, df::AbstractDataFrame, x, args...; kwargs...)
-        end
-    end
-end
+groupapply(y::Symbol, df::AbstractDataFrame, x; kwargs...) =
+groupapply(locreg, df::AbstractDataFrame, x, y; kwargs...)
