@@ -26,7 +26,7 @@ include("marginalhist.jl")
 include("bar.jl")
 include("shadederror.jl")
 include("analysisfunctions.jl")
-include("populationanalysis.jl")
+include("groupederror.jl")
 
 
 
