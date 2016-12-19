@@ -121,3 +121,40 @@ groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7)
 ```
 
 ![tmp](https://cloud.githubusercontent.com/assets/933338/18962092/673f6c78-863d-11e6-9ee9-8ca104e5d2a3.png)
+
+
+## groupapply for population analysis
+There is a groupapply function that splits the data across a keyword argument kw "group", then applies "summarize" (default is (mean,sem) of a given analysis (density, cumulative and local regression are supported so far), but the user can put any pair of functions). The option shared_xaxis specifies whether you want a common x axis for all the split data (which is required for bar plots but not recommended for line and scatter plots). The local regression uses Loess.jl and the density plot uses KernelDensity.jl. In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin.
+
+Example use:
+
+```
+using DataFrames
+import RDatasets
+using Plots
+using StatPlots
+gr()
+school = RDatasets.dataset("mlmRev","Hsb82");
+grp_error = StatPlots.groupapply(:cumulative, school, :MAch; across = :School, group = :Sx)
+plot(grp_error, line = :line)
+```
+<img width="494" alt="screenshot 2016-12-19 12 28 27" src="https://cloud.githubusercontent.com/assets/6333339/21313005/316e0f0c-c5e7-11e6-9464-f0921dee3d29.png">
+
+Keywords for loess or kerneldensity can be given to groupapply:
+
+```
+df = StatPlots.groupapply(:density, school, :CSES; bandwidth = 1., across = :School, group = :Minrty)
+plot(df, line = :line)
+```
+
+<img width="493" alt="screenshot 2016-12-19 12 34 43" src="https://cloud.githubusercontent.com/assets/6333339/21313088/9b895478-c5e7-11e6-87b4-279c0d2bc963.png">
+
+
+The bar plot
+
+```
+pool!(school, :Sx)
+grp_error = StatPlots.groupapply(school, :Sx, :MAch; across = :School, group = :Minrty, shared_xaxis = true)
+plot(grp_error, line = :bar)
+```
+<img width="498" alt="screenshot 2016-12-19 12 29 52" src="https://cloud.githubusercontent.com/assets/6333339/21313014/362dac1e-c5e7-11e6-86c9-37410868d02e.png">

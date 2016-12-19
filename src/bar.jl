@@ -43,19 +43,18 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
     # compute fillrange
     fillrange := if isstack
         # shift y/fillrange up
-        y = copy(y)
-        fr = zeros(nr, nc)
-        for c=2:nc
-            for r=1:nr
-                fr[r,c] = y[r,c-1]
-                y[r,c] += fr[r,c]
-            end
+    y = copy(y)
+    fr = zeros(nr, nc)
+    for c=2:nc
+        for r=1:nr
+            fr[r,c] = y[r,c-1]
+            y[r,c] += fr[r,c]
         end
+    end
         fr
     else
-        get(d, :fillrange, 0)
+        nothing
     end
-
     seriestype := :bar
     x, y
 end

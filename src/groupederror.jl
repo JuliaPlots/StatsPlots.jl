@@ -13,7 +13,7 @@ get_axis(column::AbstractArray) = linspace(minimum(column),maximum(column),200)
 # the input is: dataframe used, points chosen on the x axis, x (and maybe y) column labels
 # the output is the y value for the given xvalues
 
-function get_mean_sem(avg,var, f, df, population, args...; xaxis = false, kwargs...)
+function get_mean_sem(trend,variation, f, df, population, args...; xaxis = false, kwargs...)
     # define points on x axis
     if xaxis == false
         xvalues = get_axis(df[args[1]])
@@ -36,8 +36,8 @@ function get_mean_sem(avg,var, f, df, population, args...; xaxis = false, kwargs
         sem_across_pop = Array(Float64, length(xvalues));
         for j in 1:length(xvalues)
             notnan = !isnan(v[j,:])
-            mean_across_pop[j] = avg(v[j,notnan])
-            sem_across_pop[j] = var(v[j,notnan])
+            mean_across_pop[j] = trend(v[j,notnan])
+            sem_across_pop[j] = variation(v[j,notnan])
         end
         valid = !isnan(mean_across_pop) & !isnan(sem_across_pop)
     end
