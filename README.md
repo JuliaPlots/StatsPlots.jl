@@ -124,11 +124,11 @@ groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7)
 
 
 ## groupapply for population analysis
-There is a groupapply function that splits the data across a keyword argument kw "group", then applies "summarize" (default is (mean,sem) of a given analysis (density, cumulative and local regression are supported so far), but the user can put any pair of functions). The option shared_xaxis specifies whether you want a common x axis for all the split data (which is required for bar plots but not recommended for line and scatter plots). The local regression uses Loess.jl and the density plot uses KernelDensity.jl. In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin.
+There is a groupapply function that splits the data across a keyword argument kw "group", then applies "summarize" (default is (mean,sem) but the user can put any pair of functions) to a given analysis (density, cumulative and local regression are supported so far, but one can also add their own function). The option shared_xaxis specifies whether you want a common x axis for all the split data (which is required for bar plots but not recommended for line and scatter plots). The local regression uses [Loess.jl](https://github.com/JuliaStats/Loess.jl) and the density plot uses [KernelDensity.jl](https://github.com/JuliaStats/KernelDensity.jl). In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin.
 
 Example use:
 
-```
+```julia
 using DataFrames
 import RDatasets
 using Plots
@@ -142,7 +142,7 @@ plot(grp_error, line = :line)
 
 Keywords for loess or kerneldensity can be given to groupapply:
 
-```
+```julia
 df = StatPlots.groupapply(:density, school, :CSES; bandwidth = 1., across = :School, group = :Minrty)
 plot(df, line = :line)
 ```
@@ -152,7 +152,7 @@ plot(df, line = :line)
 
 The bar plot
 
-```
+```julia
 pool!(school, :Sx)
 grp_error = StatPlots.groupapply(school, :Sx, :MAch; across = :School, group = :Minrty, shared_xaxis = true)
 plot(grp_error, line = :bar)
