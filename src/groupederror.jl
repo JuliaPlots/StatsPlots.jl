@@ -128,7 +128,7 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
             error("Bar Plot requires shared_xaxis = true")
         else
             err := hcat(g.err...)
-            label --> g.group
+            label --> hcat(g.group...)
             StatPlots.GroupedBar((g.xaxis,hcat(g.y...)))
         end
     end
