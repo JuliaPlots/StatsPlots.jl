@@ -124,7 +124,7 @@ groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7)
 
 
 ## groupapply for population analysis
-There is a groupapply function that splits the data across a keyword argument kw "group", then applies "summarize" (default is (mean,sem) but the user can put any pair of functions) to a given analysis (density, cumulative and local regression are supported so far, but one can also add their own function). The option shared_xaxis specifies whether you want a common x axis for all the split data (which is required for bar plots but not recommended for line and scatter plots). The local regression uses [Loess.jl](https://github.com/JuliaStats/Loess.jl) and the density plot uses [KernelDensity.jl](https://github.com/JuliaStats/KernelDensity.jl). In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin.
+There is a groupapply function that splits the data across a keyword argument kw "group", then applies "summarize" (default is (mean,sem) but the user can put any pair of functions) to a given analysis (density, cumulative and local regression are supported so far, but one can also add their own function). The option shared_xaxis specifies whether you want a common x axis for all the split data (which is required for bar plots but not recommended for line and scatter plots). The local regression uses [Loess.jl](https://github.com/JuliaStats/Loess.jl) and the density plot uses [KernelDensity.jl](https://github.com/JuliaStats/KernelDensity.jl). In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin. The choice of continuous or discrete axis can be forced via `axis_type = :continuous` or `axis_type = :discrete`
 
 Example use:
 
@@ -135,16 +135,16 @@ using Plots
 using StatPlots
 gr()
 school = RDatasets.dataset("mlmRev","Hsb82");
-grp_error = StatPlots.groupapply(:cumulative, school, :MAch; across = :School, group = :Sx)
-plot(grp_error, line = :line)
+grp_error = groupapply(:cumulative, school, :MAch; across = :School, group = :Sx)
+plot(grp_error, line = :path)
 ```
 <img width="494" alt="screenshot 2016-12-19 12 28 27" src="https://cloud.githubusercontent.com/assets/6333339/21313005/316e0f0c-c5e7-11e6-9464-f0921dee3d29.png">
 
 Keywords for loess or kerneldensity can be given to groupapply:
 
 ```julia
-df = StatPlots.groupapply(:density, school, :CSES; bandwidth = 1., across = :School, group = :Minrty)
-plot(df, line = :line)
+df = groupapply(:density, school, :CSES; bandwidth = 1., across = :School, group = :Minrty)
+plot(df, line = :path)
 ```
 
 <img width="493" alt="screenshot 2016-12-19 12 34 43" src="https://cloud.githubusercontent.com/assets/6333339/21313088/9b895478-c5e7-11e6-87b4-279c0d2bc963.png">
@@ -154,7 +154,7 @@ The bar plot
 
 ```julia
 pool!(school, :Sx)
-grp_error = StatPlots.groupapply(school, :Sx, :MAch; across = :School, group = :Minrty, shared_xaxis = true)
+grp_error = groupapply(school, :Sx, :MAch; across = :School, group = :Minrty)
 plot(grp_error, line = :bar)
 ```
 <img width="498" alt="screenshot 2016-12-19 12 29 52" src="https://cloud.githubusercontent.com/assets/6333339/21313014/362dac1e-c5e7-11e6-86c9-37410868d02e.png">

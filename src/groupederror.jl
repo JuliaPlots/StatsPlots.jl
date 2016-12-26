@@ -1,66 +1,97 @@
-type GroupedError
-    x
-    y
-    err
-    group
-    xaxis
+type GroupedError{S, T<:AbstractString}
+    x::Vector{Vector{S}}
+    y::Vector{Vector{Float64}}
+    err::Vector{Vector{Float64}}
+    group::Vector{T}
+    axis_type::Symbol
 end
 
-get_axis(column::PooledDataArray) = sort!(unique(column))
-get_axis(column::AbstractArray) = linspace(minimum(column),maximum(column),200)
+get_axis(column) = sort!(union(column))
+get_axis(column, npoints) = linspace(minimum(column),maximum(column),npoints)
 
 # f is the function used to analyze dataset: define it as nan when it is not defined,
 # the input is: dataframe used, points chosen on the x axis, x (and maybe y) column labels
 # the output is the y value for the given xvalues
 
-function get_mean_sem(trend,variation, f, df, population, args...; xaxis = false, kwargs...)
+"""
+    get_mean_sem(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
+
+Apply function `f` to `splitdata`, then output summary statistics
+`trend` and `variation` of those values. A shared x axis `xvalues` is needed: use
+`LinSpace` for continuous x variable and a normal vector for the discrete case. Remaining arguments
+are label of x axis variable and extra arguments for function `f`. `kwargs...` are passed
+to `f`
+"""
+function get_mean_sem(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
+    v = Array(Float64, length(xvalues), length(splitdata));
+    for i in 1:length(splitdata)
+        v[:,i] = f(splitdata[i],xvalues, args...; kwargs...)
+    end
+    mean_across_pop = Array(Float64, length(xvalues));
+    sem_across_pop = Array(Float64, length(xvalues));
+    for j in 1:length(xvalues)
+        notnan = !isnan(v[j,:])
+        mean_across_pop[j] = trend(v[j,notnan])
+        sem_across_pop[j] = variation(v[j,notnan])
+    end
+    valid = !isnan(mean_across_pop) & !isnan(sem_across_pop)
+    return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
+end
+
+"""
+    get_mean_sem(trend,variation, f, df::AbstractDataFrame, across, axis_type, args...; kwargs...)
+
+Split `df` by `across`, choose shared axis according to `axis_type`
+(`:continuous` or `:discrete`) then compute `get_mean_sem`
+"""
+function get_mean_sem(trend,variation, f, df::AbstractDataFrame, across, axis_type, args...; kwargs...)
     # define points on x axis
-    if xaxis == false
+    if axis_type == :discrete
         xvalues = get_axis(df[args[1]])
+    elseif axis_type == :continuous
+        xvalues = get_axis(df[args[1]], 100)
     else
-        xvalues = xaxis
+        error("Unexpected axis_type: only :discrete and :continuous allowed!")
     end
 
-    if population == []
+    if across == []
         mean_across_pop = f(df,xvalues, args...; kwargs...)
         sem_across_pop = zeros(length(xvalues));
         valid = ~isnan(mean_across_pop)
-    else
-        # get mean value and sem of function of interest
-        splitdata = groupby(df, population)
-        v = Array(Float64, length(xvalues), length(splitdata));
-        for i in 1:length(splitdata)
-            v[:,i] = f(splitdata[i],xvalues, args...; kwargs...)
-        end
-        mean_across_pop = Array(Float64, length(xvalues));
-        sem_across_pop = Array(Float64, length(xvalues));
-        for j in 1:length(xvalues)
-            notnan = !isnan(v[j,:])
-            mean_across_pop[j] = trend(v[j,notnan])
-            sem_across_pop[j] = variation(v[j,notnan])
-        end
-        valid = !isnan(mean_across_pop) & !isnan(sem_across_pop)
-    end
-    if xaxis == false
         return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
     else
-        return xvalues, mean_across_pop, sem_across_pop
+        # get mean value and sem of function of interest
+        splitdata = groupby(df, across)
+        return get_mean_sem(trend,variation, f, splitdata, xvalues, args...; kwargs...)
     end
 end
 
+"""
+    groupapply(f::Function, df, args...; axis_type = :auto, across = [], group = [], summarize = (mean, sem), kwargs...)
+
+Split `df` by `group`. Then apply `get_mean_sem` to get a population summary of the grouped data.
+Output is a `GroupedError` with population summaries, then can be plot using `plot(g::GroupedError)`
+Seriestype can be specified to be `:path`, `:scatter` or `:bar`
+"""
 function groupapply(f::Function, df, args...;
-                    shared_xaxis = false, across = [], group = [], summarize = (mean, sem), kwargs...)
+                    axis_type = :auto, across = [], group = [], summarize = (mean, sem), kwargs...)
+    if !(axis_type in [:discrete, :continuous])
+        axis_type = (typeof(df[args[1]])<:PooledDataArray) ? :discrete : :continuous
+    end
+    if (axis_type == :continuous) & !(eltype(df[args[1]])<:Real)
+        warn("Changing to discrete axis, x values are not real numbers!")
+        axis_type = :discrete
+    end
+    mutated_xtype = (axis_type == :continuous) ? Float64 : eltype(df[args[1]])
     g = GroupedError(
-                    Array(Vector{eltype(df[args[1]])},0),
+                    Array(Vector{mutated_xtype},0),
                     Array(Vector{Float64},0),
                     Array(Vector{Float64},0),
                     Array(AbstractString,0),
-                    false
+                    axis_type
                     )
-    xaxis = shared_xaxis ? get_axis(df[args[1]]) : false
-    g.xaxis = xaxis
     if group == []
-        xvalues,yvalues,shade = get_mean_sem(summarize..., f, df, across, args...; xaxis = xaxis, kwargs...)
+        xvalues,yvalues,shade = get_mean_sem(summarize..., f, df, across, axis_type, args...; kwargs...)
         push!(g.x, xvalues)
         push!(g.y, yvalues)
         push!(g.err, shade)
@@ -70,7 +101,7 @@ function groupapply(f::Function, df, args...;
         by(df,group) do dd
             label = isa(group, AbstractArray) ?
                     string(["$(dd[1,column]) " for column in group]...) : string(dd[1,group])
-            xvalues,yvalues,shade = get_mean_sem(summarize...,f, dd, across, args...; xaxis = xaxis, kwargs...)
+            xvalues,yvalues,shade = get_mean_sem(summarize...,f, dd, across, axis_type, args...; kwargs...)
             push!(g.x, xvalues)
             push!(g.y, yvalues)
             push!(g.err, shade)
@@ -83,6 +114,13 @@ end
 
 builtin_funcs = Dict(zip([:locreg, :density, :cumulative], [_locreg, _density, _cumulative]))
 
+"""
+    groupapply(s::Symbol, df, args...; kwargs...)
+
+`s` can be `:locreg`, `:density` or `:cumulative`, in which case the corresponding built in
+analysis function is used. `s` can also be a symbol of a column of `df`, in which case the call
+is equivalent to `groupapply(:locreg, df, args[1], s; kwargs...)`
+"""
 function groupapply(s::Symbol, df, args...; kwargs...)
     if s in keys(builtin_funcs)
         analysisfunction = builtin_funcs[s]
@@ -92,13 +130,16 @@ function groupapply(s::Symbol, df, args...; kwargs...)
     end
 end
 
+"""
+    groupapply(df::AbstractDataFrame, x, y; kwargs...)
+
+Equivalent to `groupapply(:locreg, df::AbstractDataFrame, x, y; kwargs...)`
+"""
+
 groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, y; kwargs...)
 
 @recipe function f(g::GroupedError)
-    if !(:seriestype in keys(d)) || (d[:seriestype] == :line)
-        if g.xaxis != false
-            warn("shared_xaxis = false is recommended for line plots")
-        end
+    if !(:seriestype in keys(d)) || (d[:seriestype] == :path)
         for i = 1:length(g.group)
             @series begin
                 seriestype := :shadederror
@@ -110,9 +151,6 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
             end
         end
     elseif d[:seriestype] == :scatter
-        if g.xaxis != false
-            warn("shared_xaxis = false is recommended for scatter plots")
-        end
         for i = 1:length(g.group)
             @series begin
                 seriestype := :scatter
@@ -124,13 +162,16 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
             end
         end
     elseif d[:seriestype] == :bar
-        if g.xaxis == false
-            error("Bar Plot requires shared_xaxis = true")
-        else
-            err := hcat(g.err...)
-            label --> hcat(g.group...)
-            StatPlots.GroupedBar((g.xaxis,hcat(g.y...)))
+        if g.axis_type == :continuous
+            warn("Bar plot with continuous x axis doesn't make sense!")
         end
+        xaxis = sort!(union((g.x)...))
+        ys = extend_axis.(g.x, g.y, [xaxis], [NaN])
+        y = hcat(ys...)
+        errs = extend_axis.(g.x, g.err, [xaxis], [NaN])
+        err := hcat(errs...)
+        label --> hcat(g.group...)
+        StatPlots.GroupedBar((xaxis,y))
     end
 end
 
