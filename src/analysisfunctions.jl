@@ -18,10 +18,12 @@ Apply loess regression, training the regressor with `x` and `y` and
 predicting `xaxis`
 """
 function _locreg(df, xaxis::LinSpace, x, y; kwargs...)
-    model = Loess.loess(convert(Vector{Float64},df[x]),convert(Vector{Float64},df[y]); kwargs...)
     predicted = fill(NaN,length(xaxis))
-    within = minimum(df[x]).< xaxis .<maximum(df[x])
-    predicted[within] = Loess.predict(model,collect(xaxis)[within])
+    within = minimum(df[x]).< xaxis .< maximum(df[x])
+    if any(within)
+        model = Loess.loess(convert(Vector{Float64},df[x]),convert(Vector{Float64},df[y]); kwargs...)
+        predicted[within] = Loess.predict(model,collect(xaxis[within]))
+    end
     return predicted
 end
 
