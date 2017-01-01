@@ -22,7 +22,7 @@ function _locreg(df, xaxis::LinSpace, x, y; kwargs...)
     within = minimum(df[x]).< xaxis .< maximum(df[x])
     if any(within)
         model = Loess.loess(convert(Vector{Float64},df[x]),convert(Vector{Float64},df[y]); kwargs...)
-        predicted[within] = Loess.predict(model,collect(xaxis[within]))
+        predicted[within] = Loess.predict(model,xaxis[within])
     end
     return predicted
 end
