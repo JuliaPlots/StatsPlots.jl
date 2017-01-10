@@ -132,7 +132,7 @@ end
 
 Get GropedDataFrame from `df` according to `ce`. `ce = (:across, col_name)` will split
 across column `col_name`, whereas `ce = (:bootstrap, n_samples)` will generate `n_samples`
-fake datasets distribute like the real dataset (nonparametric bootstrapping). Choose shared axis
+fake datasets distributed like the real dataset (nonparametric bootstrapping). Choose shared axis
 according to `axis_type` (`:continuous` or `:discrete`) then compute `get_summary`
 """
 function get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, args...; kwargs...)

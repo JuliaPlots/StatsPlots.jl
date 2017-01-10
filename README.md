@@ -128,7 +128,8 @@ There is a groupapply function that splits the data across a keyword argument "g
 
 - `compute_error = (:across, col_name)`, where the data is split according to column `col_name` before being summarized. `compute_error = :across` splits across all observations. Default summary is `(mean, sem)` but it can be changed with keyword `summarize` to any pair of functions.
 
-- `compute_error = (:bootstrap, n_samples)`, where `n_samples` fake datasets are generated using nonparametric bootstrapping and then summarized. `compute_error = :bootstrap` defaults to `compute_error = (:bootstrap, 1000)`. Default summary is `(mean, std)`. This method will work with any analysis but is computationally very expensive.
+- `compute_error = (:bootstrap, n_samples)`, where `n_samples` fake datasets distributed like the real dataset are generated and then summarized (nonparametric
+<a href="https://en.wikipedia.org/wiki/Bootstrapping_(statistics)">bootstrapping</a>). `compute_error = :bootstrap` defaults to `compute_error = (:bootstrap, 1000)`. Default summary is `(mean, std)`. This method will work with any analysis but is computationally very expensive.
 
 - `compute_error = :none`, where no error is computed or displayed and the analysis is carried out normally.
 
