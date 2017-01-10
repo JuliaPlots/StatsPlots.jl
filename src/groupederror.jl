@@ -103,9 +103,9 @@ newsymbol(s, df::AbstractDataFrame) = newsymbol(s, names(df))
 
 
 """
-    get_mean_sem(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
+    get_summary(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
 
-Apply function `f` to `splitdata`, then output summary statistics
+Apply function `f` to `splitdata`, then compute summary statistics
 `trend` and `variation` of those values. A shared x axis `xvalues` is needed: use
 `LinSpace` for continuous x variable and a normal vector for the discrete case. Remaining arguments
 are label of x axis variable and extra arguments for function `f`. `kwargs...` are passed
@@ -128,10 +128,12 @@ function get_summary(trend,variation, f, splitdata::GroupedDataFrame, xvalues, a
 end
 
 """
-    get_mean_sem(trend,variation, f, df::AbstractDataFrame, across, axis_type, args...; kwargs...)
+    get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, args...; kwargs...)
 
-Split `df` by `across`, choose shared axis according to `axis_type`
-(`:continuous` or `:discrete`) then compute `get_mean_sem`
+Get GropedDataFrame from `df` according to `ce`. `ce = (:across, col_name)` will split
+across column `col_name`, whereas `ce = (:bootstrap, n_samples)` will generate `n_samples`
+fake datasets distribute like the real dataset (nonparametric bootstrapping). Choose shared axis
+according to `axis_type` (`:continuous` or `:discrete`) then compute `get_summary`
 """
 function get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, args...; kwargs...)
     # define points on x axis
@@ -163,7 +165,9 @@ function get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, a
         split_col = newsymbol(:split_col, df)
         bootstrap_data = df[indexes,:]
         bootstrap_data[split_col] = split_var
-        splitdata = groupby(bootstrap_data, split_col)
+        ends = collect(size(df,1)*(1:n_samples))
+        starts = ends - size(df,1) + 1
+        splitdata = GroupedDataFrame(bootstrap_data,[split_col],collect(1:ends[end]), starts, ends)
         return get_summary(trend,variation, f, splitdata, xvalues, args...; kwargs...)
     else
         error("compute_error can only be equal to :none, :across,
@@ -175,7 +179,7 @@ end
     groupapply(f::Function, df, args...; axis_type = :auto, across = [], group = [], summarize = (mean, sem), kwargs...)
 
 Split `df` by `group`. Then apply `get_summary` to get a population summary of the grouped data.
-Output is a `GroupedError` with error compute according to the keyword `compute_error`.
+Output is a `GroupedError` with error computed according to the keyword `compute_error`.
 It can be plotted using `plot(g::GroupedError)`
 Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
@@ -193,9 +197,6 @@ function groupapply(f::Function, df, args...;
 
     # Add default for :across and :bootstrap
     if compute_error == :across
-        #index_column = DataFrame(rows = 1:size(df,1))
-        #row_name = DataFrames.add_names(DataFrames.index(df), DataFrames.index(index_column))[1]
-        #DataFrames.hcat!(df, index_column)
         row_name = newsymbol(:rows, df)
         df[row_name] = 1:size(df,1)
         ce = (:across, row_name)

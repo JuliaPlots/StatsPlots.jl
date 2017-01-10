@@ -16,7 +16,7 @@ import Loess
 @shorthands cdensity
 
 export groupapply
-export get_mean_sem
+export get_summary
 
 include("dataframes.jl")
 include("corrplot.jl")
