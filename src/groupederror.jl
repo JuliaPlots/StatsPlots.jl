@@ -91,6 +91,17 @@ get_axis(column, npoints) = linspace(minimum(column),maximum(column),npoints)
 errortype(s::Symbol) = s
 errortype(s) = s[1]
 
+function newsymbol(s, l::AbstractArray{Symbol})
+    ns = s
+    while ns in l
+        ns = Symbol(ns,:_)
+    end
+    return ns
+end
+
+newsymbol(s, df::AbstractDataFrame) = newsymbol(s, names(df))
+
+
 """
     get_mean_sem(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
 
@@ -122,7 +133,7 @@ end
 Split `df` by `across`, choose shared axis according to `axis_type`
 (`:continuous` or `:discrete`) then compute `get_mean_sem`
 """
-function get_summary(trend,variation, f, df::AbstractDataFrame, compute_error, axis_type, args...; kwargs...)
+function get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, args...; kwargs...)
     # define points on x axis
     if axis_type == :discrete
         xvalues = get_axis(df[args[1]])
@@ -132,28 +143,45 @@ function get_summary(trend,variation, f, df::AbstractDataFrame, compute_error, a
         error("Unexpected axis_type: only :discrete and :continuous allowed!")
     end
 
-    if compute_error == :none
+    if ce == :none
         mean_across_pop = f(df,xvalues, args...; kwargs...)
         sem_across_pop = zeros(length(xvalues));
         valid = ~isnan(mean_across_pop)
         return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
-    elseif errortype(compute_error) == :across
+    elseif ce[1] == :across
         # get mean value and sem of function of interest
-        splitdata = groupby(df, compute_error[2])
+        splitdata = groupby(df, ce[2])
         return get_summary(trend,variation, f, splitdata, xvalues, args...; kwargs...)
+    elseif ce[1] == :bootstrap
+        n_samples = ce[2]
+        indexes = Array(Int64,0)
+        split_var = Array(Int64,0)
+        for i = 1:n_samples
+            append!(indexes, rand(1:size(df,1),size(df,1)))
+            append!(split_var, fill(i,size(df,1)))
+        end
+        split_col = newsymbol(:split_col, df)
+        bootstrap_data = df[indexes,:]
+        bootstrap_data[split_col] = split_var
+        splitdata = groupby(bootstrap_data, split_col)
+        return get_summary(trend,variation, f, splitdata, xvalues, args...; kwargs...)
+    else
+        error("compute_error can only be equal to :none, :across,
+        (:across, col_name), :bootstrap or (:bootstrap, n_samples)")
     end
 end
 
 """
     groupapply(f::Function, df, args...; axis_type = :auto, across = [], group = [], summarize = (mean, sem), kwargs...)
 
-Split `df` by `group`. Then apply `get_mean_sem` to get a population summary of the grouped data.
-Output is a `GroupedError` with population summaries, then can be plot using `plot(g::GroupedError)`
+Split `df` by `group`. Then apply `get_summary` to get a population summary of the grouped data.
+Output is a `GroupedError` with error compute according to the keyword `compute_error`.
+It can be plotted using `plot(g::GroupedError)`
 Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
 function groupapply(f::Function, df, args...;
                     axis_type = :auto, compute_error = :none, group = [],
-                    summarize = (mean, sem), kwargs...)
+                    summarize = (errortype(compute_error) == :bootstrap) ? (mean, std) : (mean, sem), kwargs...)
     if !(axis_type in [:discrete, :continuous])
         axis_type = (typeof(df[args[1]])<:PooledDataArray) ? :discrete : :continuous
     end
@@ -162,16 +190,31 @@ function groupapply(f::Function, df, args...;
         axis_type = :discrete
     end
     mutated_xtype = (axis_type == :continuous) ? Float64 : eltype(df[args[1]])
+
+    # Add default for :across and :bootstrap
+    if compute_error == :across
+        #index_column = DataFrame(rows = 1:size(df,1))
+        #row_name = DataFrames.add_names(DataFrames.index(df), DataFrames.index(index_column))[1]
+        #DataFrames.hcat!(df, index_column)
+        row_name = newsymbol(:rows, df)
+        df[row_name] = 1:size(df,1)
+        ce = (:across, row_name)
+    elseif compute_error == :bootstrap
+        ce = (:bootstrap, 1000)
+    else
+        ce = compute_error
+    end
+
     g = GroupedError(
                     Array(Vector{mutated_xtype},0),
                     Array(Vector{Float64},0),
                     Array(Vector{Float64},0),
                     Array(AbstractString,0),
                     axis_type,
-                    compute_error != :none
+                    ce != :none
                     )
     if group == []
-        xvalues,yvalues,shade = get_summary(summarize..., f, df, compute_error, axis_type, args...; kwargs...)
+        xvalues,yvalues,shade = get_summary(summarize..., f, df, ce, axis_type, args...; kwargs...)
         push!(g.x, xvalues)
         push!(g.y, yvalues)
         push!(g.err, shade)
@@ -181,7 +224,7 @@ function groupapply(f::Function, df, args...;
         by(df,group) do dd
             label = isa(group, AbstractArray) ?
                     string(["$(dd[1,column]) " for column in group]...) : string(dd[1,group])
-            xvalues,yvalues,shade = get_summary(summarize...,f, dd, compute_error, axis_type, args...; kwargs...)
+            xvalues,yvalues,shade = get_summary(summarize...,f, dd, ce, axis_type, args...; kwargs...)
             push!(g.x, xvalues)
             push!(g.y, yvalues)
             push!(g.err, shade)
@@ -189,6 +232,8 @@ function groupapply(f::Function, df, args...;
             return
         end
     end
+    if compute_error == :across; delete!(df, row_name); end
+
     return g
 end
 
