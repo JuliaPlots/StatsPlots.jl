@@ -131,7 +131,6 @@ Example use:
 ```julia
 using DataFrames
 import RDatasets
-using Plots
 using StatPlots
 gr()
 school = RDatasets.dataset("mlmRev","Hsb82");

@@ -28,7 +28,6 @@ include("hist.jl")
 include("marginalhist.jl")
 include("bar.jl")
 include("shadederror.jl")
-include("analysisfunctions.jl")
 include("groupederror.jl")
 
 

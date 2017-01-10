@@ -1,9 +1,84 @@
+##### List of functions to analyze data
+
+function extend_axis(df::AbstractDataFrame, xlabel, ylabel, xaxis, val)
+    aux = DataFrame()
+    aux[xlabel] = xaxis
+    extended = join(aux, df, on = xlabel, kind = :left)
+    sort!(extended, cols = [xlabel])
+    return convert(Array, extended[ylabel], val)
+end
+
+function extend_axis(xsmall, ysmall, xaxis, val)
+    df = DataFrame(x = xsmall, y = ysmall)
+    return extend_axis(df, :x, :y, xaxis, val)
+end
+
+"""
+    `_locreg(df, xaxis::LinSpace, x, y; kwargs...)`
+
+Apply loess regression, training the regressor with `x` and `y` and
+predicting `xaxis`
+"""
+function _locreg(df, xaxis::LinSpace, x, y; kwargs...)
+    predicted = fill(NaN,length(xaxis))
+    within = minimum(df[x]).<= xaxis .<= maximum(df[x])
+    if any(within)
+        model = Loess.loess(convert(Vector{Float64},df[x]),convert(Vector{Float64},df[y]); kwargs...)
+        predicted[within] = Loess.predict(model,xaxis[within])
+    end
+    return predicted
+end
+
+
+"""
+    `_locreg(df, xaxis, x, y; kwargs...)`
+
+In the discrete case, the function computes the conditional expectation of `y` for
+a given value of `x`
+"""
+function _locreg(df, xaxis, x,  y)
+  ymean = by(df, x) do dd
+      DataFrame(m = mean(dd[y]))
+  end
+  return extend_axis(ymean, x, :m, xaxis, NaN)
+end
+
+"""
+    `_density(df,xaxis::LinSpace, x; kwargs...)`
+
+Kernel density of `x`, computed along `xaxis`
+"""
+_density(df,xaxis::LinSpace, x; kwargs...) = pdf(KernelDensity.kde(df[x]; kwargs...),xaxis)
+
+"""
+    `_density(df, xaxis, x)`
+
+Normalized histogram of `x` (which is discrete: every value is its own bin)
+"""
+function _density(df,xaxis, x)
+    xhist = by(df, x) do dd
+        DataFrame(length = size(dd,1)/size(df,1))
+    end
+    return extend_axis(xhist, x, :length, xaxis, 0.)
+end
+
+"""
+    `_cumulative(df, xaxis, x) = ecdf(df[x])(xaxis)`
+
+Cumulative density function of `x`, computed along `xaxis`
+"""
+_cumulative(df, xaxis, x) = ecdf(df[x])(xaxis)
+
+
+#### Method to compute and plot grouped error plots using the above functions
+
 type GroupedError{S, T<:AbstractString}
     x::Vector{Vector{S}}
     y::Vector{Vector{Float64}}
     err::Vector{Vector{Float64}}
     group::Vector{T}
     axis_type::Symbol
+    show_error::Bool
 end
 
 get_axis(column) = sort!(union(column))
@@ -12,6 +87,9 @@ get_axis(column, npoints) = linspace(minimum(column),maximum(column),npoints)
 # f is the function used to analyze dataset: define it as nan when it is not defined,
 # the input is: dataframe used, points chosen on the x axis, x (and maybe y) column labels
 # the output is the y value for the given xvalues
+
+errortype(s::Symbol) = s
+errortype(s) = s[1]
 
 """
     get_mean_sem(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
@@ -22,7 +100,7 @@ Apply function `f` to `splitdata`, then output summary statistics
 are label of x axis variable and extra arguments for function `f`. `kwargs...` are passed
 to `f`
 """
-function get_mean_sem(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
+function get_summary(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
     v = Array(Float64, length(xvalues), length(splitdata));
     for i in 1:length(splitdata)
         v[:,i] = f(splitdata[i],xvalues, args...; kwargs...)
@@ -44,7 +122,7 @@ end
 Split `df` by `across`, choose shared axis according to `axis_type`
 (`:continuous` or `:discrete`) then compute `get_mean_sem`
 """
-function get_mean_sem(trend,variation, f, df::AbstractDataFrame, across, axis_type, args...; kwargs...)
+function get_summary(trend,variation, f, df::AbstractDataFrame, compute_error, axis_type, args...; kwargs...)
     # define points on x axis
     if axis_type == :discrete
         xvalues = get_axis(df[args[1]])
@@ -54,15 +132,15 @@ function get_mean_sem(trend,variation, f, df::AbstractDataFrame, across, axis_ty
         error("Unexpected axis_type: only :discrete and :continuous allowed!")
     end
 
-    if across == []
+    if compute_error == :none
         mean_across_pop = f(df,xvalues, args...; kwargs...)
         sem_across_pop = zeros(length(xvalues));
         valid = ~isnan(mean_across_pop)
         return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
-    else
+    elseif errortype(compute_error) == :across
         # get mean value and sem of function of interest
-        splitdata = groupby(df, across)
-        return get_mean_sem(trend,variation, f, splitdata, xvalues, args...; kwargs...)
+        splitdata = groupby(df, compute_error[2])
+        return get_summary(trend,variation, f, splitdata, xvalues, args...; kwargs...)
     end
 end
 
@@ -74,7 +152,8 @@ Output is a `GroupedError` with population summaries, then can be plot using `pl
 Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
 function groupapply(f::Function, df, args...;
-                    axis_type = :auto, across = [], group = [], summarize = (mean, sem), kwargs...)
+                    axis_type = :auto, compute_error = :none, group = [],
+                    summarize = (mean, sem), kwargs...)
     if !(axis_type in [:discrete, :continuous])
         axis_type = (typeof(df[args[1]])<:PooledDataArray) ? :discrete : :continuous
     end
@@ -88,10 +167,11 @@ function groupapply(f::Function, df, args...;
                     Array(Vector{Float64},0),
                     Array(Vector{Float64},0),
                     Array(AbstractString,0),
-                    axis_type
+                    axis_type,
+                    compute_error != :none
                     )
     if group == []
-        xvalues,yvalues,shade = get_mean_sem(summarize..., f, df, across, axis_type, args...; kwargs...)
+        xvalues,yvalues,shade = get_summary(summarize..., f, df, compute_error, axis_type, args...; kwargs...)
         push!(g.x, xvalues)
         push!(g.y, yvalues)
         push!(g.err, shade)
@@ -101,7 +181,7 @@ function groupapply(f::Function, df, args...;
         by(df,group) do dd
             label = isa(group, AbstractArray) ?
                     string(["$(dd[1,column]) " for column in group]...) : string(dd[1,group])
-            xvalues,yvalues,shade = get_mean_sem(summarize...,f, dd, across, axis_type, args...; kwargs...)
+            xvalues,yvalues,shade = get_summary(summarize...,f, dd, compute_error, axis_type, args...; kwargs...)
             push!(g.x, xvalues)
             push!(g.y, yvalues)
             push!(g.err, shade)
@@ -156,7 +236,9 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
                 seriestype := :scatter
                 x := cycle(g.x,i)
                 y := cycle(g.y, i)
-                err := cycle(g.err,i)
+                if g.show_error
+                    err := cycle(g.err,i)
+                end
                 label --> cycle(g.group,i)
                 ()
             end
@@ -168,8 +250,10 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
         xaxis = sort!(union((g.x)...))
         ys = extend_axis.(g.x, g.y, [xaxis], [NaN])
         y = hcat(ys...)
-        errs = extend_axis.(g.x, g.err, [xaxis], [NaN])
-        err := hcat(errs...)
+        if g.show_error
+            errs = extend_axis.(g.x, g.err, [xaxis], [NaN])
+            err := hcat(errs...)
+        end
         label --> hcat(g.group...)
         StatPlots.GroupedBar((xaxis,y))
     end
