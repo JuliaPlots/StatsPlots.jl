@@ -176,7 +176,11 @@ function get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, a
 end
 
 """
-    groupapply(f::Function, df, args...; axis_type = :auto, across = [], group = [], summarize = (mean, sem), kwargs...)
+
+    groupapply(f::Function, df, args...;
+                axis_type = :auto, compute_error = :none, group = [],
+                summarize = (errortype(compute_error) == :bootstrap) ?
+                (mean, std) : (mean, sem), kwargs...)
 
 Split `df` by `group`. Then apply `get_summary` to get a population summary of the grouped data.
 Output is a `GroupedError` with error computed according to the keyword `compute_error`.
