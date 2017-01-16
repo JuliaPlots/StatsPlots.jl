@@ -82,16 +82,26 @@ type GroupedError{S, T<:AbstractString}
 end
 
 get_axis(column) = sort!(union(column))
-get_axis(column, npoints) = linspace(minimum(column),maximum(column),npoints)
+get_axis(column, npoints::Int64) = linspace(minimum(column),maximum(column),npoints)
+
+function get_axis(column, axis_type::Symbol)
+    if axis_type == :discrete
+        return get_axis(column)
+    elseif axis_type == :continuous
+        return get_axis(column, 100)
+    else
+        error("Unexpected axis_type: only :discrete and :continuous allowed!")
+    end
+end
 
 # f is the function used to analyze dataset: define it as nan when it is not defined,
 # the input is: dataframe used, points chosen on the x axis, x (and maybe y) column labels
 # the output is the y value for the given xvalues
 
-errortype(s::Symbol) = s
-errortype(s) = s[1]
+get_symbol(s::Symbol) = s
+get_symbol(s) = s[1]
 
-function newsymbol(s, l::AbstractArray{Symbol})
+function new_symbol(s, l::AbstractArray{Symbol})
     ns = s
     while ns in l
         ns = Symbol(ns,:_)
@@ -99,7 +109,7 @@ function newsymbol(s, l::AbstractArray{Symbol})
     return ns
 end
 
-newsymbol(s, df::AbstractDataFrame) = newsymbol(s, names(df))
+new_symbol(s, df::AbstractDataFrame) = new_symbol(s, names(df))
 
 
 """
@@ -111,7 +121,7 @@ Apply function `f` to `splitdata`, then compute summary statistics
 are label of x axis variable and extra arguments for function `f`. `kwargs...` are passed
 to `f`
 """
-function get_summary(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
+function get_summary(trend,variation, f, splitdata::GroupedDataFrame, xvalues::AbstractArray, args...; kwargs...)
     v = Array(Float64, length(xvalues), length(splitdata));
     for i in 1:length(splitdata)
         v[:,i] = f(splitdata[i],xvalues, args...; kwargs...)
@@ -135,15 +145,7 @@ across column `col_name`, whereas `ce = (:bootstrap, n_samples)` will generate `
 fake datasets distributed like the real dataset (nonparametric bootstrapping). Choose shared axis
 according to `axis_type` (`:continuous` or `:discrete`) then compute `get_summary`
 """
-function get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, args...; kwargs...)
-    # define points on x axis
-    if axis_type == :discrete
-        xvalues = get_axis(df[args[1]])
-    elseif axis_type == :continuous
-        xvalues = get_axis(df[args[1]], 100)
-    else
-        error("Unexpected axis_type: only :discrete and :continuous allowed!")
-    end
+function get_summary(trend,variation, f, df::AbstractDataFrame, xvalues::AbstractArray, ce, args...; kwargs...)
 
     if ce == :none
         mean_across_pop = f(df,xvalues, args...; kwargs...)
@@ -162,7 +164,7 @@ function get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, a
             append!(indexes, rand(1:size(df,1),size(df,1)))
             append!(split_var, fill(i,size(df,1)))
         end
-        split_col = newsymbol(:split_col, df)
+        split_col = new_symbol(:split_col, df)
         bootstrap_data = df[indexes,:]
         bootstrap_data[split_col] = split_var
         ends = collect(size(df,1)*(1:n_samples))
@@ -175,12 +177,18 @@ function get_summary(trend,variation, f, df::AbstractDataFrame, ce, axis_type, a
     end
 end
 
+function get_summary(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...; kwargs...)
+    # define points on x axis
+    xvalues = get_axis(df[args[1]], axis_type)
+    return get_summary(trend,variation, f, df::AbstractDataFrame, xvalues, ce, args...; kwargs...)
+end
+
 """
 
     groupapply(f::Function, df, args...;
                 axis_type = :auto, compute_error = :none, group = [],
-                summarize = (errortype(compute_error) == :bootstrap) ?
-                (mean, std) : (mean, sem), kwargs...)
+                summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
+                kwargs...)
 
 Split `df` by `group`. Then apply `get_summary` to get a population summary of the grouped data.
 Output is a `GroupedError` with error computed according to the keyword `compute_error`.
@@ -189,7 +197,9 @@ Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
 function groupapply(f::Function, df, args...;
                     axis_type = :auto, compute_error = :none, group = [],
-                    summarize = (errortype(compute_error) == :bootstrap) ? (mean, std) : (mean, sem), kwargs...)
+                    summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
+                    compute_axis = :separate,
+                    kwargs...)
     if !(axis_type in [:discrete, :continuous])
         axis_type = (typeof(df[args[1]])<:PooledDataArray) ? :discrete : :continuous
     end
@@ -201,7 +211,7 @@ function groupapply(f::Function, df, args...;
 
     # Add default for :across and :bootstrap
     if compute_error == :across
-        row_name = newsymbol(:rows, df)
+        row_name = new_symbol(:rows, df)
         df[row_name] = 1:size(df,1)
         ce = (:across, row_name)
     elseif compute_error == :bootstrap
@@ -219,7 +229,7 @@ function groupapply(f::Function, df, args...;
                     ce != :none
                     )
     if group == []
-        xvalues,yvalues,shade = get_summary(summarize..., f, df, ce, axis_type, args...; kwargs...)
+        xvalues,yvalues,shade = get_summary(summarize..., f, df, axis_type, ce, args...; kwargs...)
         push!(g.x, xvalues)
         push!(g.y, yvalues)
         push!(g.err, shade)
@@ -229,7 +239,7 @@ function groupapply(f::Function, df, args...;
         by(df,group) do dd
             label = isa(group, AbstractArray) ?
                     string(["$(dd[1,column]) " for column in group]...) : string(dd[1,group])
-            xvalues,yvalues,shade = get_summary(summarize...,f, dd, ce, axis_type, args...; kwargs...)
+            xvalues,yvalues,shade = get_summary(summarize...,f, dd, axis_type, ce, args...; kwargs...)
             push!(g.x, xvalues)
             push!(g.y, yvalues)
             push!(g.err, shade)
