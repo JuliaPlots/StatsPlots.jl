@@ -16,7 +16,7 @@ import Loess
 @shorthands cdensity
 
 export groupapply
-export get_summary
+export get_groupederror
 
 include("dataframes.jl")
 include("corrplot.jl")
