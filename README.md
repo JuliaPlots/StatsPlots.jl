@@ -121,3 +121,48 @@ groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7)
 ```
 
 ![tmp](https://cloud.githubusercontent.com/assets/933338/18962092/673f6c78-863d-11e6-9ee9-8ca104e5d2a3.png)
+
+
+## groupapply for population analysis
+There is a groupapply function that splits the data across a keyword argument "group", then applies "summarize" to get average and variability of a given analysis (density, cumulative and local regression are supported so far, but one can also add their own function). To get average and variability there are 3 ways:
+
+- `compute_error = (:across, col_name)`, where the data is split according to column `col_name` before being summarized. `compute_error = :across` splits across all observations. Default summary is `(mean, sem)` but it can be changed with keyword `summarize` to any pair of functions.
+
+- `compute_error = (:bootstrap, n_samples)`, where `n_samples` fake datasets distributed like the real dataset are generated and then summarized (nonparametric
+<a href="https://en.wikipedia.org/wiki/Bootstrapping_(statistics)">bootstrapping</a>). `compute_error = :bootstrap` defaults to `compute_error = (:bootstrap, 1000)`. Default summary is `(mean, std)`. This method will work with any analysis but is computationally very expensive.
+
+- `compute_error = :none`, where no error is computed or displayed and the analysis is carried out normally.
+
+The local regression uses [Loess.jl](https://github.com/JuliaStats/Loess.jl) and the density plot uses [KernelDensity.jl](https://github.com/JuliaStats/KernelDensity.jl). In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin. The choice of continuous or discrete axis can be forced via `axis_type = :continuous` or `axis_type = :discrete`
+
+Example use:
+
+```julia
+using DataFrames
+import RDatasets
+using StatPlots
+gr()
+school = RDatasets.dataset("mlmRev","Hsb82");
+grp_error = groupapply(:cumulative, school, :MAch; compute_error = (:across,:School), group = :Sx)
+plot(grp_error, line = :path)
+```
+<img width="494" alt="screenshot 2016-12-19 12 28 27" src="https://cloud.githubusercontent.com/assets/6333339/21313005/316e0f0c-c5e7-11e6-9464-f0921dee3d29.png">
+
+Keywords for loess or kerneldensity can be given to groupapply:
+
+```julia
+df = groupapply(:density, school, :CSES; bandwidth = 1., compute_error = (:bootstrap,500), group = :Minrty)
+plot(df, line = :path)
+```
+
+<img width="487" alt="screenshot 2017-01-10 18 36 48" src="https://cloud.githubusercontent.com/assets/6333339/21819500/cb788fb8-d763-11e6-89b9-91018f2b9a2a.png">
+
+
+The bar plot
+
+```julia
+pool!(school, :Sx)
+grp_error = groupapply(school, :Sx, :MAch; compute_error = :across, group = :Minrty)
+plot(grp_error, line = :bar)
+```
+<img width="489" alt="screenshot 2017-01-10 18 20 51" src="https://cloud.githubusercontent.com/assets/6333339/21819413/7923681e-d763-11e6-907d-c81447b4cc99.png">
