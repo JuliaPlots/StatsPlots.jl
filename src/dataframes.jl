@@ -1,14 +1,17 @@
 
+toArray{T<:Any}(na::NullableArrays.NullableArray{T,1}) = convert(Array, na)
+toArray{T<:Number}(na::NullableArrays.NullableArray{T,1}) = Float64[isnull(x) ? NaN : get(x) for x in na]
+
 # if it's one symbol, set the guide and return the column
 function handle_dfs(df::AbstractDataFrame, d::KW, letter, sym::Symbol)
     get!(d, Symbol(letter * "guide"), string(sym))
-    collect(df[sym])
+    toArray(df[sym])
 end
 
 # if it's an array of symbols, set the labels and return a Vector{Any} of columns
 function handle_dfs(df::AbstractDataFrame, d::KW, letter, syms::AbstractArray{Symbol})
     get!(d, :label, reshape(syms, 1, length(syms)))
-    vec(Any[collect(df[s]) for s in syms])
+    vec(Any[toArray(df[s]) for s in syms])
 end
 
 # for anything else, no-op
@@ -18,7 +21,7 @@ end
 
 # handle grouping by DataFrame column
 function Plots.extractGroupArgs(group::Symbol, df::AbstractDataFrame, args...)
-    Plots.extractGroupArgs(collect(df[group]))
+    Plots.extractGroupArgs(toArray(df[group]))
 end
 
 # allows the passing of expressions including DataFrame columns as symbols
@@ -27,7 +30,7 @@ function processExpr!(expr, df)
         isa(x, Expr) && return processExpr!(x, df)
 
         if isa(x, QuoteNode) && isa(x.value, Symbol)
-            return :(collect($(df)[$x]))
+            return :(toArray($(df)[$x]))
         end
         x
     end
@@ -45,7 +48,7 @@ end
             end
 
             if isa(d[k], Symbol)
-                d[k] = collect(df[d[k]])
+                d[k] = toArray(df[d[k]])
             end
         end
     end
