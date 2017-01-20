@@ -1,15 +1,14 @@
 ##### List of functions to analyze data
 
 function extend_axis(df::AbstractDataFrame, xlabel, ylabel, xaxis, val)
-    aux = DataFrame()
-    aux[xlabel] = xaxis
+    aux = DataFrame(Any[xaxis],[xlabel])
     extended = join(aux, df, on = xlabel, kind = :left)
     sort!(extended, cols = [xlabel])
     return convert(Array, extended[ylabel], val)
 end
 
 function extend_axis(xsmall, ysmall, xaxis, val)
-    df = DataFrame(x = xsmall, y = ysmall)
+    df = DataFrame(Any[xsmall,ysmall], [:x,:y])
     return extend_axis(df, :x, :y, xaxis, val)
 end
 
@@ -202,14 +201,21 @@ Output is a `GroupedError` with error computed according to the keyword `compute
 It can be plotted using `plot(g::GroupedError)`
 Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
-function groupapply(f::Function, df, args...;
+function groupapply(f::Function, dfn, args...;
                     axis_type = :auto, compute_error = :none, group = [],
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
                     compute_axis = :separate,
                     kwargs...)
     if !(axis_type in [:discrete, :continuous])
-        axis_type = (typeof(df[args[1]])<:PooledDataArray) ? :discrete : :continuous
+        axis_type = (typeof(dfn[args[1]])<:Union{CategoricalArray,NullableCategoricalArray}) ?
+                    :discrete : :continuous
     end
+    # Convert to dataframe with only
+    rel_cols = filter(t -> (t in names(dfn)), union([args...], compute_error, group))
+    df = dfn[:, rel_cols]
+    df = df[complete_cases(df),:]
+    df = DataFrame(convert.([Array],getindex.([df],rel_cols)) , rel_cols)
+
     if (axis_type == :continuous) & !(eltype(df[args[1]])<:Real)
         warn("Changing to discrete axis, x values are not real numbers!")
         axis_type = :discrete
