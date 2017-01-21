@@ -189,10 +189,13 @@ function get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, 
     return get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues, ce, args...; kwargs...)
 end
 
+vectorify(v::AbstractArray) = v
+vectorify(v) = [v]
+
 """
 
     groupapply(f::Function, df, args...;
-                axis_type = :auto, compute_error = :none, group = [],
+                axis_type = :auto, compute_error = :none, group = Array{Symbol,1}(0),
                 summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
                 kwargs...)
 
@@ -202,18 +205,21 @@ It can be plotted using `plot(g::GroupedError)`
 Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
 function groupapply(f::Function, dfn, args...;
-                    axis_type = :auto, compute_error = :none, group = [],
+                    axis_type = :auto, compute_error = :none, group = Array{Symbol,1}(0),
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
                     compute_axis = :separate,
                     kwargs...)
+
     if !(axis_type in [:discrete, :continuous])
         axis_type = (typeof(dfn[args[1]])<:Union{CategoricalArray,NullableCategoricalArray}) ?
                     :discrete : :continuous
     end
-    # Convert to dataframe with only
-    rel_cols = filter(t -> (t in names(dfn)), union([args...], compute_error, group))
-    df = dfn[:, rel_cols]
-    df = df[complete_cases(df),:]
+
+    # Convert to dataframe with only relevant columns and no missing data
+    err_col = (isa(compute_error, Tuple) && (compute_error[1] == :across)) ?
+                vectorify(compute_error[2]) : Array{Symbol,1}(0)
+    rel_cols = filter(t -> (t in names(dfn)), union([args...], err_col, vectorify(group)))
+    df = dfn[complete_cases(dfn[:, rel_cols]),rel_cols]
     df = DataFrame(convert.([Array],getindex.([df],rel_cols)) , rel_cols)
 
     if (axis_type == :continuous) & !(eltype(df[args[1]])<:Real)
@@ -241,7 +247,7 @@ function groupapply(f::Function, dfn, args...;
                     axis_type,
                     ce != :none
                     )
-    if group == []
+    if group == Array{Symbol,1}(0)
         xvalues,yvalues,shade = get_groupederror(summarize..., f, df, axis_type, ce, args...; kwargs...)
         push!(g.x, xvalues)
         push!(g.y, yvalues)
@@ -250,8 +256,7 @@ function groupapply(f::Function, dfn, args...;
     else
         #group_array = isa(group, AbstractArray) ? group : [group]
         by(df,group) do dd
-            label = isa(group, AbstractArray) ?
-                    string(["$(dd[1,column]) " for column in group]...) : string(dd[1,group])
+            label = string(["$(dd[1,column]) " for column in vectorify(group)]...)
             xvalues,yvalues,shade = get_groupederror(summarize...,f, dd, axis_type, ce, args...; kwargs...)
             push!(g.x, xvalues)
             push!(g.y, yvalues)
