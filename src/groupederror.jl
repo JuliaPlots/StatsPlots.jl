@@ -194,38 +194,41 @@ vectorify(v) = [v]
 
 """
 
-    groupapply(f::Function, df, args...;
-                axis_type = :auto, compute_error = :none, group = Array{Symbol,1}(0),
+    groupapply(f::Function, dfn, args...;
+                axis_type = :auto, compute_error = :none, group = Symbol[],
                 summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
                 kwargs...)
 
-Split `df` by `group`. Then apply `get_groupederror` to get a population summary of the grouped data.
+Split `dfn` by `group`. Then apply `get_groupederror` to get a population summary of the grouped data.
 Output is a `GroupedError` with error computed according to the keyword `compute_error`.
 It can be plotted using `plot(g::GroupedError)`
 Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
 function groupapply(f::Function, dfn, args...;
-                    axis_type = :auto, compute_error = :none, group = Array{Symbol,1}(0),
+                    axis_type = :auto, compute_error = :none, group = Symbol[],
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
-                    compute_axis = :separate,
                     kwargs...)
 
-    if !(axis_type in [:discrete, :continuous])
-        axis_type = (typeof(dfn[args[1]])<:Union{CategoricalArray,NullableCategoricalArray}) ?
-                    :discrete : :continuous
-    end
-
+    x_categorical = (typeof(dfn[args[1]])<:Union{CategoricalArray,NullableCategoricalArray})
     # Convert to dataframe with only relevant columns and no missing data
     err_col = (isa(compute_error, Tuple) && (compute_error[1] == :across)) ?
                 vectorify(compute_error[2]) : Array{Symbol,1}(0)
     rel_cols = filter(t -> (t in names(dfn)), union([args...], err_col, vectorify(group)))
-    df = dfn[complete_cases(dfn[:, rel_cols]),rel_cols]
-    df = DataFrame(convert.([Array],getindex.([df],rel_cols)) , rel_cols)
+    df = DataFrame([Array(dfn[col]) for col in rel_cols], rel_cols)
+    x_notnumber = !(eltype(df[args[1]])<:Real)
 
-    if (axis_type == :continuous) & !(eltype(df[args[1]])<:Real)
-        warn("Changing to discrete axis, x values are not real numbers!")
+    #Choosing axis type: if x is not number it's discrete, if x is categorical it's
+    #discrete unless explicitely chosen to be continuous, if x is a number and not categorical
+    #axis is continuous unless explicitely chosen to be discrete
+    if x_notnumber
+        (axis_type == :continuous) && warn("Changing to discrete axis, x values are not real numbers!")
         axis_type = :discrete
+    elseif x_categorical
+        (axis_type == :continuous) || (axis_type = :discrete)
+    else
+        (axis_type == :discrete) || (axis_type = :continuous)
     end
+
     mutated_xtype = (axis_type == :continuous) ? Float64 : eltype(df[args[1]])
 
     # Add default for :across and :bootstrap
@@ -247,7 +250,7 @@ function groupapply(f::Function, dfn, args...;
                     axis_type,
                     ce != :none
                     )
-    if group == Array{Symbol,1}(0)
+    if group == Symbol[]
         xvalues,yvalues,shade = get_groupederror(summarize..., f, df, axis_type, ce, args...; kwargs...)
         push!(g.x, xvalues)
         push!(g.y, yvalues)
