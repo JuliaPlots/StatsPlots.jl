@@ -1,15 +1,14 @@
 ##### List of functions to analyze data
 
 function extend_axis(df::AbstractDataFrame, xlabel, ylabel, xaxis, val)
-    aux = DataFrame()
-    aux[xlabel] = xaxis
+    aux = DataFrame(Any[xaxis],[xlabel])
     extended = join(aux, df, on = xlabel, kind = :left)
     sort!(extended, cols = [xlabel])
     return convert(Array, extended[ylabel], val)
 end
 
 function extend_axis(xsmall, ysmall, xaxis, val)
-    df = DataFrame(x = xsmall, y = ysmall)
+    df = DataFrame(Any[xsmall,ysmall], [:x,:y])
     return extend_axis(df, :x, :y, xaxis, val)
 end
 
@@ -190,30 +189,46 @@ function get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, 
     return get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues, ce, args...; kwargs...)
 end
 
+vectorify(v::AbstractArray) = v
+vectorify(v) = [v]
+
 """
 
-    groupapply(f::Function, df, args...;
-                axis_type = :auto, compute_error = :none, group = [],
+    groupapply(f::Function, dfn, args...;
+                axis_type = :auto, compute_error = :none, group = Symbol[],
                 summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
                 kwargs...)
 
-Split `df` by `group`. Then apply `get_groupederror` to get a population summary of the grouped data.
+Split `dfn` by `group`. Then apply `get_groupederror` to get a population summary of the grouped data.
 Output is a `GroupedError` with error computed according to the keyword `compute_error`.
 It can be plotted using `plot(g::GroupedError)`
 Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
-function groupapply(f::Function, df, args...;
-                    axis_type = :auto, compute_error = :none, group = [],
+function groupapply(f::Function, dfn, args...;
+                    axis_type = :auto, compute_error = :none, group = Symbol[],
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
-                    compute_axis = :separate,
                     kwargs...)
-    if !(axis_type in [:discrete, :continuous])
-        axis_type = (typeof(df[args[1]])<:PooledDataArray) ? :discrete : :continuous
-    end
-    if (axis_type == :continuous) & !(eltype(df[args[1]])<:Real)
-        warn("Changing to discrete axis, x values are not real numbers!")
+
+    x_categorical = (typeof(dfn[args[1]])<:Union{CategoricalArray,NullableCategoricalArray})
+    # Convert to dataframe with only relevant columns and no missing data
+    err_col = (isa(compute_error, Tuple) && (compute_error[1] == :across)) ?
+                vectorify(compute_error[2]) : Array{Symbol,1}(0)
+    rel_cols = filter(t -> (t in names(dfn)), union([args...], err_col, vectorify(group)))
+    df = DataFrame([Array(dfn[col]) for col in rel_cols], rel_cols)
+    x_notnumber = !(eltype(df[args[1]])<:Real)
+
+    #Choosing axis type: if x is not number it's discrete, if x is categorical it's
+    #discrete unless explicitely chosen to be continuous, if x is a number and not categorical
+    #axis is continuous unless explicitely chosen to be discrete
+    if x_notnumber
+        (axis_type == :continuous) && warn("Changing to discrete axis, x values are not real numbers!")
         axis_type = :discrete
+    elseif x_categorical
+        (axis_type == :continuous) || (axis_type = :discrete)
+    else
+        (axis_type == :discrete) || (axis_type = :continuous)
     end
+
     mutated_xtype = (axis_type == :continuous) ? Float64 : eltype(df[args[1]])
 
     # Add default for :across and :bootstrap
@@ -235,7 +250,7 @@ function groupapply(f::Function, df, args...;
                     axis_type,
                     ce != :none
                     )
-    if group == []
+    if group == Symbol[]
         xvalues,yvalues,shade = get_groupederror(summarize..., f, df, axis_type, ce, args...; kwargs...)
         push!(g.x, xvalues)
         push!(g.y, yvalues)
@@ -244,8 +259,7 @@ function groupapply(f::Function, df, args...;
     else
         #group_array = isa(group, AbstractArray) ? group : [group]
         by(df,group) do dd
-            label = isa(group, AbstractArray) ?
-                    string(["$(dd[1,column]) " for column in group]...) : string(dd[1,group])
+            label = string(["$(dd[1,column]) " for column in vectorify(group)]...)
             xvalues,yvalues,shade = get_groupederror(summarize...,f, dd, axis_type, ce, args...; kwargs...)
             push!(g.x, xvalues)
             push!(g.y, yvalues)
