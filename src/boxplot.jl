@@ -77,8 +77,6 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             push!(ysegs, q5, q5, q5, q5, q4)    # upper T
         end
     end
-
-    linecolor --> :black
     
     # Outliers
     if outliers
@@ -97,6 +95,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         end
     end
 
+    fillalpha --> 0.5
     seriestype := :shape
     x := xsegs.pts
     y := ysegs.pts
