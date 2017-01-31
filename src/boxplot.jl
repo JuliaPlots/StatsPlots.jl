@@ -4,7 +4,7 @@
 
 notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
-@recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5)
+@recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true)
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     warning = false
@@ -41,8 +41,10 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             inside = Float64[]
             for value in values
                 if (value < (q2 - limit)) || (value > (q4 + limit))
-                    push!(outliers_y, value)
-                    push!(outliers_x, center)
+                    if outliers
+                        push!(outliers_y, value)
+                        push!(outliers_x, center)
+                    end
                 else
                     push!(inside, value)
                 end
@@ -76,19 +78,23 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         end
     end
 
+    linecolor --> :black
+    
     # Outliers
-    @series begin
-        seriestype  := :scatter
-        markershape := :circle
-        markercolor := d[:fillcolor]
-        markeralpha := d[:fillalpha]
-        markerstrokecolor := d[:linecolor]
-        markerstrokealpha := d[:linealpha]
-        fillrange   := nothing
-        x           := outliers_x
-        y           := outliers_y
-        primary     := false
-        ()
+    if outliers
+        @series begin
+            seriestype  := :scatter
+            markershape --> :circle
+            markercolor --> d[:fillcolor]
+            markeralpha --> d[:fillalpha]
+            markerstrokecolor --> d[:linecolor]
+            markerstrokealpha --> d[:linealpha]
+            fillrange   := nothing
+            x           := outliers_x
+            y           := outliers_y
+            primary     := false
+            ()
+        end
     end
 
     seriestype := :shape
