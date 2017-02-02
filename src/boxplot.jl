@@ -82,7 +82,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     if outliers
         @series begin
             seriestype  := :scatter
-            markershape --> :circle
+            markershape := :circle
             markercolor --> d[:fillcolor]
             markeralpha --> d[:fillalpha]
             markerstrokecolor --> d[:linecolor]
