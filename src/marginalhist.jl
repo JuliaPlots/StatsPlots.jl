@@ -53,7 +53,7 @@
         subplot := 3
         left_margin --> 0mm
         if bns != nothing && length(bns) == 2
-            bins := bns[1]
+            bins := bns[2]
         end
         y := y
     end
