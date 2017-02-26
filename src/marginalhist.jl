@@ -34,10 +34,16 @@
         seriestype := :histogram
     end
 
+
+    bns = get(d, :bins, nothing)
+
     # upper histogram
     @series begin
         subplot := 1
         bottom_margin --> 0mm
+        if bns != nothing && length(bns) == 2
+            bins := bns[1]
+        end
         y := x
     end
 
@@ -46,6 +52,9 @@
         orientation := :h
         subplot := 3
         left_margin --> 0mm
+        if bns != nothing && length(bns) == 2
+            bins := bns[1]
+        end
         y := y
     end
 end
