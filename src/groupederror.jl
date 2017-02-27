@@ -1,14 +1,14 @@
 ##### List of functions to analyze data
 
-function extend_axis(df::AbstractDataFrame, xlabel, ylabel, xaxis, val)
-    aux = DataFrame(Any[xaxis],[xlabel])
+function extend_axis(df::AbstractDataTable, xlabel, ylabel, xaxis, val)
+    aux = DataTable(Any[xaxis],[xlabel])
     extended = join(aux, df, on = xlabel, kind = :left)
     sort!(extended, cols = [xlabel])
     return convert(Array, extended[ylabel], val)
 end
 
 function extend_axis(xsmall, ysmall, xaxis, val)
-    df = DataFrame(Any[xsmall,ysmall], [:x,:y])
+    df = DataTable(Any[xsmall,ysmall], [:x,:y])
     return extend_axis(df, :x, :y, xaxis, val)
 end
 
@@ -37,7 +37,7 @@ a given value of `x`
 """
 function _locreg(df, xaxis, x,  y)
   ymean = by(df, x) do dd
-      DataFrame(m = mean(dd[y]))
+      DataTable(m = mean(dd[y]))
   end
   return extend_axis(ymean, x, :m, xaxis, NaN)
 end
@@ -56,7 +56,7 @@ Normalized histogram of `x` (which is discrete: every value is its own bin)
 """
 function _density(df,xaxis, x)
     xhist = by(df, x) do dd
-        DataFrame(length = size(dd,1)/size(df,1))
+        DataTable(length = size(dd,1)/size(df,1))
     end
     return extend_axis(xhist, x, :length, xaxis, 0.)
 end
@@ -94,7 +94,7 @@ function get_axis(column, axis_type::Symbol)
 end
 
 # f is the function used to analyze dataset: define it as nan when it is not defined,
-# the input is: dataframe used, points chosen on the x axis, x (and maybe y) column labels
+# the input is: DataTable used, points chosen on the x axis, x (and maybe y) column labels
 # the output is the y value for the given xvalues
 
 get_symbol(s::Symbol) = s
@@ -108,11 +108,11 @@ function new_symbol(s, l::AbstractArray{Symbol})
     return ns
 end
 
-new_symbol(s, df::AbstractDataFrame) = new_symbol(s, names(df))
+new_symbol(s, df::AbstractDataTable) = new_symbol(s, names(df))
 
 
 """
-    get_groupederror(trend,variation, f, splitdata::GroupedDataFrame, xvalues, args...; kwargs...)
+    get_groupederror(trend,variation, f, splitdata::GroupedDataTable, xvalues, args...; kwargs...)
 
 Apply function `f` to `splitdata`, then compute summary statistics
 `trend` and `variation` of those values. A shared x axis `xvalues` is needed: use
@@ -120,7 +120,7 @@ Apply function `f` to `splitdata`, then compute summary statistics
 are label of x axis variable and extra arguments for function `f`. `kwargs...` are passed
 to `f`
 """
-function get_groupederror(trend,variation, f, splitdata::GroupedDataFrame, xvalues::AbstractArray, args...; kwargs...)
+function get_groupederror(trend,variation, f, splitdata::GroupedDataTable, xvalues::AbstractArray, args...; kwargs...)
     v = Array(Float64, length(xvalues), length(splitdata));
     for i in 1:length(splitdata)
         v[:,i] = f(splitdata[i],xvalues, args...; kwargs...)
@@ -137,14 +137,14 @@ function get_groupederror(trend,variation, f, splitdata::GroupedDataFrame, xvalu
 end
 
 """
-    get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues::AbstractArray, ce, args...; kwargs...)
+    get_groupederror(trend,variation, f, df::AbstractDataTable, xvalues::AbstractArray, ce, args...; kwargs...)
 
-Get `GropedDataFrame` from `df` according to `ce`. `ce = (:across, col_name)` will split
+Get `GropedDataTable` from `df` according to `ce`. `ce = (:across, col_name)` will split
 across column `col_name`, whereas `ce = (:bootstrap, n_samples)` will generate `n_samples`
 fake datasets distributed like the real dataset (nonparametric bootstrapping).
-Then compute `get_groupederror` of the `GroupedDataFrame`.
+Then compute `get_groupederror` of the `GroupedDataTable`.
 """
-function get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues::AbstractArray, ce, args...; kwargs...)
+function get_groupederror(trend,variation, f, df::AbstractDataTable, xvalues::AbstractArray, ce, args...; kwargs...)
 
     if ce == :none
         mean_across_pop = f(df,xvalues, args...; kwargs...)
@@ -168,7 +168,7 @@ function get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues::Ab
         bootstrap_data[split_col] = split_var
         ends = collect(size(df,1)*(1:n_samples))
         starts = ends - size(df,1) + 1
-        splitdata = GroupedDataFrame(bootstrap_data,[split_col],collect(1:ends[end]), starts, ends)
+        splitdata = GroupedDataTable(bootstrap_data,[split_col],collect(1:ends[end]), starts, ends)
         return get_groupederror(trend,variation, f, splitdata, xvalues, args...; kwargs...)
     else
         error("compute_error can only be equal to :none, :across,
@@ -178,15 +178,15 @@ end
 
 
 """
-    get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce, args...; kwargs...)
+    get_groupederror(trend,variation, f, df::AbstractDataTable, axis_type, ce, args...; kwargs...)
 
 Choose shared axis according to `axis_type` (`:continuous` or `:discrete`) then
 compute `get_groupederror`.
 """
-function get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...; kwargs...)
+function get_groupederror(trend,variation, f, df::AbstractDataTable, axis_type, ce,  args...; kwargs...)
     # define points on x axis
     xvalues = get_axis(df[args[1]], axis_type)
-    return get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues, ce, args...; kwargs...)
+    return get_groupederror(trend,variation, f, df::AbstractDataTable, xvalues, ce, args...; kwargs...)
 end
 
 vectorify(v::AbstractArray) = v
@@ -210,11 +210,11 @@ function groupapply(f::Function, dfn, args...;
                     kwargs...)
 
     x_categorical = (typeof(dfn[args[1]])<:Union{CategoricalArray,NullableCategoricalArray})
-    # Convert to dataframe with only relevant columns and no missing data
+    # Convert to DataTable with only relevant columns and no missing data
     err_col = (isa(compute_error, Tuple) && (compute_error[1] == :across)) ?
                 vectorify(compute_error[2]) : Array{Symbol,1}(0)
     rel_cols = filter(t -> (t in names(dfn)), union([args...], err_col, vectorify(group)))
-    df = DataFrame([Array(dfn[col]) for col in rel_cols], rel_cols)
+    df = DataTable([Array(dfn[col]) for col in rel_cols], rel_cols)
     x_notnumber = !(eltype(df[args[1]])<:Real)
 
     #Choosing axis type: if x is not number it's discrete, if x is categorical it's
@@ -292,12 +292,12 @@ function groupapply(s::Symbol, df, args...; kwargs...)
 end
 
 """
-    groupapply(df::AbstractDataFrame, x, y; kwargs...)
+    groupapply(df::AbstractDataTable, x, y; kwargs...)
 
-Equivalent to `groupapply(:locreg, df::AbstractDataFrame, x, y; kwargs...)`
+Equivalent to `groupapply(:locreg, df::AbstractDataTable, x, y; kwargs...)`
 """
 
-groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, y; kwargs...)
+groupapply(df::AbstractDataTable, x, y; kwargs...) = groupapply(_locreg, df, x, y; kwargs...)
 
 @recipe function f(g::GroupedError)
     if !(:seriestype in keys(d)) || (d[:seriestype] == :path)
