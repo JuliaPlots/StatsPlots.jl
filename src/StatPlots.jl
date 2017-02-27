@@ -6,7 +6,7 @@ using Reexport
 import Plots: Plot, cycle
 using StatsBase
 using Distributions
-using DataFrames
+using DataTables
 
 import KernelDensity
 import Loess
@@ -18,7 +18,7 @@ import Loess
 export groupapply
 export get_groupederror
 
-include("dataframes.jl")
+include("DataTables.jl")
 include("corrplot.jl")
 include("cornerplot.jl")
 include("distributions.jl")

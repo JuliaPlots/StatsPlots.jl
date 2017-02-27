@@ -4,6 +4,6 @@ Reexport
 Plots 0.10
 StatsBase
 Distributions
-DataFrames 0.0 0.9
+DataTables
 KernelDensity
 Loess
