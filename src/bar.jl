@@ -53,7 +53,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
         end
         fr
     else
-        get(d, :fillrange, 0)
+        get(d, :fillrange, nothing)
     end
 
     seriestype := :bar

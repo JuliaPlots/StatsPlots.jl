@@ -4,13 +4,15 @@
 
 notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
-@recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5)
+@recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true, whisker_width=:match)
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     warning = false
     outliers_x, outliers_y = zeros(0), zeros(0)
     bw = d[:bar_width]
     bw == nothing && (bw = 0.8)
+    @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
+    ww = whisker_width == :match ? bw : whisker_width
     for (i,glabel) in enumerate(glabels)
         # filter y
         values = y[filter(i -> cycle(x,i) == glabel, 1:length(y))]
@@ -29,8 +31,10 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
         # make the shape
         center = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
-        hw = 0.5cycle(bw, i)
+        hw = 0.5cycle(bw, i) # Box width
+        HW = 0.5cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
+        lw, rw = center - HW, center + HW       
 
         # internal nodes for notches
         L, R = center - 0.5 * hw, center + 0.5 * hw
@@ -41,8 +45,10 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             inside = Float64[]
             for value in values
                 if (value < (q2 - limit)) || (value > (q4 + limit))
-                    push!(outliers_y, value)
-                    push!(outliers_x, center)
+                    if outliers
+                        push!(outliers_y, value)
+                        push!(outliers_x, center)
+                    end
                 else
                     push!(inside, value)
                 end
@@ -54,20 +60,20 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
         # Box
         if notch
-            push!(xsegs, m, l, r, m, m)       # lower T
+            push!(xsegs, m, lw, rw, m, m)       # lower T
             push!(xsegs, l, l, L, R, r, r, l) # lower box
             push!(xsegs, l, l, L, R, r, r, l) # upper box
-            push!(xsegs, m, l, r, m, m)       # upper T
+            push!(xsegs, m, lw, rw, m, m)       # upper T
 
             push!(ysegs, q1, q1, q1, q1, q2)             # lower T
             push!(ysegs, q2, q3-n, q3, q3, q3-n, q2, q2) # lower box
             push!(ysegs, q4, q3+n, q3, q3, q3+n, q4, q4) # upper box
             push!(ysegs, q5, q5, q5, q5, q4)             # upper T
         else
-            push!(xsegs, m, l, r, m, m)         # lower T
+            push!(xsegs, m, lw, rw, m, m)         # lower T
             push!(xsegs, l, l, r, r, l)         # lower box
             push!(xsegs, l, l, r, r, l)         # upper box
-            push!(xsegs, m, l, r, m, m)         # upper T
+            push!(xsegs, m, lw, rw, m, m)         # upper T
 
             push!(ysegs, q1, q1, q1, q1, q2)    # lower T
             push!(ysegs, q2, q3, q3, q2, q2)    # lower box
@@ -75,20 +81,27 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             push!(ysegs, q5, q5, q5, q5, q4)    # upper T
         end
     end
-
+ 
+    # To prevent linecolor equal to fillcolor (It makes the median visible)
+    if d[:linecolor] == d[:fillcolor]
+	d[:linecolor] = d[:markerstrokecolor]
+    end
+    
     # Outliers
-    @series begin
-        seriestype  := :scatter
-        markershape := :circle
-        markercolor := d[:fillcolor]
-        markeralpha := d[:fillalpha]
-        markerstrokecolor := d[:linecolor]
-        markerstrokealpha := d[:linealpha]
-        fillrange   := nothing
-        x           := outliers_x
-        y           := outliers_y
-        primary     := false
-        ()
+    if outliers
+        @series begin
+            seriestype  := :scatter
+	    if get!(d, :markershape, :circle) == :none
+            	d[:markershape] = :circle
+	    end
+            markercolor := d[:fillcolor]
+            markerstrokecolor := d[:linecolor]
+            fillrange   := nothing
+            x           := outliers_x
+            y           := outliers_y
+            primary     := false
+            ()
+        end
     end
 
     seriestype := :shape
