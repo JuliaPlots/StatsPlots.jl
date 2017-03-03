@@ -27,9 +27,12 @@ function handle_dfs(df::AbstractDataFrame, d::KW, letter, anything)
     anything
 end
 
+Base.hcat(a::AbstractArray, b::Number) = hcat(a, fill(b, size(a,1)))
+Base.hcat(a::Number, b::AbstractArray) = hcat(fill(a, size(b,1)), b)
+
 # allows the passing of expressions including DataFrame columns as symbols
 processDFarg(df::AbstractDataFrame, sym::Symbol) = collect(df[sym])
-processDFarg(df::AbstractDataFrame, syms::AbstractArray) = vec(Any[processDFarg(df, s) for s in syms])
+function processDFarg(df::AbstractDataFrame, syms::AbstractMatrix)
 processDFarg(df::AbstractDataFrame, expr::Expr) = eval(processDFsym(df, expr))
 
 # the processDFsym! functions work with expressions and pass results to processDFarg for final eval - this to allow recursion without eval

@@ -28,7 +28,7 @@ gr(size=(400,300))
 The `DataFrames` support allows passing `DataFrame` columns as symbols. Operations on DataFrame column can be specified using quoted expressions, e.g.
 ```julia
 using DataFrames
-df = DataFrame(a = 1:100, b = randn(100), c = abs(randn(100)))
+df = DataFrame(a = 1:10, b = 10*rand(10), c = 10 * rand(10))
 plot(df, :a, [:b :c])
 scatter(df, :a, :b, markersize = :(4 * log(:c + 0.1)))
 ```
