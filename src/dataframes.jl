@@ -73,7 +73,6 @@ end
 
 # if a DataFrame is the first arg, lets swap symbols out for columns
 @recipe function f(df::AbstractDataFrame, args...)
-    kw, args = processDF(d, df, args...)
-    d = kw
+    d, args = processDF(d, df, args...)
     args
 end

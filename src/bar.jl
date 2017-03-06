@@ -12,8 +12,7 @@ end
 
 @recipe function f(g::GroupedBar)
     if isa(g.args[1], DataFrame)
-        kw, g.args = processDF(d, g.args[1], g.args[2:end]...)
-        d = kw
+        d, g.args = processDF(d, g.args[1], g.args[2:end]...)
     end
     x, y = grouped_xy(g.args...)
     @show x
