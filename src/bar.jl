@@ -69,6 +69,5 @@ end
     end
 
     seriestype := :bar
-
     x, y
 end
