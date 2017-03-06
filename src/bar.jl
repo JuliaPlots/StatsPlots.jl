@@ -69,9 +69,6 @@ end
     end
 
     seriestype := :bar
-    if isa(g.args[1], DataFrame)
-        g.args[1], x, y
-    else
-        x, y
-    end
+
+    x, y
 end
