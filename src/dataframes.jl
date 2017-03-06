@@ -35,8 +35,7 @@ function processExpr!(expr, df)
     return expr
 end
 
-# if a DataFrame is the first arg, lets swap symbols out for columns
-@recipe function f(df::AbstractDataFrame, args...)
+function processDF(d::KW, df, args...)
     # if any of these attributes are symbols, swap out for the df column
     for k in (:fillrange, :line_z, :marker_z, :markersize, :ribbon, :weights, :xerror, :yerror, :hover)
         if haskey(d, k)
@@ -51,5 +50,12 @@ end
     end
 
     # return a list of new arguments
-    tuple(Any[handle_dfs(df, d, (i==1 ? "x" : i==2 ? "y" : "z"), arg) for (i,arg) in enumerate(args)]...)
+    d, tuple(Any[handle_dfs(df, d, (i==1 ? "x" : i==2 ? "y" : "z"), arg) for (i,arg) in enumerate(args)]...)
+end
+
+# if a DataFrame is the first arg, lets swap symbols out for columns
+@recipe function f(df::AbstractDataFrame, args...)
+    kw, args = processDF(d, df, args...)
+    d = kw
+    args
 end
