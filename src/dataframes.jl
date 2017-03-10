@@ -31,7 +31,7 @@ Base.hcat(a::AbstractArray, b::Number) = hcat(a, fill(b, size(a,1)))
 Base.hcat(a::Number, b::AbstractArray) = hcat(fill(a, size(b,1)), b)
 
 # allows the passing of expressions including DataFrame columns as symbols
-processDFarg(df::AbstractDataFrame, sym::Symbol) = collect(df[sym])
+processDFarg(df::AbstractDataFrame, sym::Symbol) = haskey(df, sym) ? collect(df[sym]) : sym
 function processDFarg(df::AbstractDataFrame, syms::AbstractMatrix)
     ret = processDFcol(df, syms[:,1])
     for i in 2:size(syms, 2)
