@@ -2,8 +2,8 @@
 module StatPlots
 
 using Reexport
-@reexport using Plots
-import Plots: Plot, cycle
+using Plots
+import Plots: _cycle
 using StatsBase
 using Distributions
 using DataFrames

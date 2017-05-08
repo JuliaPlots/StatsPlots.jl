@@ -21,11 +21,11 @@ end
     bw = d[:bar_width]
     bw == nothing && (bw = 0.8)
     for (i,glabel) in enumerate(glabels)
-        widths, centers = violin_coords(y[filter(i -> cycle(x,i) == glabel, 1:length(y))], trim=trim)
+        widths, centers = violin_coords(y[filter(i -> _cycle(x,i) == glabel, 1:length(y))], trim=trim)
         isempty(widths) && continue
 
         # normalize
-        hw = 0.5cycle(bw, i)
+        hw = 0.5_cycle(bw, i)
         widths = hw * widths / Plots.ignorenan_maximum(widths)
 
         # make the violin
