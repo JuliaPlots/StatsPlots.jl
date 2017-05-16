@@ -1,6 +1,7 @@
 
 toArray{T<:Any}(na::NullableArrays.NullableArray{T,1}) = convert(Array, na)
-#perhaps? toArray{T<:String}(na::NullableArrays.NullableArray{T,1}) = convert(String, na, "")
+toArray{T<:String}(na::NullableArrays.NullableArray{T,1}) = convert(Array, na, "")
+toArray{T<:Symbol}(na::NullableArrays.NullableArray{T,1}) = convert(Array, na, Symbol())
 toArray{T<:Number}(na::NullableArrays.NullableArray{T,1}) = Float64[isnull(x) ? NaN : get(x) for x in na]
 
 # if it's one symbol, set the guide and return the column
