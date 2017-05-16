@@ -34,11 +34,3 @@ Plots.@deps density path
     ()
 end
 Plots.@deps cdensity path
-
-# ---------------------------------------------------------------------------
-# StatsBase.Histogram
-
-@recipe function f(h::StatsBase.Histogram)
-    seriestype := :histogram
-    h.edges[1], h.weights
-end
