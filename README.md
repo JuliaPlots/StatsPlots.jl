@@ -89,17 +89,16 @@ boxplot!(singers,:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
 
 ![](https://juliaplots.github.io/examples/img/pyplot/pyplot_example_30.png)
 
+Asymmetric violin plots can be created using the `side` keyword (`:both` - default,`:right` or `:left`), e.g.:
 
 ```julia
-import RDatasets
-singers_scala = RDatasets.dataset("lattice","singer")
-singers_moscow = deepcopy(singers_scala)
-[r[:Height] = floor(r[:Height]*rand(97:105)*0.01) for r in eachrow(singers_moscow)]
-myPlot = violin(singers_scala,:VoicePart,:Height, side=:right, marker=(0.2,:blue,stroke(0)), label="Scala")
+singers_moscow = deepcopy(singers)
+singers_moscow[:Height] = singers_moscow[:Height]+5
+myPlot = violin(singers,:VoicePart,:Height, side=:right, marker=(0.2,:blue,stroke(0)), label="Scala")
 violin!(singers_moscow,:VoicePart,:Height, side=:left, marker=(0.2,:red,stroke(0)), label="Moscow")
 ```
 
-![](https://cloud.githubusercontent.com/assets/2077159/26158748/f0b26d9a-3b1c-11e7-8a9c-99d26332393c.png)
+![](https://cloud.githubusercontent.com/assets/2077159/26156938/22ccf0d4-3b18-11e7-9f34-555005437e6c.png)
 
 ---
 
