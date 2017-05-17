@@ -15,7 +15,7 @@ function violin_coords(y; trim::Bool=false)
 end
 
 
-@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true)
+@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both)
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     bw = d[:bar_width]
@@ -30,7 +30,13 @@ end
 
         # make the violin
         xcenter = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
-        xcoords = vcat(widths, -reverse(widths)) + xcenter
+        if (side==:right)
+          xcoords = vcat(widths, zeros(length(widths))) + xcenter
+        elseif (side==:left)
+          xcoords = vcat(zeros(length(widths)), -reverse(widths)) + xcenter
+        else
+          xcoords = vcat(widths, -reverse(widths)) + xcenter
+        end
         ycoords = vcat(centers, reverse(centers))
 
         push!(xsegs, xcoords)
