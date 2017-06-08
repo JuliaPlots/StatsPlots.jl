@@ -21,7 +21,7 @@ predicting `xaxis`
 """
 function _locreg(df, xaxis::LinSpace, x, y; kwargs...)
     predicted = fill(NaN,length(xaxis))
-    within = minimum(df[x]).<= xaxis .<= maximum(df[x])
+    within = Plots.ignorenan_minimum(df[x]).<= xaxis .<= Plots.ignorenan_maximum(df[x])
     if any(within)
         model = Loess.loess(convert(Vector{Float64},df[x]),convert(Vector{Float64},df[y]); kwargs...)
         predicted[within] = Loess.predict(model,xaxis[within])
@@ -72,7 +72,7 @@ _cumulative(df, xaxis, x) = ecdf(df[x])(xaxis)
 
 #### Method to compute and plot grouped error plots using the above functions
 
-type GroupedError{S, T<:AbstractString}
+mutable struct GroupedError{S, T<:AbstractString}
     x::Vector{Vector{S}}
     y::Vector{Vector{Float64}}
     err::Vector{Vector{Float64}}
@@ -82,7 +82,7 @@ type GroupedError{S, T<:AbstractString}
 end
 
 get_axis(column) = sort!(union(column))
-get_axis(column, npoints::Int64) = linspace(minimum(column),maximum(column),npoints)
+get_axis(column, npoints::Int64) = linspace(Plots.ignorenan_minimum(column),Plots.ignorenan_maximum(column),npoints)
 
 function get_axis(column, axis_type::Symbol)
     if axis_type == :discrete

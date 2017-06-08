@@ -54,7 +54,7 @@ processDFsym(df::AbstractDataFrame, s::QuoteNode) = haskey(df,s.value) ? :(colle
 processDFsym(df::AbstractDataFrame, s) = :($s)
 
 function processDFsym(df::AbstractDataFrame, expr::Expr)
-    arg = map(_->processDFsym(df,_), expr.args)
+    arg = map(x->processDFsym(df,x), expr.args)
     ret = copy(expr)
     ret.args = arg
     return ret

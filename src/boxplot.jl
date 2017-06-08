@@ -34,7 +34,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         hw = 0.5cycle(bw, i) # Box width
         HW = 0.5cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
-        lw, rw = center - HW, center + HW       
+        lw, rw = center - HW, center + HW
 
         # internal nodes for notches
         L, R = center - 0.5 * hw, center + 0.5 * hw
@@ -55,7 +55,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             end
             # change q1 and q5 to show outliers
             # using maximum and minimum values inside the limits
-            q1, q5 = extrema(inside)
+            q1, q5 = Plots.ignorenan_extrema(inside)
         end
 
         # Box
@@ -81,12 +81,12 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             push!(ysegs, q5, q5, q5, q5, q4)    # upper T
         end
     end
- 
+
     # To prevent linecolor equal to fillcolor (It makes the median visible)
     if d[:linecolor] == d[:fillcolor]
 	d[:linecolor] = d[:markerstrokecolor]
     end
-    
+
     # Outliers
     if outliers
         @series begin

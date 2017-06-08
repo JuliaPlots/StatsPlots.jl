@@ -7,7 +7,7 @@ const _violin_warned = [false]
 function violin_coords(y; trim::Bool=false)
     kd = KernelDensity.kde(y, npoints = 200)
     if trim
-        xmin, xmax = extrema(y)
+        xmin, xmax = Plots.ignorenan_extrema(y)
         inside = Bool[ xmin <= x <= xmax for x in kd.x]
         return(kd.density[inside], kd.x[inside])
     end
@@ -26,7 +26,7 @@ end
 
         # normalize
         hw = 0.5cycle(bw, i)
-        widths = hw * widths / maximum(widths)
+        widths = hw * widths / Plots.ignorenan_maximum(widths)
 
         # make the violin
         xcenter = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
