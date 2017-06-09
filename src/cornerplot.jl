@@ -91,11 +91,11 @@
                 ticks := :auto
                 if i == N
                     xformatter := :auto
-                    xguide := cycle(labs, j)
+                    xguide := _cycle(labs, j)
                 end
                 if j == 1
                     yformatter := :auto
-                    yguide := cycle(labs, i)
+                    yguide := _cycle(labs, i)
                 end
                 seriestype := :scatter
                 subplot := indices[i+1-k, j]

@@ -1,5 +1,5 @@
 function border(x,y,rib)
-    rib1, rib2 = if Plots.istuple(rib)
+    rib1, rib2 = if typeof(rib) <: Tuple
         first(rib), last(rib)
     else
         rib, rib
@@ -9,7 +9,7 @@ function border(x,y,rib)
     return xline, yline
 end
 
-@recipe function f(::Type{Val{:shadederror}},plt::Plot; shade = 0.)
+@recipe function f(::Type{Val{:shadederror}},plt::AbstractPlot; shade = 0.)
 
     # set up the subplots
     x,y = d[:x],d[:y]

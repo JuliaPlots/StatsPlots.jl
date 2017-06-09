@@ -15,7 +15,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     ww = whisker_width == :match ? bw : whisker_width
     for (i,glabel) in enumerate(glabels)
         # filter y
-        values = y[filter(i -> cycle(x,i) == glabel, 1:length(y))]
+        values = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
 
         # compute quantiles
         q1,q2,q3,q4,q5 = quantile(values, linspace(0,1,5))
@@ -31,8 +31,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
         # make the shape
         center = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
-        hw = 0.5cycle(bw, i) # Box width
-        HW = 0.5cycle(ww, i) # Whisker width
+        hw = 0.5_cycle(bw, i) # Box width
+        HW = 0.5_cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
         lw, rw = center - HW, center + HW
 

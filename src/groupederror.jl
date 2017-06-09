@@ -290,10 +290,10 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
         for i = 1:length(g.group)
             @series begin
                 seriestype := :shadederror
-                x := cycle(g.x,i)
-                y := cycle(g.y, i)
-                shade := cycle(g.err,i)
-                label --> cycle(g.group,i)
+                x := _cycle(g.x,i)
+                y := _cycle(g.y, i)
+                shade := _cycle(g.err,i)
+                label --> _cycle(g.group,i)
                 ()
             end
         end
@@ -301,12 +301,12 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
         for i = 1:length(g.group)
             @series begin
                 seriestype := :scatter
-                x := cycle(g.x,i)
-                y := cycle(g.y, i)
+                x := _cycle(g.x,i)
+                y := _cycle(g.y, i)
                 if g.show_error
-                    err := cycle(g.err,i)
+                    err := _cycle(g.err,i)
                 end
-                label --> cycle(g.group,i)
+                label --> _cycle(g.group,i)
                 ()
             end
         end

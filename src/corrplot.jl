@@ -1,11 +1,11 @@
 @userplot CorrPlot
 
 function update_ticks_guides(d::KW, labs, i, j, n)
-    # d[:title]  = (i==1 ? cycle(labs,j) : "")
+    # d[:title]  = (i==1 ? _cycle(labs,j) : "")
     d[:xticks] = (i==n)
-    d[:xguide] = (i==n ? cycle(labs,j) : "")
+    d[:xguide] = (i==n ? _cycle(labs,j) : "")
     d[:yticks] = (j==1)
-    d[:yguide] = (j==1 ? cycle(labs,i) : "")
+    d[:yguide] = (j==1 ? _cycle(labs,i) : "")
 end
 
 @recipe function f(cp::CorrPlot)

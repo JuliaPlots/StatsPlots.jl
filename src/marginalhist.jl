@@ -1,6 +1,6 @@
 @shorthands marginalhist
 
-@recipe function f(::Type{Val{:marginalhist}}, plt::Plot; density = false)
+@recipe function f(::Type{Val{:marginalhist}}, plt::AbstractPlot; density = false)
     x, y = d[:x], d[:y]
 
     # set up the subplots
