@@ -7,7 +7,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
     x, y = grouped_xy(g.args...)
 
     nr, nc = size(y)
-    isstack = pop!(d, :bar_position, :dodge) == :stack
+    isstack = pop!(plotattributes, :bar_position, :dodge) == :stack
 
     # extract xnums and set default bar width.
     # might need to set xticks as well
@@ -27,7 +27,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
     x = if isstack
         x
     else
-        bws = d[:bar_width] / nc
+        bws = plotattributes[:bar_width] / nc
         bar_width := bws
         xmat = zeros(nr,nc)
         for r=1:nr
@@ -53,7 +53,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
         end
         fr
     else
-        get(d, :fillrange, nothing)
+        get(plotattributes, :fillrange, nothing)
     end
 
     seriestype := :bar

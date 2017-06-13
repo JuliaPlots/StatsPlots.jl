@@ -12,7 +12,7 @@ end
     mat = cp.args[1]
     n = size(mat,2)
     C = cor(mat)
-    labs = pop!(d, :label, [""])
+    labs = pop!(plotattributes, :label, [""])
 
     link := :x  # need custom linking for y
     layout := (n,n)
@@ -20,12 +20,12 @@ end
     foreground_color_border := nothing
     margin := 1mm
     titlefont := font(11)
-    fillcolor --> Plots.fg_color(d)
-    linecolor --> Plots.fg_color(d)
+    fillcolor --> Plots.fg_color(plotattributes)
+    linecolor --> Plots.fg_color(plotattributes)
     markeralpha := 0.4
-    grad = cgrad(get(d, :markercolor, cgrad()))
+    grad = cgrad(get(plotattributes, :markercolor, cgrad()))
     indices = reshape(1:n^2, n, n)'
-    title = get(d,:title,"")
+    title = get(plotattributes,:title,"")
     title := ""
 
     # histograms on the diagonal
@@ -34,7 +34,7 @@ end
             seriestype := :histogram
             subplot := indices[i,i]
             grid := false
-            update_ticks_guides(d, labs, i, i, n)
+            update_ticks_guides(plotattributes, labs, i, i, n)
             view(mat,:,i)
         end
     end
@@ -47,7 +47,7 @@ end
             j==i && continue
             vj = view(mat,:,j)
             subplot := indices[i,j]
-            update_ticks_guides(d, labs, i, j, n)
+            update_ticks_guides(plotattributes, labs, i, j, n)
             if i > j
                 #below diag... scatter
                 @series begin
@@ -60,7 +60,7 @@ end
             else
                 #above diag... hist2d
                 @series begin
-                    seriestype := get(d, :seriestype, :histogram2d)
+                    seriestype := get(plotattributes, :seriestype, :histogram2d)
                     if title != "" && i == 1 && j == div(n,2)+1
                         title := title
                     end

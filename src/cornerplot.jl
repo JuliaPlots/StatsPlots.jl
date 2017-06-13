@@ -15,7 +15,7 @@
     # n is the total number of rows/columns.  hists always shown
     n = N + 1 - k
 
-    labs = pop!(d, :label, ["x$i" for i=1:N])
+    labs = pop!(plotattributes, :label, ["x$i" for i=1:N])
     if labs!=[""] && length(labs)!=N
         error("Number of labels not identical to number of datasets")
     end
@@ -40,13 +40,13 @@
     foreground_color_border := nothing
     margin    --> 1mm
     titlefont --> font(11)
-    fillcolor --> Plots.fg_color(d)
-    linecolor --> Plots.fg_color(d)
+    fillcolor --> Plots.fg_color(plotattributes)
+    linecolor --> Plots.fg_color(plotattributes)
     grid      --> true
     ticks     := nothing
     formatter := v->""
     link      := :both
-    grad = cgrad(get(d, :markercolor, cgrad()))
+    grad = cgrad(get(plotattributes, :markercolor, cgrad()))
 
     # figure out good defaults for scatter plot dots:
     pltarea = 1 / (2n)

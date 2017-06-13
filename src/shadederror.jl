@@ -12,7 +12,7 @@ end
 @recipe function f(::Type{Val{:shadederror}},plt::AbstractPlot; shade = 0.)
 
     # set up the subplots
-    x,y = d[:x],d[:y]
+    x,y = plotattributes[:x],plotattributes[:y]
     xline, yline = border(x,y,shade)
 
     # line plot

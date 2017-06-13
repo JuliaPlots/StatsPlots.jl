@@ -65,11 +65,11 @@ end
 @recipe function f(df::AbstractDataFrame, args...)
     # if any of these attributes are symbols, swap out for the df column
     for k in (:fillrange, :line_z, :marker_z, :markersize, :ribbon, :weights, :xerror, :yerror, :hover, :bar_width, :fill_z, :fillalpha, :fillcolor, :linealpha, :linecolor, :linestyle, :linewidth, :markeralpha, :markercolor, :markershape, :markerstrokecolor, :series_annotations, :seriesalpha, :seriescolor)
-        if haskey(d, k)
-            d[k] = processDFarg(df, d[k])
+        if haskey(plotattributes, k)
+            plotattributes[k] = processDFarg(df, plotattributes[k])
         end
     end
 
     # return a list of new arguments
-    tuple(Any[handle_dfs(df, d, (i==1 ? "x" : i==2 ? "y" : "z"), arg) for (i,arg) in enumerate(args)]...)
+    tuple(Any[handle_dfs(df, plotattributes, (i==1 ? "x" : i==2 ? "y" : "z"), arg) for (i,arg) in enumerate(args)]...)
 end

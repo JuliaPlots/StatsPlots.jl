@@ -4,7 +4,7 @@
 
 @recipe function f(::Type{Val{:density}}, x, y, z; trim=false)
     newx, newy = violin_coords(y, trim=trim)
-    if Plots.isvertical(d)
+    if Plots.isvertical(plotattributes)
         newx, newy = newy, newx
     end
     x := newx
@@ -22,7 +22,7 @@ Plots.@deps density path
                    npoints = 200)
     newx, newy = violin_coords(y, trim=trim)
 
-    if Plots.isvertical(d)
+    if Plots.isvertical(plotattributes)
         newx, newy = newy, newx
     end
 
