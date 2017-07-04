@@ -28,8 +28,7 @@ end
 
 # ---------------------------------------------------------------------------
 # Violin plot recipe
-
-@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both)
+@recipe function f(::Type{Val{:violin}}, x, y, z; trim=false, side=:both)
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     bw = d[:bar_width]

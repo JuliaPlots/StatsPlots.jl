@@ -6,12 +6,21 @@
         side = :both
         info("side set to :$side")
     end
-    xsegs, ysegs = Segments(), Segments()
+    x, y = Float64[], Float64[]
     glabels = sort(collect(unique(x)))
     bw = d[:bar_width]
     bw == nothing && (bw = 0.8)
     for (i,glabel) in enumerate(glabels)
-        widths, centers = violin_coords(y[filter(i -> _cycle(x,i) == glabel, 1:length(y))], trim=trim)
+
+        # We get the values for this label
+        lab_y = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
+        lab_x = zeros(lab_y)
+        
+        # Then we apply Sturge's rule to get the number of bins
+        n = convert(Int64, ceil(1+log2(length(lab_y))))
+
+        # Get the widths and the coordinates
+        widths, centers = violin_coords(lab_y, trim=trim, n=n)
         isempty(widths) && continue
 
         # normalize
