@@ -30,6 +30,4 @@ include("bar.jl")
 include("shadederror.jl")
 include("groupederror.jl")
 
-
-
 end # module
