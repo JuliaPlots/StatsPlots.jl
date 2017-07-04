@@ -1,6 +1,5 @@
-
 # ---------------------------------------------------------------------------
-# Violin Plot
+# Violin plot utility functions
 
 const _violin_warned = [false]
 
@@ -26,6 +25,9 @@ function violin_coords(y; trim::Bool=false, n::Int64=200)
     kd.density, kd.x
 end
 
+
+# ---------------------------------------------------------------------------
+# Violin plot recipe
 
 @recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both)
     xsegs, ysegs = Segments(), Segments()
@@ -61,3 +63,4 @@ end
     ()
 end
 Plots.@deps violin shape
+
