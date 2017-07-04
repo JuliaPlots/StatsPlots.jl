@@ -4,8 +4,20 @@
 
 const _violin_warned = [false]
 
-function violin_coords(y; trim::Bool=false)
-    kd = KernelDensity.kde(y, npoints = 200)
+"""
+**Use kde to return an enveloppe for the violin and beeswarm plots**
+
+~~~
+violin_coords(y; trim::Bool=false, n::Int64=200)
+~~~
+
+- `y`: points to estimate the distribution from
+- `trim`: whether to remove the extreme values
+- `n`: number of points to use in kde (defaults to 200)
+
+"""
+function violin_coords(y; trim::Bool=false, n::Int64=200)
+    kd = KernelDensity.kde(y, npoints = n)
     if trim
         xmin, xmax = Plots.ignorenan_extrema(y)
         inside = Bool[ xmin <= x <= xmax for x in kd.x]
