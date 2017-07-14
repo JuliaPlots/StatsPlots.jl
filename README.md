@@ -136,7 +136,7 @@ groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7)
 
 
 ## groupapply for population analysis
-There is a groupapply function that splits the data across a keyword argument "group", then applies "summarize" to get average and variability of a given analysis (density, cumulative and local regression are supported so far, but one can also add their own function). To get average and variability there are 3 ways:
+There is a groupapply function that splits the data across a keyword argument "group", then applies "summarize" to get average and variability of a given analysis (density, cumulative, hazard rate and local regression are supported so far, but one can also add their own function). To get average and variability there are 3 ways:
 
 - `compute_error = (:across, col_name)`, where the data is split according to column `col_name` before being summarized. `compute_error = :across` splits across all observations. Default summary is `(mean, sem)` but it can be changed with keyword `summarize` to any pair of functions.
 
@@ -164,8 +164,8 @@ plot(grp_error, line = :path)
 Keywords for loess or kerneldensity can be given to groupapply:
 
 ```julia
-df = groupapply(:density, school, :CSES; bandwidth = 1., compute_error = (:bootstrap,500), group = :Minrty)
-plot(df, line = :path)
+grp_error = groupapply(:density, school, :CSES; bandwidth = 1., compute_error = (:bootstrap,500), group = :Minrty)
+plot(grp_error, line = :path)
 ```
 
 <img width="487" alt="screenshot 2017-01-10 18 36 48" src="https://cloud.githubusercontent.com/assets/6333339/21819500/cb788fb8-d763-11e6-89b9-91018f2b9a2a.png">

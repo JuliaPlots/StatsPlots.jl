@@ -31,14 +31,14 @@ end
 
 
 """
-    `_locreg(df, xaxis, x, y; kwargs...)`
+    `_locreg(df, xaxis, x, y; estimator = mean)`
 
-In the discrete case, the function computes the conditional expectation of `y` for
-a given value of `x`
+In the discrete case, the function computes the estimate of `y` for
+a given value of `x` using the function `estimator` (default is mean)
 """
-function _locreg(df, xaxis, x,  y)
+function _locreg(df, xaxis, x,  y; estimator = mean)
   ymean = by(df, x) do dd
-      DataFrame(m = mean(dd[y]))
+      DataFrame(m = estimator(dd[y]))
   end
   return extend_axis(ymean, x, :m, xaxis, NaN)
 end
@@ -69,6 +69,15 @@ Cumulative density function of `x`, computed along `xaxis`
 """
 _cumulative(df, xaxis, x) = ecdf(df[x])(xaxis)
 
+
+"""
+    `_hazard(df,xaxis, x; kwargs...)`
+
+Hazard rate of `x`, computed along `xaxis`. Keyword arguments are passed to
+the function computing the density
+"""
+_hazard(df,xaxis, x; kwargs...) =
+_density(df,xaxis, x; kwargs...)./(1 -_cumulative(df, xaxis, x))
 
 #### Method to compute and plot grouped error plots using the above functions
 
@@ -129,18 +138,18 @@ function get_groupederror(trend,variation, f, splitdata::GroupedDataFrame, xvalu
     mean_across_pop = Array(Float64, length(xvalues));
     sem_across_pop = Array(Float64, length(xvalues));
     for j in 1:length(xvalues)
-        notnan = !isnan(v[j,:])
-        mean_across_pop[j] = trend(v[j,notnan])
-        sem_across_pop[j] = variation(v[j,notnan])
+        finite_vals = isfinite(v[j,:])
+        mean_across_pop[j] = trend(v[j,finite_vals])
+        sem_across_pop[j] = variation(v[j,finite_vals])
     end
-    valid = !isnan(mean_across_pop) & !isnan(sem_across_pop)
+    valid = isfinite(mean_across_pop) & isfinite(sem_across_pop)
     return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
 end
 
 """
     get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues::AbstractArray, ce, args...; kwargs...)
 
-Get `GropedDataFrame` from `df` according to `ce`. `ce = (:across, col_name)` will split
+Get `GroupedDataFrame` from `df` according to `ce`. `ce = (:across, col_name)` will split
 across column `col_name`, whereas `ce = (:bootstrap, n_samples)` will generate `n_samples`
 fake datasets distributed like the real dataset (nonparametric bootstrapping).
 Then compute `get_groupederror` of the `GroupedDataFrame`.
@@ -150,7 +159,7 @@ function get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues::Ab
     if ce == :none
         mean_across_pop = f(df,xvalues, args...; kwargs...)
         sem_across_pop = zeros(length(xvalues));
-        valid = ~isnan(mean_across_pop)
+        valid = isfinite(mean_across_pop)
         return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
     elseif ce[1] == :across
         # get mean value and sem of function of interest
@@ -263,12 +272,13 @@ function groupapply(f::Function, df, args...;
     return g
 end
 
-builtin_funcs = Dict(zip([:locreg, :density, :cumulative], [_locreg, _density, _cumulative]))
+builtin_funcs = Dict(zip([:locreg, :density, :cumulative, :hazard],
+    [_locreg, _density, _cumulative, _hazard]))
 
 """
     groupapply(s::Symbol, df, args...; kwargs...)
 
-`s` can be `:locreg`, `:density` or `:cumulative`, in which case the corresponding built in
+`s` can be `:locreg`, `:density`, `:cumulative` or `:hazard`, in which case the corresponding built in
 analysis function is used. `s` can also be a symbol of a column of `df`, in which case the call
 is equivalent to `groupapply(:locreg, df, args[1], s; kwargs...)`
 """
