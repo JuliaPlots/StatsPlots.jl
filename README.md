@@ -22,6 +22,7 @@ Initialize:
 ```julia
 #Pkg.clone("git@github.com:JuliaPlots/StatPlots.jl.git")
 using StatPlots
+using Plots
 gr(size=(400,300))
 ```
 
@@ -152,6 +153,7 @@ Example use:
 using DataFrames
 import RDatasets
 using StatPlots
+using Plots
 gr()
 school = RDatasets.dataset("mlmRev","Hsb82");
 grp_error = groupapply(:cumulative, school, :MAch; compute_error = (:across,:School), group = :Sx)

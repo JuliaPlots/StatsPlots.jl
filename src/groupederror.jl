@@ -14,12 +14,12 @@ function extend_axis(xsmall, ysmall, xaxis, val)
 end
 
 """
-    `_locreg(df, xaxis::LinSpace, x, y; kwargs...)`
+    `_locreg(df, xaxis::Range, x, y; kwargs...)`
 
 Apply loess regression, training the regressor with `x` and `y` and
 predicting `xaxis`
 """
-function _locreg(df, xaxis::LinSpace, x, y; kwargs...)
+function _locreg(df, xaxis::Range, x, y; kwargs...)
     predicted = fill(NaN,length(xaxis))
     within = Plots.ignorenan_minimum(df[x]).<= xaxis .<= Plots.ignorenan_maximum(df[x])
     if any(within)
@@ -44,11 +44,11 @@ function _locreg(df, xaxis, x,  y)
 end
 
 """
-    `_density(df,xaxis::LinSpace, x; kwargs...)`
+    `_density(df,xaxis::Range, x; kwargs...)`
 
 Kernel density of `x`, computed along `xaxis`
 """
-_density(df,xaxis::LinSpace, x; kwargs...) = pdf(KernelDensity.kde(df[x]; kwargs...),xaxis)
+_density(df,xaxis::Range, x; kwargs...) = pdf(KernelDensity.kde(df[x]; kwargs...),xaxis)
 
 """
     `_density(df, xaxis, x)`
@@ -117,7 +117,7 @@ new_symbol(s, df::AbstractDataFrame) = new_symbol(s, names(df))
 
 Apply function `f` to `splitdata`, then compute summary statistics
 `trend` and `variation` of those values. A shared x axis `xvalues` is needed: use
-`LinSpace` for continuous x variable and a normal vector for the discrete case. Remaining arguments
+`Range` for continuous x variable and a normal vector for the discrete case. Remaining arguments
 are label of x axis variable and extra arguments for function `f`. `kwargs...` are passed
 to `f`
 """
@@ -193,7 +193,7 @@ end
 """
 
     groupapply(f::Function, df, args...;
-                axis_type = :auto, compute_error = :none, group = [],
+                axis_type = :auto, compute_error = :none, group = Symbol[],
                 summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
                 kwargs...)
 
@@ -203,16 +203,20 @@ It can be plotted using `plot(g::GroupedError)`
 Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 """
 function groupapply(f::Function, df, args...;
-                    axis_type = :auto, compute_error = :none, group = [],
+                    axis_type = :auto, compute_error = :none, group = Symbol[],
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
                     compute_axis = :separate,
                     kwargs...)
-    if !(axis_type in [:discrete, :continuous])
-        axis_type = (typeof(df[args[1]])<:PooledDataArray) ? :discrete : :continuous
-    end
-    if (axis_type == :continuous) & !(eltype(df[args[1]])<:Real)
-        warn("Changing to discrete axis, x values are not real numbers!")
+    if !(eltype(df[args[1]])<:Real)
+        (axis_type == :continuous) && warn("Changing to discrete axis, x values are not real numbers!")
         axis_type = :discrete
+    end
+    if axis_type == :auto
+        if (typeof(df[args[1]])<:PooledDataArray)
+            axis_type = :discrete
+        else
+            axis_type = :continuous
+        end
     end
     mutated_xtype = (axis_type == :continuous) ? Float64 : eltype(df[args[1]])
 
@@ -235,7 +239,7 @@ function groupapply(f::Function, df, args...;
                     axis_type,
                     ce != :none
                     )
-    if group == []
+    if group == Symbol[]
         xvalues,yvalues,shade = get_groupederror(summarize..., f, df, axis_type, ce, args...; kwargs...)
         push!(g.x, xvalues)
         push!(g.y, yvalues)
