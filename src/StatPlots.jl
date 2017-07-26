@@ -2,7 +2,7 @@
 module StatPlots
 
 using Reexport
-using Plots
+@reexport using Plots
 import Plots: _cycle
 using StatsBase
 using Distributions
