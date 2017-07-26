@@ -18,9 +18,8 @@ Plots.@deps density path
 # ---------------------------------------------------------------------------
 # cumulative density
 
-@recipe function f(::Type{Val{:cdensity}}, x, y, z; trim::Bool=false,
-                   n::Int64=200)
-    newx, newy = violin_coords(y, trim=trim, n=n)
+@recipe function f(::Type{Val{:cdensity}}, x, y, z; trim::Bool=false, npoints=200)
+    newx, newy = violin_coords(y, trim=trim, n=npoints)
 
     if Plots.isvertical(d)
         newx, newy = newy, newx
