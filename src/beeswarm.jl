@@ -38,7 +38,7 @@
       inside = Bool[centers[i-1] < u <= centers[i] for u in lab_y]
       if sum(inside) > 1
         if (side==:right)
-          start == 0.0
+          start = 0.0
           stop = widths[i]
         elseif (side==:left)
           start = -widths[i]
@@ -59,6 +59,9 @@
   x := xp
   y := yp
   seriestype := :scatter
+  if get!(d, :markershape, :circle) == :none
+    d[:markershape] = :circle
+  end
   ()
 
 end
