@@ -131,18 +131,18 @@ are label of x axis variable and extra arguments for function `f`. `kwargs...` a
 to `f`
 """
 function get_groupederror(trend,variation, f, splitdata::GroupedDataFrame, xvalues::AbstractArray, args...; kwargs...)
-    v = Array(Float64, length(xvalues), length(splitdata));
+    v = Array{Float64}(length(xvalues), length(splitdata));
     for i in 1:length(splitdata)
         v[:,i] = f(splitdata[i],xvalues, args...; kwargs...)
     end
-    mean_across_pop = Array(Float64, length(xvalues));
-    sem_across_pop = Array(Float64, length(xvalues));
+    mean_across_pop = Array{Float64}(length(xvalues));
+    sem_across_pop = Array{Float64}(length(xvalues));
     for j in 1:length(xvalues)
-        finite_vals = isfinite(v[j,:])
+        finite_vals = isfinite.(v[j,:])
         mean_across_pop[j] = trend(v[j,finite_vals])
         sem_across_pop[j] = variation(v[j,finite_vals])
     end
-    valid = isfinite(mean_across_pop) & isfinite(sem_across_pop)
+    valid = isfinite.(mean_across_pop) .& isfinite.(sem_across_pop)
     return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
 end
 
@@ -159,7 +159,7 @@ function get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues::Ab
     if ce == :none
         mean_across_pop = f(df,xvalues, args...; kwargs...)
         sem_across_pop = zeros(length(xvalues));
-        valid = isfinite(mean_across_pop)
+        valid = isfinite.(mean_across_pop)
         return xvalues[valid], mean_across_pop[valid], sem_across_pop[valid]
     elseif ce[1] == :across
         # get mean value and sem of function of interest
@@ -167,8 +167,8 @@ function get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues::Ab
         return get_groupederror(trend,variation, f, splitdata, xvalues, args...; kwargs...)
     elseif ce[1] == :bootstrap
         n_samples = ce[2]
-        indexes = Array(Int64,0)
-        split_var = Array(Int64,0)
+        indexes = Array{Int64}(0)
+        split_var = Array{Int64}(0)
         for i = 1:n_samples
             append!(indexes, rand(1:size(df,1),size(df,1)))
             append!(split_var, fill(i,size(df,1)))
@@ -241,10 +241,10 @@ function groupapply(f::Function, df, args...;
     end
 
     g = GroupedError(
-                    Array(Vector{mutated_xtype},0),
-                    Array(Vector{Float64},0),
-                    Array(Vector{Float64},0),
-                    Array(AbstractString,0),
+                    Array{Vector{mutated_xtype}}(0),
+                    Array{Vector{Float64}}(0),
+                    Array{Vector{Float64}}(0),
+                    Array{AbstractString}(0),
                     axis_type,
                     ce != :none
                     )
