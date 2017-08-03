@@ -1,6 +1,6 @@
 
 # pick a nice default x range given a distribution
-function default_range(dist::Distribution, alpha = 0.01)
+function default_range(dist::Distribution, alpha = 0.0001)
     minval = isfinite(minimum(dist)) ? minimum(dist) : quantile(dist, alpha)
     maxval = isfinite(maximum(dist)) ? maximum(dist) : quantile(dist, 1-alpha)
     minval, maxval
