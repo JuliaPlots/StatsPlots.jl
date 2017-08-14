@@ -93,7 +93,7 @@ end
 get_axis(column) = sort!(union(column))
 get_axis(column, npoints::Int64) = linspace(Plots.ignorenan_minimum(column),Plots.ignorenan_maximum(column),npoints)
 
-function get_axis(column, axis_type::Symbol)
+function get_axis(column, axis_type::Symbol, compute_axis::Symbol)
     if axis_type == :discrete
         return get_axis(column)
     elseif axis_type == :continuous
@@ -102,6 +102,8 @@ function get_axis(column, axis_type::Symbol)
         error("Unexpected axis_type: only :discrete and :continuous allowed!")
     end
 end
+
+get_axis(column, axis_type::Symbol, compute_axis) = compute_axis(column, axis_type::Symbol)
 
 # f is the function used to analyze dataset: define it as nan when it is not defined,
 # the input is: dataframe used, points chosen on the x axis, x (and maybe y) column labels
@@ -188,14 +190,16 @@ end
 
 
 """
-    get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce, args...; kwargs...)
+    get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...;
+        compute_axis = :separate, kwargs...)
 
 Choose shared axis according to `axis_type` (`:continuous` or `:discrete`) then
 compute `get_groupederror`.
 """
-function get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...; kwargs...)
+function get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...;
+    compute_axis = :separate, kwargs...)
     # define points on x axis
-    xvalues = get_axis(df[args[1]], axis_type)
+    xvalues = get_axis(df[args[1]], axis_type, compute_axis)
     return get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues, ce, args...; kwargs...)
 end
 
@@ -214,7 +218,6 @@ Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 function groupapply(f::Function, df, args...;
                     axis_type = :auto, compute_error = :none, group = Symbol[],
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
-                    compute_axis = :separate,
                     kwargs...)
     if !(eltype(df[args[1]])<:Real)
         (axis_type == :continuous) && warn("Changing to discrete axis, x values are not real numbers!")
