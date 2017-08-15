@@ -155,18 +155,18 @@ using StatPlots
 gr()
 school = RDatasets.dataset("mlmRev","Hsb82");
 grp_error = groupapply(:cumulative, school, :MAch; compute_error = (:across,:School), group = :Sx)
-plot(grp_error, line = :path)
+plot(grp_error, line = :path, legend = :topleft)
 ```
-<img width="494" alt="screenshot 2016-12-19 12 28 27" src="https://cloud.githubusercontent.com/assets/6333339/21313005/316e0f0c-c5e7-11e6-9464-f0921dee3d29.png">
+<img width="494" alt="screenshot 2016-12-19 12 28 27" src="https://user-images.githubusercontent.com/6333339/29280675-1a8df192-8114-11e7-878e-754ecdd9184d.png">
 
 Keywords for loess or kerneldensity can be given to groupapply:
 
 ```julia
-grp_error = groupapply(:density, school, :CSES; bandwidth = 1., compute_error = (:bootstrap,500), group = :Minrty)
+grp_error = groupapply(:density, school, :CSES; bandwidth = 0.2, compute_error = (:bootstrap,500), group = :Minrty)
 plot(grp_error, line = :path)
 ```
 
-<img width="487" alt="screenshot 2017-01-10 18 36 48" src="https://cloud.githubusercontent.com/assets/6333339/21819500/cb788fb8-d763-11e6-89b9-91018f2b9a2a.png">
+<img width="487" alt="screenshot 2017-01-10 18 36 48" src="https://user-images.githubusercontent.com/6333339/29280692-2bc1f97c-8114-11e7-932e-a86156d36cf5.png">
 
 
 The bar plot
@@ -176,4 +176,4 @@ pool!(school, :Sx)
 grp_error = groupapply(school, :Sx, :MAch; compute_error = :across, group = :Minrty)
 plot(grp_error, line = :bar)
 ```
-<img width="489" alt="screenshot 2017-01-10 18 20 51" src="https://cloud.githubusercontent.com/assets/6333339/21819413/7923681e-d763-11e6-907d-c81447b4cc99.png">
+<img width="489" alt="screenshot 2017-01-10 18 20 51" src="https://user-images.githubusercontent.com/6333339/29280710-3998b310-8114-11e7-9a24-a93d5727cc52.png">

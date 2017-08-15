@@ -62,6 +62,9 @@ function _density(df,xaxis, x)
     return extend_axis(xhist, x, :length, xaxis, 0.)
 end
 
+_density_axis(df, axis_type::Symbol, x; kwargs...) =
+    (axis_type == :discrete) ? get_axis(df[x]) : KernelDensity.kde(df[x]; kwargs...).x
+
 """
     `_cumulative(df, xaxis, x) = ecdf(df[x])(xaxis)`
 
@@ -93,15 +96,18 @@ end
 get_axis(column) = sort!(union(column))
 get_axis(column, npoints::Int64) = linspace(Plots.ignorenan_minimum(column),Plots.ignorenan_maximum(column),npoints)
 
-function get_axis(column, axis_type::Symbol)
+function get_axis(df, axis_type::Symbol, compute_axis::Symbol, args...; kwargs...)
     if axis_type == :discrete
-        return get_axis(column)
+        return get_axis(df[args[1]])
     elseif axis_type == :continuous
-        return get_axis(column, 100)
+        return get_axis(df[args[1]], 100)
     else
         error("Unexpected axis_type: only :discrete and :continuous allowed!")
     end
 end
+
+get_axis(df, axis_type::Symbol, compute_axis, args...; kwargs...) =
+    compute_axis(df, axis_type, args...; kwargs...)
 
 # f is the function used to analyze dataset: define it as nan when it is not defined,
 # the input is: dataframe used, points chosen on the x axis, x (and maybe y) column labels
@@ -188,14 +194,16 @@ end
 
 
 """
-    get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce, args...; kwargs...)
+    get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...;
+        compute_axis = :auto, kwargs...)
 
 Choose shared axis according to `axis_type` (`:continuous` or `:discrete`) then
 compute `get_groupederror`.
 """
-function get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...; kwargs...)
+function get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...;
+    compute_axis = :auto, kwargs...)
     # define points on x axis
-    xvalues = get_axis(df[args[1]], axis_type)
+    xvalues = get_axis(df, axis_type, compute_axis, args...; kwargs...)
     return get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues, ce, args...; kwargs...)
 end
 
@@ -214,7 +222,6 @@ Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 function groupapply(f::Function, df, args...;
                     axis_type = :auto, compute_error = :none, group = Symbol[],
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
-                    compute_axis = :separate,
                     kwargs...)
     if !(eltype(df[args[1]])<:Real)
         (axis_type == :continuous) && warn("Changing to discrete axis, x values are not real numbers!")
@@ -275,6 +282,8 @@ end
 builtin_funcs = Dict(zip([:locreg, :density, :cumulative, :hazard],
     [_locreg, _density, _cumulative, _hazard]))
 
+builtin_axis = Dict(:density => _density_axis)
+
 """
     groupapply(s::Symbol, df, args...; kwargs...)
 
@@ -285,9 +294,11 @@ is equivalent to `groupapply(:locreg, df, args[1], s; kwargs...)`
 function groupapply(s::Symbol, df, args...; kwargs...)
     if s in keys(builtin_funcs)
         analysisfunction = builtin_funcs[s]
-        return groupapply(analysisfunction, df, args...; kwargs...)
+        return groupapply(analysisfunction, df, args...;
+            compute_axis = get(builtin_axis, s, :auto), kwargs...)
     else
-        return groupapply(_locreg, df, args[1], s; kwargs...)
+        return groupapply(_locreg, df, args[1], s;
+            compute_axis = get(builtin_axis, :locreg, :auto), kwargs...)
     end
 end
 
