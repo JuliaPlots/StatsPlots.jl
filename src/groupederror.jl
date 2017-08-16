@@ -226,6 +226,10 @@ function groupapply(f::Function, df, args...;
                     nbins = 30,
                     kwargs...)
     added_cols = Symbol[]
+    if !(eltype(df[args[1]])<:Real)
+        (axis_type in [:discrete, :auto]) || warn("Changing to discrete axis, x values are not real numbers!")
+        axis_type = :discrete
+    end
     if axis_type == :binned
         edges = linspace(Plots.ignorenan_minimum(df[args[1]]),
             Plots.ignorenan_maximum(df[args[1]]), nbins+1)
@@ -235,10 +239,6 @@ function groupapply(f::Function, df, args...;
         df[x_binned] = middles[indices]
         push!(added_cols, x_binned)
         args = ((i==1 ? x_binned : args[i] for i in 1:length(args))..., step(edges))
-        axis_type = :discrete
-    end
-    if !(eltype(df[args[1]])<:Real)
-        (axis_type == :continuous) && warn("Changing to discrete axis, x values are not real numbers!")
         axis_type = :discrete
     end
     if axis_type == :auto
