@@ -36,7 +36,7 @@ end
 In the discrete case, the function computes the estimate of `y` for
 a given value of `x` using the function `estimator` (default is mean)
 """
-function _locreg(df, xaxis, x,  y; estimator = mean)
+function _locreg(df, xaxis, x,  y, bin_width = 1.; estimator = mean)
   ymean = by(df, x) do dd
       DataFrame(m = estimator(dd[y]))
   end
@@ -55,22 +55,22 @@ _density(df,xaxis::Range, x; kwargs...) = pdf(KernelDensity.kde(df[x]; kwargs...
 
 Normalized histogram of `x` (which is discrete: every value is its own bin)
 """
-function _density(df,xaxis, x)
+function _density(df,xaxis, x, bin_width = 1.)
     xhist = by(df, x) do dd
-        DataFrame(length = size(dd,1)/size(df,1))
+        DataFrame(length = size(dd,1)/(size(df,1)*bin_width))
     end
     return extend_axis(xhist, x, :length, xaxis, 0.)
 end
 
-_density_axis(df, axis_type::Symbol, x; kwargs...) =
-    (axis_type == :discrete) ? get_axis(df[x]) : KernelDensity.kde(df[x]; kwargs...).x
+_density_axis(column, axis_type::Symbol; kwargs...) =
+    (axis_type == :discrete) ? get_axis(column) : KernelDensity.kde(column; kwargs...).x
 
 """
     `_cumulative(df, xaxis, x) = ecdf(df[x])(xaxis)`
 
 Cumulative density function of `x`, computed along `xaxis`
 """
-_cumulative(df, xaxis, x) = ecdf(df[x])(xaxis)
+_cumulative(df, xaxis, x, bin_width = 1.) = ecdf(df[x])(xaxis)
 
 
 """
@@ -79,8 +79,8 @@ _cumulative(df, xaxis, x) = ecdf(df[x])(xaxis)
 Hazard rate of `x`, computed along `xaxis`. Keyword arguments are passed to
 the function computing the density
 """
-_hazard(df,xaxis, x; kwargs...) =
-_density(df,xaxis, x; kwargs...)./(1 -_cumulative(df, xaxis, x))
+_hazard(df,xaxis, x, bin_width = 1.; kwargs...) =
+_density(df,xaxis, x, bin_width; kwargs...)./(1 -_cumulative(df, xaxis, x, bin_width))
 
 #### Method to compute and plot grouped error plots using the above functions
 
@@ -96,18 +96,18 @@ end
 get_axis(column) = sort!(union(column))
 get_axis(column, npoints::Int64) = linspace(Plots.ignorenan_minimum(column),Plots.ignorenan_maximum(column),npoints)
 
-function get_axis(df, axis_type::Symbol, compute_axis::Symbol, args...; kwargs...)
+function get_axis(column, axis_type::Symbol, compute_axis::Symbol; kwargs...)
     if axis_type == :discrete
-        return get_axis(df[args[1]])
+        return get_axis(column)
     elseif axis_type == :continuous
-        return get_axis(df[args[1]], 100)
+        return get_axis(column, 100)
     else
         error("Unexpected axis_type: only :discrete and :continuous allowed!")
     end
 end
 
-get_axis(df, axis_type::Symbol, compute_axis, args...; kwargs...) =
-    compute_axis(df, axis_type, args...; kwargs...)
+get_axis(column, axis_type::Symbol, compute_axis; kwargs...) =
+    compute_axis(column, axis_type; kwargs...)
 
 # f is the function used to analyze dataset: define it as nan when it is not defined,
 # the input is: dataframe used, points chosen on the x axis, x (and maybe y) column labels
@@ -203,7 +203,7 @@ compute `get_groupederror`.
 function get_groupederror(trend,variation, f, df::AbstractDataFrame, axis_type, ce,  args...;
     compute_axis = :auto, kwargs...)
     # define points on x axis
-    xvalues = get_axis(df, axis_type, compute_axis, args...; kwargs...)
+    xvalues = get_axis(df[args[1]], axis_type, compute_axis; kwargs...)
     return get_groupederror(trend,variation, f, df::AbstractDataFrame, xvalues, ce, args...; kwargs...)
 end
 
@@ -212,6 +212,7 @@ end
     groupapply(f::Function, df, args...;
                 axis_type = :auto, compute_error = :none, group = Symbol[],
                 summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
+                nbins = 30,
                 kwargs...)
 
 Split `df` by `group`. Then apply `get_groupederror` to get a population summary of the grouped data.
@@ -222,9 +223,22 @@ Seriestype can be specified to be `:path`, `:scatter` or `:bar`
 function groupapply(f::Function, df, args...;
                     axis_type = :auto, compute_error = :none, group = Symbol[],
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
+                    nbins = 30,
                     kwargs...)
+    added_cols = Symbol[]
     if !(eltype(df[args[1]])<:Real)
-        (axis_type == :continuous) && warn("Changing to discrete axis, x values are not real numbers!")
+        (axis_type in [:discrete, :auto]) || warn("Changing to discrete axis, x values are not real numbers!")
+        axis_type = :discrete
+    end
+    if axis_type == :binned
+        edges = linspace(Plots.ignorenan_minimum(df[args[1]]),
+            Plots.ignorenan_maximum(df[args[1]]), nbins+1)
+        middles = (edges[2:end] .+ edges[1:end-1])./2
+        indices = [searchsortedfirst(edges[2:end], x) for x in df[args[1]]]
+        x_binned = new_symbol(Symbol(args[1], :_binned), df)
+        df[x_binned] = middles[indices]
+        push!(added_cols, x_binned)
+        args = (x_binned, Base.tail(args)..., step(edges))
         axis_type = :discrete
     end
     if axis_type == :auto
@@ -240,6 +254,7 @@ function groupapply(f::Function, df, args...;
     if compute_error == :across
         row_name = new_symbol(:rows, df)
         df[row_name] = 1:size(df,1)
+        push!(added_cols, row_name)
         ce = (:across, row_name)
     elseif compute_error == :bootstrap
         ce = (:bootstrap, 1000)
@@ -274,7 +289,7 @@ function groupapply(f::Function, df, args...;
             return
         end
     end
-    if compute_error == :across; delete!(df, row_name); end
+    delete!(df, added_cols)
 
     return g
 end

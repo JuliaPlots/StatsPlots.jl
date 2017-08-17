@@ -144,7 +144,7 @@ There is a groupapply function that splits the data across a keyword argument "g
 
 - `compute_error = :none`, where no error is computed or displayed and the analysis is carried out normally.
 
-The local regression uses [Loess.jl](https://github.com/JuliaStats/Loess.jl) and the density plot uses [KernelDensity.jl](https://github.com/JuliaStats/KernelDensity.jl). In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin. The choice of continuous or discrete axis can be forced via `axis_type = :continuous` or `axis_type = :discrete`
+The local regression uses [Loess.jl](https://github.com/JuliaStats/Loess.jl) and the density plot uses [KernelDensity.jl](https://github.com/JuliaStats/KernelDensity.jl). In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin. The choice of continuous or discrete axis can be forced via `axis_type = :continuous` or `axis_type = :discrete`. `axis_type = :binned` will bin the x axis in equally spaced bins (number given by the `nbins` keyword, defaulting to `30`), and continue the analysis with the binned data, treating it as discrete.
 
 Example use:
 
@@ -177,3 +177,15 @@ grp_error = groupapply(school, :Sx, :MAch; compute_error = :across, group = :Min
 plot(grp_error, line = :bar)
 ```
 <img width="489" alt="screenshot 2017-01-10 18 20 51" src="https://user-images.githubusercontent.com/6333339/29280710-3998b310-8114-11e7-9a24-a93d5727cc52.png">
+
+Density bar plot of binned data versus continuous estimation:
+
+```julia
+grp_error = groupapply(:density, school, :MAch; axis_type = :binned, nbins = 40, group = :Minrty)
+plot(grp_error, line = :bar, color = ["orange" "turquoise"], legend = :topleft)
+
+grp_error = groupapply(:density, school, :MAch; axis_type = :continuous, group = :Minrty)
+plot!(grp_error, line = :path, color = ["orange" "turquoise"], label = "")
+```
+
+![density](https://user-images.githubusercontent.com/6333339/29373096-06317b50-82a5-11e7-900f-d6c183977ab8.png)
