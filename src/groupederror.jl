@@ -238,7 +238,7 @@ function groupapply(f::Function, df, args...;
         x_binned = new_symbol(Symbol(args[1], :_binned), df)
         df[x_binned] = middles[indices]
         push!(added_cols, x_binned)
-        args = ((i==1 ? x_binned : args[i] for i in 1:length(args))..., step(edges))
+        args = (x_binned, Base.tail(args)..., step(edges))
         axis_type = :discrete
     end
     if axis_type == :auto
