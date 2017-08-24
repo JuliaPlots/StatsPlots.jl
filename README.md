@@ -32,10 +32,12 @@ df = DataFrame(a = 1:10, b = 10*rand(10), c = 10 * rand(10))
 plot(df, :a, [:b :c])
 scatter(df, :a, :b, markersize = :(4 * log(:c + 0.1)))
 ```
-If you find an operation not supported by DataFrames, please open an issue. An alternative approach to the `StatPlots` syntax is to use the [DataFramesMeta](https://github.com/JuliaStats/DataFramesMeta.jl) macro `@with`. Symbols not referring to DataFrame columns must be escaped by `^()` e.g.
+If you find an operation not supported by DataFrames, please open an issue. An alternative approach to the above syntax is to use the macro `@given`. Symbols not referring to DataFrame columns must be escaped by `^()` wherever this could cause ambiguity e.g.
 ```julia
 using DataFramesMeta
-@with(df, plot(:a, [:b :c], colour = ^([:red :blue])))
+@given df plot(:a, [:b :c], colour = [:red :blue])
+df[:red] = rand(10)
+@given df plot(:a, [:b :c], colour = ^([:red :blue]))
 ```
 ---
 

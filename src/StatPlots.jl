@@ -17,7 +17,9 @@ import Loess
 
 export groupapply
 export get_groupederror
+export @given
 
+include("given.jl")
 include("dataframes.jl")
 include("corrplot.jl")
 include("cornerplot.jl")
