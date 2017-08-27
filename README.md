@@ -25,19 +25,23 @@ using StatPlots
 gr(size=(400,300))
 ```
 
-The `DataFrames` support allows passing `DataFrame` columns as symbols. Operations on DataFrame column can be specified using quoted expressions, e.g.
+`DataFrames` are supported thanks to the macro `@df` which allows passing `DataFrame` columns as symbols. Those columns can then be manipulated inside the `plot` call, like normal `Arrays`:
 ```julia
 using DataFrames
 df = DataFrame(a = 1:10, b = 10*rand(10), c = 10 * rand(10))
-plot(df, :a, [:b :c])
-scatter(df, :a, :b, markersize = :(4 * log(:c + 0.1)))
+@df df plot(:a, [:b :c], colour = [:red :blue])
+@df df scatter(:a, :b, markersize = 4 * log.(:c + 0.1))
 ```
-If you find an operation not supported by DataFrames, please open an issue. An alternative approach to the above syntax is to use the macro `@given`. Symbols not referring to DataFrame columns must be escaped by `^()` wherever this could cause ambiguity e.g.
+
+In case of ambiguity, symbols not referring to `DataFrame` columns must be escaped by `^()`:
 ```julia
-using DataFramesMeta
-@given df plot(:a, [:b :c], colour = [:red :blue])
 df[:red] = rand(10)
-@given df plot(:a, [:b :c], colour = ^([:red :blue]))
+@df df plot(:a, [:b :c], colour = ^([:red :blue]))
+```
+
+The old syntax, passing the `DataFrame` as the first argument to the `plot` call is still supported, but has several limitations (the most important being incompatibility with user recipes):
+```julia
+plot(df, :a, [:b :c], colour = [:red :blue])
 ```
 ---
 
