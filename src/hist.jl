@@ -35,6 +35,22 @@ Plots.@deps density path
 end
 Plots.@deps cdensity path
 
+ea_binnumber(y, bin::AbstractVector) = error("You cannot specify edge locations for equal area histogram")
+ea_binnumber(y, bin::Real) = (floor(bin) == bin || error("Only integer or symbol values accepted by bins"); Int(bin))
+ea_binnumber(y, bin::Int) = bin
+ea_binnumber(y, bin::Symbol) = Plots._auto_binning_nbins((y,), 1, mode = bin)
+
+@recipe function f(::Type{Val{:ea_histogram}}, x, y, z)
+    bin = ea_binnumber(y, d[:bins])
+    bins := quantile(y, linspace(0,1,bin+1))
+    normalize := :density
+    seriestype := :barhist
+    ()
+end
+Plots.@deps histogram barhist
+
+@shorthands ea_histogram
+
 
 # ---------------------------------------------------------------------------
 # Compute binsizes using Wand (1997)'s criterion
