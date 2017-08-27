@@ -41,7 +41,7 @@ Plots.@deps cdensity path
 # Ported from R code located here https://github.com/cran/KernSmooth/tree/master/R
 
 function linbin(X, gpoints; trun = true)
-    n, M = length(x), length(gpoints)
+    n, M = length(X), length(gpoints)
 
     a, b = gpoints[1], gpoints[M]
     gcnts = zeros(M)
@@ -93,12 +93,12 @@ function bkfe(gcounts, drv, bandwidth, range_x)
     arg = lvec .* delta/h
 
     kappam = pdf(Normal(),arg)/(h^(drv+1))
-    hmold0 = 1
+    hmold0, hmnew = ones(length(arg)), ones(length(arg))
     hmold1 = arg
-    hmnew = 1
+
     if drv >= 2
         for i in (2:drv)
-            hmnew = arg .* hmold1 .- (i-1)*hmold0
+            hmnew = arg .* hmold1 .- (i-1) .* hmold0
             hmold0 = hmold1       # Compute mth degree Hermite polynomial
             hmold1 = hmnew        # by recurrence.
         end
