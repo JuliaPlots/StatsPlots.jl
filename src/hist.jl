@@ -36,8 +36,11 @@ end
 Plots.@deps cdensity path
 
 
+# ---------------------------------------------------------------------------
+# Compute binsizes using Wand (1995)'s criterion
+# Ported from R code located here https://github.com/cran/KernSmooth/tree/master/R
 
-function linbin(X, gpoints; truncate = true)
+function linbin(X, gpoints; trun = true)
     n, M = length(x), length(gpoints)
 
     a, b = gpoints[1], gpoints[M]
@@ -54,7 +57,7 @@ function linbin(X, gpoints; truncate = true)
             gcnts[li+1] += rem
         end
 
-        if !truncate
+        if !trun
             if lt < 1
                 gcnts[1] += 1
             end
@@ -67,23 +70,66 @@ function linbin(X, gpoints; truncate = true)
     gcnts
 end
 
+"binned kernel function estimator"
+function bkfe(gcounts, drv, bandwidth, range_x)
+    bandwidth <= 0 && error("'bandwidth' must be strictly positive")
 
+    a, b = range_x
+    h = bandwidth
+    M = length(gcounts)
+    gpoints = linspace(a, b, M)
 
-function wand_bins(x, scalest = :minim, level = 2, gridsize = 401, range_x = extrema(x), truncate = true)
+    ## Set the sample size and bin width
 
-    level > 5 && error("Level should be between 0 and 5")
+    n = sum(gcounts)
+    delta = (b-a)/(M-1)
+
+    ## Obtain kernel weights
+
+    tau = 4 + drv
+    L = min(floor(tau*h/delta), M)
+
+    lvec = 0:L
+    arg = lvec .* delta/h
+
+    kappam = pdf(Normal(),arg)/(h^(drv+1))
+    hmold0 = 1
+    hmold1 = arg
+    hmnew = 1
+    if drv >= 2
+        for i in (2:drv)
+            hmnew = arg .* hmold1 .- (i-1)*hmold0
+            hmold0 = hmold1       # Compute mth degree Hermite polynomial
+            hmold1 = hmnew        # by recurrence.
+        end
+    end
+    kappam = hmnew .* kappam
+
+    ## Now combine weights and counts to obtain estimate
+    ## we need P >= 2L+1L, M: L <= M.
+    P = 2^(ceil(log(M+L+1)/log(2)))
+    kappam = [kappam; zeros(P-2*L-1); reverse(kappam[2:end])]
+    Gcounts = [gcounts; zeros(P-M)]
+    kappam = fft(kappam)
+    Gcounts = fft(Gcounts)
+
+    sum(gcounts .* (real(ifft(kappam .* Gcounts)))[1:M] )/(n^2)
+end
+
+"Returns optimal histogram bin widths in accordance to Wand (1995)'s criterion'"
+function wand_bins(x, scalest = :minim, gridsize = 401, range_x = extrema(x), trun = true)
+
     n = length(x)
-    minx = range_x[1]
-    maxx = range_x[2]
+    minx, maxx = range_x
     gpoints = linspace(minx, maxx, gridsize)
-    gcounts = linbin(x, gpoints, truncate)
+    gcounts = linbin(x, gpoints, trun = trun)
 
     scalest = if scalest == :stdev
         sqrt(var(x))
     elseif scalest == :iqr
         (quantile(x, 3//4) - quantile(x, 1//4))/1.349
     elseif scalest == :minim
-        min((quantile(x, 3//4) - quantile(x, 1//4))/1.349, sqrt(var(x))
+        min((quantile(x, 3//4) - quantile(x, 1//4))/1.349, sqrt(var(x)))
     else
         error("scalest must be one of :stdev, :iqr or :minim (default)")
     end
@@ -94,71 +140,21 @@ function wand_bins(x, scalest = :minim, level = 2, gridsize = 401, range_x = ext
     sb = (maxx - mean(x))/scalest
 
     gpoints = linspace(sa, sb, gridsize)
-    gcounts = linbin(sx, gpoints, truncate)
+    gcounts = linbin(sx, gpoints, trun = trun)
 
-# made it to here with porting
+    hpi = begin
+        alpha = ((2/(11 * n))^(1/13)) * sqrt(2)
+        psi10hat = bkfe(gcounts, 10, alpha, [sa, sb])
+        alpha = (-105 * sqrt(2/pi)/(psi10hat * n))^(1//11)
+        psi8hat = bkfe(gcounts, 8, alpha, [sa, sb])
+        alpha = (15 * sqrt(2/pi)/(psi8hat * n))^(1/9)
+        psi6hat = bkfe(gcounts, 6, alpha, [sa, sb])
+        alpha = (-3 * sqrt(2/pi)/(psi6hat * n))^(1/7)
+        psi4hat = bkfe(gcounts, 4, alpha, [sa, sb])
+        alpha = (sqrt(2/pi)/(psi4hat * n))^(1/5)
+        psi2hat = bkfe(gcounts, 2, alpha, [sa, sb])
+        (6/(-psi2hat * n))^(1/3)
+    end
 
-    hpi <- if (level == 0L)
-        (24 * sqrt(pi)/n)^(1/3)
-    else if (level == 1L) {
-        alpha <- (2/(3 * n))^(1/5) * sqrt(2)
-        psi2hat <- bkfe(gcounts, 2L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        (6/(-psi2hat * n))^(1/3)
-    }
-    else if (level == 2L) {
-        alpha <- ((2/(5 * n))^(1/7)) * sqrt(2)
-        psi4hat <- bkfe(gcounts, 4L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (sqrt(2/pi)/(psi4hat * n))^(1/5)
-        psi2hat <- bkfe(gcounts, 2L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        (6/(-psi2hat * n))^(1/3)
-    }
-    else if (level == 3L) {
-        alpha <- ((2/(7 * n))^(1/9)) * sqrt(2)
-        psi6hat <- bkfe(gcounts, 6L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (-3 * sqrt(2/pi)/(psi6hat * n))^(1/7)
-        psi4hat <- bkfe(gcounts, 4L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (sqrt(2/pi)/(psi4hat * n))^(1/5)
-        psi2hat <- bkfe(gcounts, 2L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        (6/(-psi2hat * n))^(1/3)
-    }
-    else if (level == 4L) {
-        alpha <- ((2/(9 * n))^(1/11)) * sqrt(2)
-        psi8hat <- bkfe(gcounts, 8L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (15 * sqrt(2/pi)/(psi8hat * n))^(1/9)
-        psi6hat <- bkfe(gcounts, 6L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (-3 * sqrt(2/pi)/(psi6hat * n))^(1/7)
-        psi4hat <- bkfe(gcounts, 4L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (sqrt(2/pi)/(psi4hat * n))^(1/5)
-        psi2hat <- bkfe(gcounts, 2L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        (6/(-psi2hat * n))^(1/3)
-    }
-    else if (level == 5L) {
-        alpha <- ((2/(11 * n))^(1/13)) * sqrt(2)
-        psi10hat <- bkfe(gcounts, 10L, alpha, range.x = c(sa,
-            sb), binned = TRUE)
-        alpha <- (-105 * sqrt(2/pi)/(psi10hat * n))^(1/11)
-        psi8hat <- bkfe(gcounts, 8L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (15 * sqrt(2/pi)/(psi8hat * n))^(1/9)
-        psi6hat <- bkfe(gcounts, 6L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (-3 * sqrt(2/pi)/(psi6hat * n))^(1/7)
-        psi4hat <- bkfe(gcounts, 4L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        alpha <- (sqrt(2/pi)/(psi4hat * n))^(1/5)
-        psi2hat <- bkfe(gcounts, 2L, alpha, range.x = c(sa, sb),
-            binned = TRUE)
-        (6/(-psi2hat * n))^(1/3)
-    }
     scalest * hpi
 end
