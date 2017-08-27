@@ -102,6 +102,8 @@ violin!(singers_moscow,:VoicePart,:Height, side=:left, marker=(0.2,:red,stroke(0
 
 ---
 
+## Distributions
+
 ```julia
 using Distributions
 plot(Normal(3,5), fill=(0, .5,:orange))
