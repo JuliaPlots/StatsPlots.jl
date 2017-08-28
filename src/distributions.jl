@@ -10,6 +10,6 @@ end
 @recipe f(dist::Distribution) = (dist, default_range(dist)...)
 
 # this "type recipe" replaces any instance of a distribution with a function mapping xi to yi
-@recipe function f{T<:Distribution}(::Type{T}, dist::T; func = pdf)
+@recipe function f(::Type{T}, dist::T; func = pdf) where T<:Distribution
     xi -> func(dist, xi)
 end

@@ -45,7 +45,7 @@ end
 processDFarg(df::AbstractDataFrame, expr::Expr) = eval(processDFsym(df, expr))
 processDFarg(df::AbstractDataFrame, anything) = anything
 
-processDFcol{T <: Union{Expr, Symbol}}(df, col::AbstractArray{T}) = processDFarg(df, col[1])
+processDFcol(df, col::AbstractArray{T}) where {T <: Union{Expr, Symbol}} = processDFarg(df, col[1])
 processDFcol(df, anything) = anything
 
 # the processDFsym! functions work with expressions and pass results to processDFarg for final eval - this to allow recursion without eval
