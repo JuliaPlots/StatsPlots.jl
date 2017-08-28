@@ -50,7 +50,7 @@ plot(df, :a, [:b :c], colour = [:red :blue])
 ```julia
 using RDatasets
 iris = dataset("datasets","iris")
-marginalhist(iris, :PetalLength, :PetalWidth)
+@df iris marginalhist(:PetalLength, :PetalWidth)
 ```
 
 ![](https://cloud.githubusercontent.com/assets/933338/19213780/a82e34a6-8d42-11e6-8846-80c9f4c48b9c.png)
@@ -59,6 +59,17 @@ marginalhist(iris, :PetalLength, :PetalWidth)
 
 ## corrplot and cornerplot
 
+```julia
+@df iris corrplot([:SepalLength :SepalWidth :PetalLength :PetalWidth])
+```
+or also:
+```julia
+@df iris corrplot(cols(1:4))
+```
+
+![iris](https://user-images.githubusercontent.com/6333339/29792101-3daa6cfe-8c37-11e7-97e2-d1763d3b95c3.png)
+
+A correlation plot may also be produced from a matrix:
 
 ```julia
 M = randn(1000,4)
@@ -89,8 +100,10 @@ cornerplot(M, compact=true)
 ```julia
 import RDatasets
 singers = RDatasets.dataset("lattice","singer")
-violin(singers,:VoicePart,:Height,marker=(0.2,:blue,stroke(0)))
-boxplot!(singers,:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
+@df singers begin
+    violin(:VoicePart,:Height,marker=(0.2,:blue,stroke(0)))
+    boxplot!(:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
+end
 ```
 
 ![](https://juliaplots.github.io/examples/img/pyplot/pyplot_example_30.png)
@@ -100,8 +113,8 @@ Asymmetric violin plots can be created using the `side` keyword (`:both` - defau
 ```julia
 singers_moscow = deepcopy(singers)
 singers_moscow[:Height] = singers_moscow[:Height]+5
-myPlot = violin(singers,:VoicePart,:Height, side=:right, marker=(0.2,:blue,stroke(0)), label="Scala")
-violin!(singers_moscow,:VoicePart,:Height, side=:left, marker=(0.2,:red,stroke(0)), label="Moscow")
+@df singers violin(:VoicePart,:Height, side=:right, marker=(0.2,:blue,stroke(0)), label="Scala")
+@df singers_moscow violin!(:VoicePart,:Height, side=:left, marker=(0.2,:red,stroke(0)), label="Moscow")
 ```
 
 ![](https://cloud.githubusercontent.com/assets/2077159/26156938/22ccf0d4-3b18-11e7-9f34-555005437e6c.png)
