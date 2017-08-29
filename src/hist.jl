@@ -49,6 +49,8 @@ ea_binnumber(y, bin::Symbol) = Plots._auto_binning_nbins((y,), 1, mode = bin)
 end
 Plots.@deps histogram barhist
 
+push!(Plots._histogram_like, :ea_histogram)
+
 @shorthands ea_histogram
 
 
