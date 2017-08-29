@@ -2,9 +2,9 @@
 
 function update_ticks_guides(d::KW, labs, i, j, n)
     # d[:title]  = (i==1 ? _cycle(labs,j) : "")
-    d[:xticks] = (i==n)
+    # d[:xticks] = (i==n)
     d[:xguide] = (i==n ? _cycle(labs,j) : "")
-    d[:yticks] = (j==1)
+    # d[:yticks] = (j==1)
     d[:yguide] = (j==1 ? _cycle(labs,i) : "")
 end
 
@@ -27,6 +27,7 @@ end
     indices = reshape(1:n^2, n, n)'
     title = get(d,:title,"")
     title := ""
+    ticks --> false
 
     # histograms on the diagonal
     for i=1:n
