@@ -1,4 +1,3 @@
-
 module StatPlots
 
 using Reexport
@@ -24,12 +23,11 @@ include("cornerplot.jl")
 include("distributions.jl")
 include("boxplot.jl")
 include("violin.jl")
+include("beeswarm.jl")
 include("hist.jl")
 include("marginalhist.jl")
 include("bar.jl")
 include("shadederror.jl")
 include("groupederror.jl")
-
-
 
 end # module

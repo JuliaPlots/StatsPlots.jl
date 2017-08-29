@@ -1,11 +1,20 @@
-
 # ---------------------------------------------------------------------------
-# Violin Plot
+# Utility functions
 
 const _violin_warned = [false]
 
-function violin_coords(y; trim::Bool=false)
-    kd = KernelDensity.kde(y, npoints = 200)
+"""
+**Use kde to return an envelope for the violin and beeswarm plots**
+
+    violin_coords(y; trim::Bool=false, n::Int64=200)
+
+- `y`: points to estimate the distribution from
+- `trim`: whether to remove the extreme values
+- `n`: number of points to use in kde (defaults to 200)
+
+"""
+function violin_coords(y; trim::Bool=false, n::Int64=200)
+    kd = KernelDensity.kde(y, npoints = n)
     if trim
         xmin, xmax = Plots.ignorenan_extrema(y)
         inside = Bool[ xmin <= x <= xmax for x in kd.x]
@@ -14,8 +23,29 @@ function violin_coords(y; trim::Bool=false)
     kd.density, kd.x
 end
 
+"""
+**Check that the side is correct**
 
-@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both)
+    check_side(side::Symbol)
+
+`side` can be `:both`, `:left`, or `:right`. Any other value will default to
+`:both`.
+"""
+function check_side(side::Symbol)
+    if !(side in [:both, :left, :right])
+        warn("side (you gave :$side) must be one of :both, :left, or :right")
+        side = :both
+        info("side set to :$side")
+    end
+    return side
+end
+
+# ---------------------------------------------------------------------------
+# Violin plot
+@recipe function f(::Type{Val{:violin}}, x, y, z; trim=false, side=:both)
+
+    side = check_side(side)
+
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     bw = d[:bar_width]
