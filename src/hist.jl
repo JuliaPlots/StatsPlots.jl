@@ -41,7 +41,7 @@ Plots.@deps cdensity path
 # Ported from R code located here https://github.com/cran/KernSmooth/tree/master/R
 
 "Returns optimal histogram edge positions in accordance to Wand (1995)'s criterion'"
-wand_edges(x, args...) = (binwidth = wand_bins(x, args...); minimum(x)-binwidth:binwidth:maximum(x)+binwidth)
+Plots.wand_edges(x::AbstractVector, args...) = (binwidth = wand_bins(x, args...); minimum(x)-binwidth:binwidth:maximum(x)+binwidth)
 
 "Returns optimal histogram bin widths in accordance to Wand (1995)'s criterion'"
 function wand_bins(x, scalest = :minim, gridsize = 401, range_x = extrema(x), trun = true)
