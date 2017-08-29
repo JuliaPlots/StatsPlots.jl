@@ -12,7 +12,7 @@ macro df(d, x)
     argnames = _argnames(d, x)
     plot_call = _df(d,x)
     for i in 1:length(argnames)
-        if isa(argnames[i], Expr)
+        if isa(argnames[i], Expr) || isa(argnames[i], AbstractArray)
             push!(plot_call.args, Expr(:kw, :label, argnames[i]))
         else
             push!(plot_call.args, Expr(:kw, kw_list[i], argnames[i]))
@@ -45,6 +45,10 @@ arg2string(x) = string(x)
 function arg2string(d, x)
     if isa(x, Expr) && x.head == :call && x.args[1] == :cols
         return :(reshape([(DataFrames.names($d)[i]) for i in $(x.args[2])], 1, :))
+    elseif isa(x, Expr) && x.head == :call && x.args[1] == :hcat
+        return hcat.((filter(t -> t != ':', string(s)) for s in x.args[2:end])...)
+    elseif isa(x, Expr) && x.head == :hcat
+        return hcat.((filter(t -> t != ':', string(s)) for s in x.args)...)
     else
         return filter(t -> t != ':', string(x))
     end
