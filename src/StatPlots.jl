@@ -17,6 +17,7 @@ import Loess
 
 export groupapply
 export get_groupederror
+export wand_edges
 export @df
 
 include("df.jl")
