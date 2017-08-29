@@ -13,9 +13,9 @@ macro df(d, x)
     plot_call = _df(d,x)
     for i in 1:length(argnames)
         if isa(argnames[i], Expr) || isa(argnames[i], AbstractArray)
-            push!(plot_call.args, Expr(:kw, :label, argnames[i]))
+            insert_kw!(plot_call, :label, argnames[i])
         else
-            push!(plot_call.args, Expr(:kw, kw_list[i], argnames[i]))
+            insert_kw!(plot_call, kw_list[i], argnames[i])
         end
     end
     esc(plot_call)
@@ -32,16 +32,16 @@ function _df(d, x::Expr)
     return Expr(x.head, _df.(d, x.args)...)
 end
 
-const kw_list = [:xlabel, :ylabel, :zlabel]
-
-macro argnames(d, x)
-    esc(_argnames(d, x))
+function insert_kw!(x::Expr, s::Symbol, v)
+    index = x.args[2].head == :parameters ? 3 : 2
+    x.args = vcat(x.args[1:index-1], Expr(:kw, s, v), x.args[index:end])
 end
+
+const kw_list = [:xlabel, :ylabel, :zlabel]
 
 not_kw(x) = true
 not_kw(x::Expr) = !(x.head in [:kw, :parameters])
 
-arg2string(x) = string(x)
 function arg2string(d, x)
     if isa(x, Expr) && x.head == :call && x.args[1] == :cols
         return :(reshape([(DataFrames.names($d)[i]) for i in $(x.args[2])], 1, :))
