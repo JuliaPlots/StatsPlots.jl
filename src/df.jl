@@ -37,7 +37,7 @@ function insert_kw!(x::Expr, s::Symbol, v)
     x.args = vcat(x.args[1:index-1], Expr(:kw, s, v), x.args[index:end])
 end
 
-const kw_list = [:xlabel, :ylabel, :zlabel]
+const kw_list = [:xguide, :yguide, :zguide]
 
 function _argnames(d, x::Expr)
     [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]
@@ -60,7 +60,6 @@ function _arg2string(d, x::Expr)
 end
 
 stringify(x) = filter(t -> t != ':', string(x))
-
 
 select_column(df, s) = haskey(df, s) ? convert_column(df[s]) : s
 

@@ -60,14 +60,15 @@ iris = dataset("datasets","iris")
 ## corrplot and cornerplot
 
 ```julia
-@df iris corrplot([:SepalLength :SepalWidth :PetalLength :PetalWidth])
+@df iris corrplot([:SepalLength :SepalWidth :PetalLength :PetalWidth], grid = false)
 ```
 or also:
 ```julia
-@df iris corrplot(cols(1:4))
+@df iris corrplot(cols(1:4), grid = false)
 ```
 
-![iris](https://user-images.githubusercontent.com/6333339/29792101-3daa6cfe-8c37-11e7-97e2-d1763d3b95c3.png)
+![corrplot](https://user-images.githubusercontent.com/6333339/29830744-fd1fe282-8cda-11e7-86aa-ff5e8033a693.png)
+
 
 A correlation plot may also be produced from a matrix:
 
@@ -100,10 +101,8 @@ cornerplot(M, compact=true)
 ```julia
 import RDatasets
 singers = RDatasets.dataset("lattice","singer")
-@df singers begin
-    violin(:VoicePart,:Height,marker=(0.2,:blue,stroke(0)))
-    boxplot!(:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
-end
+@df singers violin(:VoicePart,:Height,marker=(0.2,:blue,stroke(0)))
+@df singers boxplot!(:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
 ```
 
 ![](https://juliaplots.github.io/examples/img/pyplot/pyplot_example_30.png)
