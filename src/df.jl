@@ -39,24 +39,27 @@ end
 
 const kw_list = [:xlabel, :ylabel, :zlabel]
 
+function _argnames(d, x::Expr)
+    [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]
+end
+
 not_kw(x) = true
 not_kw(x::Expr) = !(x.head in [:kw, :parameters])
 
-function arg2string(d, x)
-    if isa(x, Expr) && x.head == :call && x.args[1] == :cols
+_arg2string(d, x) = stringify(x)
+function _arg2string(d, x::Expr)
+    if x.head == :call && x.args[1] == :cols
         return :(reshape([(DataFrames.names($d)[i]) for i in $(x.args[2])], 1, :))
-    elseif isa(x, Expr) && x.head == :call && x.args[1] == :hcat
-        return hcat.((filter(t -> t != ':', string(s)) for s in x.args[2:end])...)
-    elseif isa(x, Expr) && x.head == :hcat
-        return hcat.((filter(t -> t != ':', string(s)) for s in x.args)...)
+    elseif x.head == :call && x.args[1] == :hcat
+        return hcat(stringify.(x.args[2:end])...)
+    elseif x.head == :hcat
+        return hcat(stringify.(x.args)...)
     else
-        return filter(t -> t != ':', string(x))
+        return stringify(x)
     end
 end
 
-function _argnames(d, x::Expr)
-    [arg2string(d, s) for s in x.args[2:end] if not_kw(s)]
-end
+stringify(x) = filter(t -> t != ':', string(x))
 
 
 select_column(df, s) = haskey(df, s) ? convert_column(df[s]) : s
