@@ -37,8 +37,55 @@ Plots.@deps cdensity path
 
 
 # ---------------------------------------------------------------------------
-# Compute binsizes using Wand (1995)'s criterion
+# Compute binsizes using Wand (1997)'s criterion
 # Ported from R code located here https://github.com/cran/KernSmooth/tree/master/R
+
+"Returns optimal histogram edge positions in accordance to Wand (1995)'s criterion'"
+wand_edges(x, args...) = (binwidth = wand_bins(x, args...); minimum(x)-binwidth:binwidth:maximum(x)+binwidth)
+
+"Returns optimal histogram bin widths in accordance to Wand (1995)'s criterion'"
+function wand_bins(x, scalest = :minim, gridsize = 401, range_x = extrema(x), trun = true)
+
+    n = length(x)
+    minx, maxx = range_x
+    gpoints = linspace(minx, maxx, gridsize)
+    gcounts = linbin(x, gpoints, trun = trun)
+
+    scalest = if scalest == :stdev
+        sqrt(var(x))
+    elseif scalest == :iqr
+        (quantile(x, 3//4) - quantile(x, 1//4))/1.349
+    elseif scalest == :minim
+        min((quantile(x, 3//4) - quantile(x, 1//4))/1.349, sqrt(var(x)))
+    else
+        error("scalest must be one of :stdev, :iqr or :minim (default)")
+    end
+
+    scalest == 0 && error("scale estimate is zero for input data")
+    sx = (x .- mean(x))./scalest
+    sa = (minx - mean(x))/scalest
+    sb = (maxx - mean(x))/scalest
+
+    gpoints = linspace(sa, sb, gridsize)
+    gcounts = linbin(sx, gpoints, trun = trun)
+
+    hpi = begin
+        alpha = ((2/(11 * n))^(1/13)) * sqrt(2)
+        psi10hat = bkfe(gcounts, 10, alpha, [sa, sb])
+        alpha = (-105 * sqrt(2/pi)/(psi10hat * n))^(1//11)
+        psi8hat = bkfe(gcounts, 8, alpha, [sa, sb])
+        alpha = (15 * sqrt(2/pi)/(psi8hat * n))^(1/9)
+        psi6hat = bkfe(gcounts, 6, alpha, [sa, sb])
+        alpha = (-3 * sqrt(2/pi)/(psi6hat * n))^(1/7)
+        psi4hat = bkfe(gcounts, 4, alpha, [sa, sb])
+        alpha = (sqrt(2/pi)/(psi4hat * n))^(1/5)
+        psi2hat = bkfe(gcounts, 2, alpha, [sa, sb])
+        (6/(-psi2hat * n))^(1/3)
+    end
+
+    scalest * hpi
+end
+
 
 function linbin(X, gpoints; trun = true)
     n, M = length(X), length(gpoints)
@@ -114,47 +161,4 @@ function bkfe(gcounts, drv, bandwidth, range_x)
     Gcounts = fft(Gcounts)
 
     sum(gcounts .* (real(ifft(kappam .* Gcounts)))[1:M] )/(n^2)
-end
-
-"Returns optimal histogram bin widths in accordance to Wand (1995)'s criterion'"
-function wand_bins(x, scalest = :minim, gridsize = 401, range_x = extrema(x), trun = true)
-
-    n = length(x)
-    minx, maxx = range_x
-    gpoints = linspace(minx, maxx, gridsize)
-    gcounts = linbin(x, gpoints, trun = trun)
-
-    scalest = if scalest == :stdev
-        sqrt(var(x))
-    elseif scalest == :iqr
-        (quantile(x, 3//4) - quantile(x, 1//4))/1.349
-    elseif scalest == :minim
-        min((quantile(x, 3//4) - quantile(x, 1//4))/1.349, sqrt(var(x)))
-    else
-        error("scalest must be one of :stdev, :iqr or :minim (default)")
-    end
-
-    scalest == 0 && error("scale estimate is zero for input data")
-    sx = (x .- mean(x))./scalest
-    sa = (minx - mean(x))/scalest
-    sb = (maxx - mean(x))/scalest
-
-    gpoints = linspace(sa, sb, gridsize)
-    gcounts = linbin(sx, gpoints, trun = trun)
-
-    hpi = begin
-        alpha = ((2/(11 * n))^(1/13)) * sqrt(2)
-        psi10hat = bkfe(gcounts, 10, alpha, [sa, sb])
-        alpha = (-105 * sqrt(2/pi)/(psi10hat * n))^(1//11)
-        psi8hat = bkfe(gcounts, 8, alpha, [sa, sb])
-        alpha = (15 * sqrt(2/pi)/(psi8hat * n))^(1/9)
-        psi6hat = bkfe(gcounts, 6, alpha, [sa, sb])
-        alpha = (-3 * sqrt(2/pi)/(psi6hat * n))^(1/7)
-        psi4hat = bkfe(gcounts, 4, alpha, [sa, sb])
-        alpha = (sqrt(2/pi)/(psi4hat * n))^(1/5)
-        psi2hat = bkfe(gcounts, 2, alpha, [sa, sb])
-        (6/(-psi2hat * n))^(1/3)
-    end
-
-    scalest * hpi
 end
