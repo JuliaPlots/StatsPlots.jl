@@ -18,7 +18,7 @@ function _df(d, x::Expr)
     (x.head == :quote) && return :(StatPlots.select_column($d, $x))
     if x.head == :call
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
-        x.args[1] == :cols && return :(hcat((convert_column($d[i]) for i in $(x.args[2]))...))
+        x.args[1] == :cols && return :(hcat((StatPlots.convert_column($d[i]) for i in $(x.args[2]))...))
     end
     return Expr(x.head, _df.(d, x.args)...)
 end
