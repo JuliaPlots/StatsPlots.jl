@@ -46,12 +46,12 @@ end
 stringify(x) = filter(t -> t != ':', string(x))
 
 function select_column(df, s)
-    iterator = getiterator(df)
-    if s in fieldnames(next(iterator, 1)[1]) || isa(s, Integer)
-        return convert_column([getfield(i, s) for i in iterator])
-    else
-        return s
-    end
+    v = try
+            [getfield(i, s) for i in getiterator(df)]
+        catch
+            s
+        end
+    return convert_column(v)
 end
 
 convert_column(col) = col
