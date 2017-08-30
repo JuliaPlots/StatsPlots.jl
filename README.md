@@ -53,7 +53,7 @@ iris = dataset("datasets","iris")
 @df iris marginalhist(:PetalLength, :PetalWidth)
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/19213780/a82e34a6-8d42-11e6-8846-80c9f4c48b9c.png)
+![marginalhist](https://user-images.githubusercontent.com/6333339/29869938-fbe08d02-8d7c-11e7-9409-ca47ee3aaf35.png)
 
 ---
 
@@ -67,7 +67,7 @@ or also:
 @df iris corrplot(cols(1:4), grid = false)
 ```
 
-![corrplot](https://user-images.githubusercontent.com/6333339/29830744-fd1fe282-8cda-11e7-86aa-ff5e8033a693.png)
+![corrplot](https://user-images.githubusercontent.com/6333339/29870023-7b07b010-8d7d-11e7-901c-3ef9a6af78bb.png)
 
 
 A correlation plot may also be produced from a matrix:
@@ -105,7 +105,7 @@ singers = RDatasets.dataset("lattice","singer")
 @df singers boxplot!(:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
 ```
 
-![](https://juliaplots.github.io/examples/img/pyplot/pyplot_example_30.png)
+![violin](https://user-images.githubusercontent.com/6333339/29870077-b4242e32-8d7d-11e7-9b18-40a57360936d.png)
 
 Asymmetric violin plots can be created using the `side` keyword (`:both` - default,`:right` or `:left`), e.g.:
 
@@ -116,7 +116,7 @@ singers_moscow[:Height] = singers_moscow[:Height]+5
 @df singers_moscow violin!(:VoicePart,:Height, side=:left, marker=(0.2,:red,stroke(0)), label="Moscow")
 ```
 
-![](https://cloud.githubusercontent.com/assets/2077159/26156938/22ccf0d4-3b18-11e7-9f34-555005437e6c.png)
+![2violin](https://user-images.githubusercontent.com/6333339/29870110-d90ed468-8d7d-11e7-8ebb-008323dff8b8.png)
 
 ---
 

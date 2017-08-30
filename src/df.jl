@@ -9,16 +9,7 @@ If you want to avoid replacing the symbol, escape it with `^`.
 for strings and symbols respectively.
 """
 macro df(d, x)
-    argnames = _argnames(d, x)
-    plot_call = _df(d,x)
-    for i in 1:length(argnames)
-        if isa(argnames[i], Expr) || isa(argnames[i], AbstractArray)
-            insert_kw!(plot_call, :label, argnames[i])
-        else
-            insert_kw!(plot_call, kw_list[i], argnames[i])
-        end
-    end
-    esc(plot_call)
+    esc(_df(d,x))
 end
 
 _df(d, x) = x
@@ -31,13 +22,6 @@ function _df(d, x::Expr)
     end
     return Expr(x.head, _df.(d, x.args)...)
 end
-
-function insert_kw!(x::Expr, s::Symbol, v)
-    index = x.args[2].head == :parameters ? 3 : 2
-    x.args = vcat(x.args[1:index-1], Expr(:kw, s, v), x.args[index:end])
-end
-
-const kw_list = [:xguide, :yguide, :zguide]
 
 function _argnames(d, x::Expr)
     [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]
