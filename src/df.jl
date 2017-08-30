@@ -55,15 +55,7 @@ function select_column(df, s)
 end
 
 convert_missing(el) = el
-
-function convert_missing(el::DataValue{T}) where T
-    try
-        get(el)
-    catch
-        error("Missing data of type $T is not supported")
-    end
-end
-
+convert_missing(el::DataValue{T}) where {T} = get(el, error("Missing data of type $T is not supported"))
 convert_missing(el::DataValue{<:AbstractString}) = get(el, "")
 convert_missing(el::DataValue{Symbol}) = get(el, Symbol())
 convert_missing(el::DataValue{<:Real}) = get(convert(DataValue{Float64}, el), NaN)
