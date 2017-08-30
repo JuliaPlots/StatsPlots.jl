@@ -25,17 +25,23 @@ using StatPlots
 gr(size=(400,300))
 ```
 
-The `DataFrames` support allows passing `DataFrame` columns as symbols. Operations on DataFrame column can be specified using quoted expressions, e.g.
+`DataFrames` are supported thanks to the macro `@df` which allows passing `DataFrame` columns as symbols. Those columns can then be manipulated inside the `plot` call, like normal `Arrays`:
 ```julia
 using DataFrames
 df = DataFrame(a = 1:10, b = 10*rand(10), c = 10 * rand(10))
-plot(df, :a, [:b :c])
-scatter(df, :a, :b, markersize = :(4 * log(:c + 0.1)))
+@df df plot(:a, [:b :c], colour = [:red :blue])
+@df df scatter(:a, :b, markersize = 4 * log.(:c + 0.1))
 ```
-If you find an operation not supported by DataFrames, please open an issue. An alternative approach to the `StatPlots` syntax is to use the [DataFramesMeta](https://github.com/JuliaStats/DataFramesMeta.jl) macro `@with`. Symbols not referring to DataFrame columns must be escaped by `^()` e.g.
+
+In case of ambiguity, symbols not referring to `DataFrame` columns must be escaped by `^()`:
 ```julia
-using DataFramesMeta
-@with(df, plot(:a, [:b :c], colour = ^([:red :blue])))
+df[:red] = rand(10)
+@df df plot(:a, [:b :c], colour = ^([:red :blue]))
+```
+
+The old syntax, passing the `DataFrame` as the first argument to the `plot` call is still supported, but has several limitations (the most important being incompatibility with user recipes):
+```julia
+plot(df, :a, [:b :c], colour = [:red :blue])
 ```
 ---
 
@@ -44,15 +50,27 @@ using DataFramesMeta
 ```julia
 using RDatasets
 iris = dataset("datasets","iris")
-marginalhist(iris, :PetalLength, :PetalWidth)
+@df iris marginalhist(:PetalLength, :PetalWidth)
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/19213780/a82e34a6-8d42-11e6-8846-80c9f4c48b9c.png)
+![marginalhist](https://user-images.githubusercontent.com/6333339/29869938-fbe08d02-8d7c-11e7-9409-ca47ee3aaf35.png)
 
 ---
 
 ## corrplot and cornerplot
 
+```julia
+@df iris corrplot([:SepalLength :SepalWidth :PetalLength :PetalWidth], grid = false)
+```
+or also:
+```julia
+@df iris corrplot(cols(1:4), grid = false)
+```
+
+![corrplot](https://user-images.githubusercontent.com/6333339/29870023-7b07b010-8d7d-11e7-901c-3ef9a6af78bb.png)
+
+
+A correlation plot may also be produced from a matrix:
 
 ```julia
 M = randn(1000,4)
@@ -83,22 +101,22 @@ cornerplot(M, compact=true)
 ```julia
 import RDatasets
 singers = RDatasets.dataset("lattice","singer")
-violin(singers,:VoicePart,:Height,marker=(0.2,:blue,stroke(0)))
-boxplot!(singers,:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
+@df singers violin(:VoicePart,:Height,marker=(0.2,:blue,stroke(0)))
+@df singers boxplot!(:VoicePart,:Height,marker=(0.3,:orange,stroke(2)))
 ```
 
-![](https://juliaplots.github.io/examples/img/pyplot/pyplot_example_30.png)
+![violin](https://user-images.githubusercontent.com/6333339/29870077-b4242e32-8d7d-11e7-9b18-40a57360936d.png)
 
 Asymmetric violin plots can be created using the `side` keyword (`:both` - default,`:right` or `:left`), e.g.:
 
 ```julia
 singers_moscow = deepcopy(singers)
 singers_moscow[:Height] = singers_moscow[:Height]+5
-myPlot = violin(singers,:VoicePart,:Height, side=:right, marker=(0.2,:blue,stroke(0)), label="Scala")
-violin!(singers_moscow,:VoicePart,:Height, side=:left, marker=(0.2,:red,stroke(0)), label="Moscow")
+@df singers violin(:VoicePart,:Height, side=:right, marker=(0.2,:blue,stroke(0)), label="Scala")
+@df singers_moscow violin!(:VoicePart,:Height, side=:left, marker=(0.2,:red,stroke(0)), label="Moscow")
 ```
 
-![](https://cloud.githubusercontent.com/assets/2077159/26156938/22ccf0d4-3b18-11e7-9f34-555005437e6c.png)
+![2violin](https://user-images.githubusercontent.com/6333339/29870110-d90ed468-8d7d-11e7-8ebb-008323dff8b8.png)
 
 ---
 
