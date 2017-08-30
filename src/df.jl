@@ -49,21 +49,21 @@ function select_column(df, s)
     v = try
             [getfield(i, s) for i in getiterator(df)]
         catch
-            s
+            return s
         end
-    return convert_column(v)
+    return convert_missing.(v)
 end
 
-convert_column(col) = col
+convert_missing(el) = el
 
-function convert_column(col::AbstractArray{T}) where T<:DataValue
+function convert_missing(el::DataValue{T}) where T
     try
-        get.(col)
+        get(el)
     catch
         error("Missing data of type $T is not supported")
     end
 end
 
-convert_column(col::AbstractArray{DataValue{<:AbstractString}}) = get.(col, "")
-convert_column(col::AbstractArray{DataValue{Symbol}}) = get.(col, Symbol())
-convert_column(col::AbstractDataArray{DataValue{<:Real}}) = get.(convert.(DataValue{Float64}, col), NaN)
+convert_missing(el::DataValue{<:AbstractString}) = get(el, "")
+convert_missing(el::DataValue{Symbol}) = get(el, Symbol())
+convert_missing(el::DataValue{<:Real}) = get(convert(DataValue{Float64}, el), NaN)
