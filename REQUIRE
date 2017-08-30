@@ -7,3 +7,4 @@ Distributions
 DataFrames
 KernelDensity
 Loess
+IterableTables

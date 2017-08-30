@@ -7,6 +7,8 @@ import Plots: _cycle
 using StatsBase
 using Distributions
 using DataFrames
+using IterableTables
+using DataValues
 
 import KernelDensity
 import Loess

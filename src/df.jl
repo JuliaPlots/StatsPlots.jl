@@ -18,7 +18,7 @@ function _df(d, x::Expr)
     (x.head == :quote) && return :(StatPlots.select_column($d, $x))
     if x.head == :call
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
-        x.args[1] == :cols && return :(hcat((StatPlots.convert_column($d[i]) for i in $(x.args[2]))...))
+        x.args[1] == :cols && return :(hcat((StatPlots.select_column($d, i) for i in $(x.args[2]))...))
     end
     return Expr(x.head, _df.(d, x.args)...)
 end
@@ -45,18 +45,25 @@ end
 
 stringify(x) = filter(t -> t != ':', string(x))
 
-select_column(df, s) = haskey(df, s) ? convert_column(df[s]) : s
+function select_column(df, s)
+    iterator = getiterator(df)
+    if s in fieldnames(next(iterator, 1)[1]) || isa(s, Integer)
+        return convert_column([getfield(i, s) for i in iterator])
+    else
+        return s
+    end
+end
 
 convert_column(col) = col
 
-function convert_column(col::AbstractDataArray{T}) where T
+function convert_column(col::AbstractArray{T}) where T<:DataValue
     try
-        convert(Array, col)
+        get.(col)
     catch
         error("Missing data of type $T is not supported")
     end
 end
 
-convert_column(col::AbstractDataArray{<:AbstractString}) = convert(Array, col, "")
-convert_column(col::AbstractDataArray{Symbol}) = convert(Array, col, Symbol())
-convert_column(col::AbstractDataArray{<:Real}) = convert(Array, convert(DataArray{Float64}, col), NaN)
+convert_column(col::AbstractArray{DataValue{<:AbstractString}}) = get.(col, "")
+convert_column(col::AbstractArray{DataValue{Symbol}}) = get.(col, Symbol())
+convert_column(col::AbstractDataArray{DataValue{<:Real}}) = get.(convert.(DataValue{Float64}, col), NaN)
