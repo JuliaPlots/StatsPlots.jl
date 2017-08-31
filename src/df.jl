@@ -9,19 +9,31 @@ If you want to avoid replacing the symbol, escape it with `^`.
 for strings and symbols respectively.
 """
 macro df(d, x)
-    esc(_df(d,x))
+    syms = Expr[]
+    vars = Symbol[]
+    plot_call = _df(d, x, syms, vars)
+    compute_vars = Expr(:(=), Expr(:tuple, vars...),
+        Expr(:call, :(StatPlots.compute_all), d, syms...))
+    esc(Expr(:block, compute_vars, plot_call))
 end
 
-_df(d, x) = x
+_df(d, x, syms, vars) = x
 
-function _df(d, x::Expr)
-    (x.head == :quote) && return :(StatPlots.select_column($d, $x))
+function _df(d, x::Expr, syms, vars)
+    if x.head == :quote
+        new_var = gensym(x.args[1])
+        push!(syms, x)
+        push!(vars, new_var)
+        return new_var
+    end
     if x.head == :call
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         x.args[1] == :cols && return :(hcat((StatPlots.select_column($d, i) for i in $(x.args[2]))...))
     end
-    return Expr(x.head, _df.(d, x.args)...)
+    return Expr(x.head, (_df(d, arg, syms, vars) for arg in x.args)...)
 end
+
+compute_all(d, s...) = [StatPlots.select_column(d, ss) for ss in s]
 
 function _argnames(d, x::Expr)
     [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]
