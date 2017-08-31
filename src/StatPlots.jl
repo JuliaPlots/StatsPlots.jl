@@ -8,7 +8,8 @@ using StatsBase
 using Distributions
 using DataFrames
 using IterableTables
-using DataValues
+import DataValues: DataValue
+import TableTraits: column_types, column_names
 
 import KernelDensity
 import Loess

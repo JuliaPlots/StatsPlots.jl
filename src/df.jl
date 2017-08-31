@@ -46,12 +46,9 @@ end
 stringify(x) = filter(t -> t != ':', string(x))
 
 function select_column(df, s)
-    v = try
-            [getfield(i, s) for i in getiterator(df)]
-        catch
-            return s
-        end
-    return convert_missing.(v)
+    iter = IterableTables.getiterator(df)
+    isa(s, Symbol) && !(s in column_names(iter)) && return s
+    [convert_missing(getfield(i, s)) for i in iter]
 end
 
 convert_missing(el) = el
