@@ -43,7 +43,7 @@ ea_binnumber(y, bin::Symbol) = Plots._auto_binning_nbins((y,), 1, mode = bin)
 @recipe function f(::Type{Val{:ea_histogram}}, x, y, z)
     bin = ea_binnumber(y, d[:bins])
     bins := quantile(y, linspace(0,1,bin+1))
-    normalize := :density
+    normalize --> :density
     seriestype := :barhist
     ()
 end
