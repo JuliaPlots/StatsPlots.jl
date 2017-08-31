@@ -48,7 +48,7 @@ not_kw(x::Expr) = !(x.head in [:kw, :parameters])
 _arg2string(d, x) = stringify(x)
 function _arg2string(d, x::Expr)
     if x.head == :call && x.args[1] == :cols
-        return :(reshape([(DataFrames.names($d)[i]) for i in $(x.args[2])], 1, :))
+        return :(reshape([StatPlots.compute_name($d, i) for i in $(x.args[2])], 1, :))
     elseif x.head == :call && x.args[1] == :hcat
         return hcat(stringify.(x.args[2:end])...)
     elseif x.head == :hcat
@@ -60,7 +60,7 @@ end
 
 stringify(x) = filter(t -> t != ':', string(x))
 
-#compute_all(d, s...) = [StatPlots.select_column(d, ss) for ss in s]
+compute_name(df, i) = column_names(IterableTables.getiterator(df))[i]
 
 function compute_all(df, syms...)
     iter = IterableTables.getiterator(df)
