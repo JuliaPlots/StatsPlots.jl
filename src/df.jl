@@ -33,8 +33,6 @@ function _df(d, x::Expr, syms, vars)
     return Expr(x.head, (_df(d, arg, syms, vars) for arg in x.args)...)
 end
 
-compute_all(d, s...) = [StatPlots.select_column(d, ss) for ss in s]
-
 function _argnames(d, x::Expr)
     [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]
 end
@@ -56,6 +54,21 @@ function _arg2string(d, x::Expr)
 end
 
 stringify(x) = filter(t -> t != ':', string(x))
+
+#compute_all(d, s...) = [StatPlots.select_column(d, ss) for ss in s]
+
+function compute_all(df, syms...)
+    iter = IterableTables.getiterator(df)
+    type_info = Dict(zip(column_names(iter), column_types(iter)))
+    is_col = [s in column_names(iter) for s in syms]
+    cols = Tuple(s in column_names(iter) ? Array{type_info[s]}(0) : s for s in syms)
+    for i in iter
+        for ind in eachindex(syms)
+            is_col[ind] && push!(cols[ind], getfield(i, syms[ind]))
+        end
+    end
+    return Tuple(convert_missing.(t) for t in cols)
+end
 
 function select_column(df, s)
     iter = IterableTables.getiterator(df)
