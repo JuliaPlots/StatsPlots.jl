@@ -9,11 +9,10 @@ If you want to avoid replacing the symbol, escape it with `^`.
 for strings and symbols respectively.
 """
 macro df(d, x)
-    syms = Expr[]
+    syms = Any[]
     vars = Symbol[]
     plot_call = _df(d, x, syms, vars)
-    compute_vars = Expr(:(=), Expr(:tuple, vars...),
-        Expr(:call, :(StatPlots.compute_all), d, syms...))
+    compute_vars = Expr(:(=), Expr(:tuple, vars...), Expr(:call, :(StatPlots.compute_all), d, syms...))
     esc(Expr(:block, compute_vars, plot_call))
 end
 
@@ -28,7 +27,13 @@ function _df(d, x::Expr, syms, vars)
     end
     if x.head == :call
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
-        x.args[1] == :cols && return :(hcat((StatPlots.select_column($d, i) for i in $(x.args[2]))...))
+        if x.args[1] == :cols
+            range = eval(x.args[2])
+            new_vars = gensym.(string.(range))
+            append!(syms, range)
+            append!(vars, new_vars)
+            return Expr(:hcat, new_vars...)
+        end
     end
     return Expr(x.head, (_df(d, arg, syms, vars) for arg in x.args)...)
 end
@@ -60,20 +65,14 @@ stringify(x) = filter(t -> t != ':', string(x))
 function compute_all(df, syms...)
     iter = IterableTables.getiterator(df)
     type_info = Dict(zip(column_names(iter), column_types(iter)))
-    is_col = [s in column_names(iter) for s in syms]
-    cols = Tuple(s in column_names(iter) ? Array{type_info[s]}(0) : s for s in syms)
+    cols = Tuple(isa(s, Integer) ? Array{column_types(iter)[s]}(0) :
+        s in column_names(iter) ? Array{type_info[s]}(0) : s for s in syms)
     for i in iter
-        for ind in eachindex(syms)
-            is_col[ind] && push!(cols[ind], getfield(i, syms[ind]))
+        for ind in 1:length(syms)
+            isa(cols[ind], Symbol) || push!(cols[ind], getfield(i, syms[ind]))
         end
     end
     return Tuple(convert_missing.(t) for t in cols)
-end
-
-function select_column(df, s)
-    iter = IterableTables.getiterator(df)
-    isa(s, Symbol) && !(s in column_names(iter)) && return s
-    [convert_missing(getfield(i, s)) for i in iter]
 end
 
 convert_missing(el) = el
