@@ -1,5 +1,7 @@
 @userplot GroupedBar
 
+RecipesBase.group_as_matrix(g::GroupedBar) = true
+
 grouped_xy(x::AbstractVector, y::AbstractMatrix) = x, y
 grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
 
