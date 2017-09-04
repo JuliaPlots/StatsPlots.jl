@@ -60,18 +60,15 @@ end
 
 stringify(x) = filter(t -> t != ':', string(x))
 
-compute_name(df, i) = column_names(IterableTables.getiterator(df))[i]
+compute_name(df, i) = column_names(getiterator(df))[i]
 
 function compute_all(df, syms...)
-    iter = IterableTables.getiterator(df)
-    type_info = Dict(zip(column_names(iter), column_types(iter)))
-    cols = Tuple(isa(s, Integer) ? Array{column_types(iter)[s]}(0) :
-        s in column_names(iter) ? Array{type_info[s]}(0) : s for s in syms)
-    for i in iter
-        for ind in 1:length(syms)
-            isa(cols[ind], Symbol) || push!(cols[ind], getfield(i, syms[ind]))
-        end
-    end
+    isiterabletable(df) || error("Only iterable tables are supported")
+    iter = getiterator(df)
+    name2index = Dict(zip(column_names(iter), 1:length(column_names(iter))))
+    col_index = [isa(s, Integer) ? s : get(name2index, s, 0) for s in syms]
+    cols = convert(Array{Any}, collect(syms))
+    cols[col_index .!= 0] = create_columns_from_iterabletable(df, filter(t -> t != 0, col_index))[1]
     return Tuple(convert_missing.(t) for t in cols)
 end
 
