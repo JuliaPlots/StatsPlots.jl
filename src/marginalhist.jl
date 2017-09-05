@@ -1,7 +1,7 @@
 @shorthands marginalhist
 
 @recipe function f(::Type{Val{:marginalhist}}, plt::AbstractPlot; density = false)
-    x, y = d[:x], d[:y]
+    x, y = plotattributes[:x], plotattributes[:y]
 
     # set up the subplots
     legend --> false
@@ -24,8 +24,8 @@
     ticks := nothing
     guide := ""
     foreground_color_border := nothing
-    fillcolor --> Plots.fg_color(d)
-    linecolor --> Plots.fg_color(d)
+    fillcolor --> Plots.fg_color(plotattributes)
+    linecolor --> Plots.fg_color(plotattributes)
 
     if density
         trim := true
@@ -35,7 +35,7 @@
     end
 
 
-    bns = get(d, :bins, nothing)
+    bns = get(plotattributes, :bins, nothing)
 
     # upper histogram
     @series begin
