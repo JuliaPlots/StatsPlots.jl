@@ -2,6 +2,8 @@
 
 @recipe function f(::Type{Val{:marginalhist}}, plt::AbstractPlot; density = false)
     x, y = d[:x], d[:y]
+    bns = get(d, :bins, :auto)
+    edges1, edges2 = Plots._hist_edges((x,y), bns)
 
     # set up the subplots
     legend --> false
@@ -18,6 +20,7 @@
         right_margin --> 0mm
         top_margin --> 0mm
         subplot := 2
+        bins := (edges1, edges2)
     end
 
     # these are common to both marginal histograms
@@ -34,16 +37,11 @@
         seriestype := :histogram
     end
 
-
-    bns = get(d, :bins, nothing)
-
     # upper histogram
     @series begin
         subplot := 1
         bottom_margin --> 0mm
-        if bns != nothing && length(bns) == 2
-            bins := bns[1]
-        end
+        bins := edges1
         y := x
     end
 
@@ -52,9 +50,7 @@
         orientation := :h
         subplot := 3
         left_margin --> 0mm
-        if bns != nothing && length(bns) == 2
-            bins := bns[2]
-        end
+        bins := edges2
         y := y
     end
 end
