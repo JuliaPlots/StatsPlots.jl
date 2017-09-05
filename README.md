@@ -120,6 +120,24 @@ singers_moscow[:Height] = singers_moscow[:Height]+5
 
 ---
 
+## Equal-area histograms
+
+The ea-histogram is an alternative histogram implementation, where every 'box' in
+the histogram contains the same number of sample points and all boxes have the same
+area. Areas with a higher density of points thus get higher boxes. This type of
+histogram shows spikes well, but may oversmooth in the tails. The y axis is not
+intuitively interpretable.
+
+```julia
+a = [randn(100); randn(100)+3; randn(100)/2+3]
+ea_histogram(a, bins = :scott, fillalpha = 0.4)
+```
+
+<img width="487" alt="equal area histogram"
+src ="https://user-images.githubusercontent.com/8429802/29754490-8d1b01f6-8b86-11e7-9f86-e1063a88dfd8.png">
+
+---
+
 ## Distributions
 
 ```julia
