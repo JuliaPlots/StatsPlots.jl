@@ -7,6 +7,10 @@ import Plots: _cycle
 using StatsBase
 using Distributions
 using DataFrames
+import IterableTables
+import DataValues: DataValue
+import TableTraits: column_types, column_names, getiterator, isiterabletable
+import TableTraitsUtils: create_columns_from_iterabletable
 
 import KernelDensity
 import Loess
