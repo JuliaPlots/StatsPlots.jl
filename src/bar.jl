@@ -1,5 +1,9 @@
 @userplot GroupedBar
 
+if isdefined(Plots, :group_as_matrix)
+    Plots.group_as_matrix(g::GroupedBar) = true
+end
+
 grouped_xy(x::AbstractVector, y::AbstractMatrix) = x, y
 grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
 
