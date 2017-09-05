@@ -11,14 +11,15 @@ for strings and symbols respectively.
 macro df(d, x)
     syms = Any[]
     vars = Symbol[]
-    plot_call = _df(d, x, syms, vars)
-    compute_vars = Expr(:(=), Expr(:tuple, vars...), Expr(:call, :(StatPlots.compute_all), d, syms...))
+    plot_call = parse_iterabletable_call!(d, x, syms, vars)
+    compute_vars = Expr(:(=), Expr(:tuple, vars...),
+        Expr(:call, :(StatPlots.extract_columns_from_iterabletable), d, syms...))
     esc(Expr(:block, compute_vars, plot_call))
 end
 
-_df(d, x, syms, vars) = x
+parse_iterabletable_call!(d, x, syms, vars) = x
 
-function _df(d, x::Expr, syms, vars)
+function parse_iterabletable_call!(d, x::Expr, syms, vars)
     if x.head == :quote
         new_var = gensym(x.args[1])
         push!(syms, x)
@@ -35,7 +36,7 @@ function _df(d, x::Expr, syms, vars)
             return Expr(:hcat, new_vars...)
         end
     end
-    return Expr(x.head, (_df(d, arg, syms, vars) for arg in x.args)...)
+    return Expr(x.head, (parse_iterabletable_call!(d, arg, syms, vars) for arg in x.args)...)
 end
 
 function _argnames(d, x::Expr)
@@ -62,7 +63,7 @@ stringify(x) = filter(t -> t != ':', string(x))
 
 compute_name(df, i) = column_names(getiterator(df))[i]
 
-function compute_all(df, syms...)
+function extract_columns_from_iterabletable(df, syms...)
     isiterabletable(df) || error("Only iterable tables are supported")
     iter = getiterator(df)
     name2index = Dict(zip(column_names(iter), 1:length(column_names(iter))))
