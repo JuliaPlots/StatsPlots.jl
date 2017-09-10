@@ -25,12 +25,14 @@ using StatPlots
 gr(size=(400,300))
 ```
 
-`DataFrames` are supported thanks to the macro `@df` which allows passing `DataFrame` columns as symbols. Those columns can then be manipulated inside the `plot` call, like normal `Arrays`:
+Table-like data structures, including `DataFrames`, `IndexedTables`, `DataStreams`, etc... (see [here](https://github.com/davidanthoff/IterableTables.jl) for an exhaustive list), are supported thanks to the macro `@df` which allows passing columns as symbols. Those columns can then be manipulated inside the `plot` call, like normal `Arrays`:
 ```julia
-using DataFrames
+using DataFrames, IndexedTables
 df = DataFrame(a = 1:10, b = 10*rand(10), c = 10 * rand(10))
 @df df plot(:a, [:b :c], colour = [:red :blue])
 @df df scatter(:a, :b, markersize = 4 * log.(:c + 0.1))
+t = IndexedTable(Columns(a = collect(1:10)), Columns(b = rand(10)))
+@df t scatter(2 * :b)
 ```
 
 In case of ambiguity, symbols not referring to `DataFrame` columns must be escaped by `^()`:
@@ -171,6 +173,11 @@ groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7)
 
 ![tmp](https://cloud.githubusercontent.com/assets/933338/18962092/673f6c78-863d-11e6-9ee9-8ca104e5d2a3.png)
 
+The `group` syntax is also possible in combination with `groupedbar`:
+
+```julia
+groupedbar(rand(6), group = [1, 1, 2, 2, 3, 3])
+```
 
 ## groupapply for population analysis
 There is a groupapply function that splits the data across a keyword argument "group", then applies "summarize" to get average and variability of a given analysis (density, cumulative, hazard rate and local regression are supported so far, but one can also add their own function). To get average and variability there are 3 ways:
