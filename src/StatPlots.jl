@@ -15,7 +15,7 @@ import TableTraitsUtils: create_columns_from_iterabletable
 import KernelDensity
 import Loess
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
-@recipe f(k::KernelDensity.BivariateKDE) = k.x, k.y, k.density
+@recipe f(k::KernelDensity.BivariateKDE) = k.x, k.y, k.density.'
 
 @shorthands cdensity
 
