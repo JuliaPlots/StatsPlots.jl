@@ -16,6 +16,10 @@ end
 
 
 @recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both)
+    # if only y is provided, then x will be UnitRange 1:length(y)
+    if typeof(x) <: UnitRange
+        x = [getindex(x, d[:series_plotindex])]
+    end
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     bw = d[:bar_width]
