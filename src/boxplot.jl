@@ -9,10 +9,6 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     if typeof(x) <: UnitRange
         x = [getindex(x, d[:series_plotindex])]
     end
-    # x values need to be categories
-    if !(typeof(x) in (Array{String,1}, Array{Symbol,1}))
-        x = string.(x)
-    end
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     warning = false
