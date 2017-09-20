@@ -41,6 +41,16 @@ df[:red] = rand(10)
 @df df plot(:a, [:b :c], colour = ^([:red :blue]))
 ```
 
+The `@df` macro plays nicely with the new syntax of the [Query.jl](https://github.com/davidanthoff/Query.jl) data manipulation package (v0.7 and above), in that a plot command can be added at the end of a query pipeline, without having to explicitly collect the outcome of the query first:
+
+```julia
+using Query, StatPlots
+df |>
+    @where(_.a > 5) |>
+    @select({_.b, d = _.c-10}) |>
+    @df scatter(:b, :d)
+```
+
 The old syntax, passing the `DataFrame` as the first argument to the `plot` call is still supported, but has several limitations (the most important being incompatibility with user recipes):
 ```julia
 plot(df, :a, [:b :c], colour = [:red :blue])
@@ -176,7 +186,7 @@ groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7)
 The `group` syntax is also possible in combination with `groupedbar`:
 
 ```julia
-groupedbar(rand(6), group = [1, 1, 2, 2, 3, 3])
+groupedbar([1, 2, 1, 2, 1, 2], rand(6), group = [1, 1, 2, 2, 3, 3])
 ```
 
 ## groupapply for population analysis
