@@ -17,6 +17,16 @@ macro df(d, x)
     esc(Expr(:block, compute_vars, plot_call))
 end
 
+"""
+    `@df x`
+
+Curried version of `@df d x`. Outputs an anonymous function `d -> @df d x`.
+"""
+macro df(x)
+    i = gensym()
+    :($i -> @df($i, $x))
+end
+
 parse_iterabletable_call!(d, x, syms, vars) = x
 
 function parse_iterabletable_call!(d, x::Expr, syms, vars)
