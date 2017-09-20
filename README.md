@@ -44,12 +44,11 @@ df[:red] = rand(10)
 The `@df` macro plays nicely with the new syntax of the [Query.jl](https://github.com/davidanthoff/Query.jl) data manipulation package (v0.7 and above), in that a plot command can be added at the end of a query pipeline, without having to explicitly collect the outcome of the query first:
 
 ```julia
-using Lazy, Query, StatPlots
-@> df begin
-    @where _.a > 5
-    @select {_.b, d = _.c-10}
+using Query, StatPlots
+df |>
+    @where(_.a > 5) |>
+    @select({_.b, d = _.c-10}) |>
     @df scatter(:b, :d)
-end
 ```
 
 The old syntax, passing the `DataFrame` as the first argument to the `plot` call is still supported, but has several limitations (the most important being incompatibility with user recipes):
