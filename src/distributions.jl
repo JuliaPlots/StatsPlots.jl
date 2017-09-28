@@ -41,8 +41,11 @@ end
     h.qx, h.qy
 end
 
+loc(D::Type{T}, x) where T<:Distribution = fit(D, x), x
+loc(D, x) = D, x
+
 @userplot QQPlot
-@recipe f(h::QQPlot) = qqbuild(h.args[1], h.args[2])
+@recipe f(h::QQPlot) = qqbuild(loc(h.args[1], h.args[2])...)
 
 @userplot QQNorm
-@recipe f(h::QQNorm) = qqbuild(Normal(), h.args[1])
+@recipe f(h::QQNorm) = QQPlot((Normal, h.args[1]))
