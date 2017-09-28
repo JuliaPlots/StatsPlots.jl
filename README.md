@@ -176,11 +176,12 @@ x = rand(Normal(), 100)
 y = rand(Cauchy(), 100)
 
 plot(
- qqplot(x, y),
- qqnorm(x, smooth = true)
+ qqplot(x, y, qqline = :fit), # qqplot of two samples, show a fitted regression line
+ qqplot(Cauchy, y),           # compare with a Cauchy distribution fitted to y; pass an instance (e.g. Normal(0,1)) to compare with a specific distribution
+ qqnorm(x, qqline = :R)       # the :R default line passes through the 1st and 3rd quartiles of the distribution
 )
 ```
-<img width="788" alt="skaermbillede 2017-09-28 kl 08 36 56" src="https://user-images.githubusercontent.com/8429802/30963544-1fa789ec-a44e-11e7-9d40-2ef4f33463e6.png">
+<img width="1185" alt="skaermbillede 2017-09-28 kl 22 46 28" src="https://user-images.githubusercontent.com/8429802/30989741-0c4f9dac-a49f-11e7-98ff-028192a8d5b1.png">
 
 ## Grouped Bar plots
 
