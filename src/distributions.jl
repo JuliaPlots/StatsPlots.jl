@@ -17,7 +17,25 @@ end
 #-----------------------------------------------------------------------------
 # qqplots
 
-@recipe function f(h::QQPair)
+@recipe function f(h::QQPair; qqline = :quantile)
+    if qqline == :fit
+        smooth --> true
+    elseif qqline in (:identity, :quantile)
+        if qqline == :identity
+            xs = ys = [extrema(h.qx)...]
+        else
+            quantx, quanty = quantile(h.qx, [0.25, 0.75]), quantile(h.qy, [0.25, 0.75])
+            slp = diff(quanty) ./ diff(quantx)
+            xs = [extrema(h.qx)...]
+            ys = quanty .+ slp .* (xs .- quantx)
+        end
+        @series begin
+            primary := false
+            seriestype := :path
+            xs, ys
+        end
+    end
+
     seriestype --> :scatter
     legend --> false
     h.qx, h.qy
