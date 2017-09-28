@@ -176,11 +176,11 @@ x = rand(Normal(), 100)
 y = rand(Cauchy(), 100)
 
 plot(
- qqnorm(x),
- qqplot(x, y)
+ qqplot(x, y),
+ qqnorm(x, smooth = true)
 )
 ```
-<img width="788" alt="skaermbillede 2017-09-28 kl 08 36 56" src="https://user-images.githubusercontent.com/8429802/30952479-4f4dc18c-a428-11e7-9856-0601cb420fba.png">
+<img width="788" alt="skaermbillede 2017-09-28 kl 08 36 56" src="https://user-images.githubusercontent.com/8429802/30963544-1fa789ec-a44e-11e7-9d40-2ef4f33463e6.png">
 
 ## Grouped Bar plots
 
