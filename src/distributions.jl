@@ -17,19 +17,20 @@ end
 #-----------------------------------------------------------------------------
 # qqplots
 
-@recipe function f(h::QQPair; qqline = :quantile)
-    if qqline == :fit
-        smooth --> true
-    elseif qqline in (:identity, :quantile)
+@recipe function f(h::QQPair; qqline = :identity)
     if qqline in (:fit, :quantile, :identity, :R)
+        xs = [extrema(h.qx)...]
         if qqline == :identity
-            xs = ys = [extrema(h.qx)...]
-        else
+            ys = xs
+        elseif qqline == :fit
+            itc, slp = linreg(h.qx, h.qy)
+            ys = slp .* xs .+ itc
+        else # if qqline == :quantile || qqline == :R
             quantx, quanty = quantile(h.qx, [0.25, 0.75]), quantile(h.qy, [0.25, 0.75])
             slp = diff(quanty) ./ diff(quantx)
-            xs = [extrema(h.qx)...]
             ys = quanty .+ slp .* (xs .- quantx)
         end
+
         @series begin
             primary := false
             seriestype := :path
