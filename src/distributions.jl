@@ -21,6 +21,7 @@ end
     if qqline == :fit
         smooth --> true
     elseif qqline in (:identity, :quantile)
+    if qqline in (:fit, :quantile, :identity, :R)
         if qqline == :identity
             xs = ys = [extrema(h.qx)...]
         else
