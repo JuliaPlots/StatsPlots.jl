@@ -13,3 +13,18 @@ end
 @recipe function f(::Type{T}, dist::T; func = pdf) where T<:Distribution
     xi -> func(dist, xi)
 end
+
+#-----------------------------------------------------------------------------
+# qqplots
+
+@recipe function f(h::QQPair)
+    seriestype --> :scatter
+    legend --> false
+    h.qx, h.qy
+end
+
+@userplot QQPlot
+@recipe f(h::QQPlot) = qqbuild(h.args[1], h.args[2])
+
+@userplot QQNorm
+@recipe f(h::QQNorm) = qqbuild(Normal(), h.args[1])
