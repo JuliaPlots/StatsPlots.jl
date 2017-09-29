@@ -1,4 +1,5 @@
 @userplot GroupedBar
+GroupedBar(args...) = GroupedBar(args)
 
 if isdefined(Plots, :group_as_matrix)
     Plots.group_as_matrix(g::GroupedBar) = true
@@ -6,9 +7,20 @@ end
 
 grouped_xy(x::AbstractVector, y::AbstractMatrix) = x, y
 grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
+grouped_xy(y::AbstractVector) = 1:length(y), reshape(y, length(y), 1)
+
+# handle grouping by DataFrame column
+function Plots.extractGroupArgs(group::Symbol, g::GroupedBar, args...)
+    Plots.extractGroupArgs(collect(g.args[1][group]))
+end
 
 @recipe function f(g::GroupedBar)
+    if isa(g.args[1], DataFrame)
+        d, g.args = processDF(d, g.args[1], g.args[2:end]...)
+    end
     x, y = grouped_xy(g.args...)
+    @show x
+    @show y
 
     nr, nc = size(y)
     isstack = pop!(d, :bar_position, :dodge) == :stack
