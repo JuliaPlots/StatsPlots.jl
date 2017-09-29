@@ -167,6 +167,22 @@ bar!(dist, func=cdf, alpha=0.3)
 
 ![](https://cloud.githubusercontent.com/assets/933338/16718720/729b6fea-46f0-11e6-9bff-fdf2541ce305.png)
 
+### Quantile-Quantile plots
+
+The `qqplot` function compares the quantiles of two distributions, and accepts either a vector of sample values or a `Distribution`. The `qqnorm` is a shorthand for comparing a distribution to the normal distribution. If the distributions are similar the points will be on a straight line.
+
+```julia
+x = rand(Normal(), 100)
+y = rand(Cauchy(), 100)
+
+plot(
+ qqplot(x, y, qqline = :fit), # qqplot of two samples, show a fitted regression line
+ qqplot(Cauchy, y),           # compare with a Cauchy distribution fitted to y; pass an instance (e.g. Normal(0,1)) to compare with a specific distribution
+ qqnorm(x, qqline = :R)       # the :R default line passes through the 1st and 3rd quartiles of the distribution
+)
+```
+<img width="1185" alt="skaermbillede 2017-09-28 kl 22 46 28" src="https://user-images.githubusercontent.com/8429802/30989741-0c4f9dac-a49f-11e7-98ff-028192a8d5b1.png">
+
 ## Grouped Bar plots
 
 ```julia
