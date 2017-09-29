@@ -5,6 +5,10 @@
 notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
 @recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true, whisker_width=:match)
+    # if only y is provided, then x will be UnitRange 1:length(y)
+    if typeof(x) <: UnitRange
+        x = [getindex(x, d[:series_plotindex])]
+    end
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     warning = false
