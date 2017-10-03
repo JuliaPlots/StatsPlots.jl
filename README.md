@@ -205,58 +205,21 @@ The `group` syntax is also possible in combination with `groupedbar`:
 groupedbar([1, 2, 1, 2, 1, 2], rand(6), group = [1, 1, 2, 2, 3, 3])
 ```
 
-## groupapply for population analysis
-There is a groupapply function that splits the data across a keyword argument "group", then applies "summarize" to get average and variability of a given analysis (density, cumulative, hazard rate and local regression are supported so far, but one can also add their own function). To get average and variability there are 3 ways:
+## GroupedErrors.jl for population analysis
 
-- `compute_error = (:across, col_name)`, where the data is split according to column `col_name` before being summarized. `compute_error = :across` splits across all observations. Default summary is `(mean, sem)` but it can be changed with keyword `summarize` to any pair of functions.
+Population analysis on a table-like data structures can be done using the [GroupedErrors](https://github.com/piever/GroupedErrors.jl) package.
 
-- `compute_error = (:bootstrap, n_samples)`, where `n_samples` fake datasets distributed like the real dataset are generated and then summarized (nonparametric
-<a href="https://en.wikipedia.org/wiki/Bootstrapping_(statistics)">bootstrapping</a>). `compute_error = :bootstrap` defaults to `compute_error = (:bootstrap, 1000)`. Default summary is `(mean, std)`. This method will work with any analysis but is computationally very expensive.
+This external package, in combination with StatPlots, greatly simplifies the creation of two types of plots:
 
-- `compute_error = :none`, where no error is computed or displayed and the analysis is carried out normally.
+### 1. Subject by subject plot (generally a scatter plot)
 
-The local regression uses [Loess.jl](https://github.com/JuliaStats/Loess.jl) and the density plot uses [KernelDensity.jl](https://github.com/JuliaStats/KernelDensity.jl). In case of categorical x variable, these function are computed by splitting the data across the x variable and then computing the density/average per bin. The choice of continuous or discrete axis can be forced via `axis_type = :continuous` or `axis_type = :discrete`. `axis_type = :binned` will bin the x axis in equally spaced bins (number given by the `nbins` keyword, defaulting to `30`), and continue the analysis with the binned data, treating it as discrete.
+Some simple summary statistics are computed for each experimental subject (mean is default but any scalar valued function would do) and then plotted against some other summary statistics, potentially splitting by some categorical experimental variable.
 
-Example use:
+### 2. Population plot (generally a ribbon plot in continuous case, or bar plot in discrete case)
 
-```julia
-using DataFrames
-import RDatasets
-using StatPlots
-gr()
-school = RDatasets.dataset("mlmRev","Hsb82");
-grp_error = groupapply(:cumulative, school, :MAch; compute_error = (:across,:School), group = :Sx)
-plot(grp_error, line = :path, legend = :topleft)
-```
-<img width="494" alt="screenshot 2016-12-19 12 28 27" src="https://user-images.githubusercontent.com/6333339/29280675-1a8df192-8114-11e7-878e-754ecdd9184d.png">
-
-Keywords for loess or kerneldensity can be given to groupapply:
-
-```julia
-grp_error = groupapply(:density, school, :CSES; bandwidth = 0.2, compute_error = (:bootstrap,500), group = :Minrty)
-plot(grp_error, line = :path)
-```
-
-<img width="487" alt="screenshot 2017-01-10 18 36 48" src="https://user-images.githubusercontent.com/6333339/29280692-2bc1f97c-8114-11e7-932e-a86156d36cf5.png">
+Some statistical analysis is computed at the single subject level (for example the density/hazard/cumulative of some variable, or the expected value of a variable given another) and the analysis is summarized across subjects (taking for example mean and s.e.m), potentially splitting by some categorical experimental variable.
 
 
-The bar plot
+For more information please refer to the [README](https://github.com/piever/GroupedErrors.jl/blob/master/README.md).
 
-```julia
-pool!(school, :Sx)
-grp_error = groupapply(school, :Sx, :MAch; compute_error = :across, group = :Minrty)
-plot(grp_error, line = :bar)
-```
-<img width="489" alt="screenshot 2017-01-10 18 20 51" src="https://user-images.githubusercontent.com/6333339/29280710-3998b310-8114-11e7-9a24-a93d5727cc52.png">
-
-Density bar plot of binned data versus continuous estimation:
-
-```julia
-grp_error = groupapply(:density, school, :MAch; axis_type = :binned, nbins = 40, group = :Minrty)
-plot(grp_error, line = :bar, color = ["orange" "turquoise"], legend = :topleft)
-
-grp_error = groupapply(:density, school, :MAch; axis_type = :continuous, group = :Minrty)
-plot!(grp_error, line = :path, color = ["orange" "turquoise"], label = "")
-```
-
-![density](https://user-images.githubusercontent.com/6333339/29373096-06317b50-82a5-11e7-900f-d6c183977ab8.png)
+A GUI based on QML and the GR Plots.jl backend to simplify the use of StatPlots.jl and GroupedErrors.jl even further can be found [here](https://github.com/piever/PlugAndPlot.jl) (usable but still in alpha stage).
