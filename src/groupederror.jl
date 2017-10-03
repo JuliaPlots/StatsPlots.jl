@@ -137,6 +137,7 @@ are label of x axis variable and extra arguments for function `f`. `kwargs...` a
 to `f`
 """
 function get_groupederror(trend,variation, f, splitdata::GroupedDataFrame, xvalues::AbstractArray, args...; kwargs...)
+    Base.depwarn("`get_groupederror` is deprecated: its functionality has been moved to the GroupedErrors.jl package", :get_groupederror)
     v = Array{Float64}(length(xvalues), length(splitdata));
     for i in 1:length(splitdata)
         v[:,i] = f(splitdata[i],xvalues, args...; kwargs...)
@@ -225,6 +226,7 @@ function groupapply(f::Function, df, args...;
                     summarize = (get_symbol(compute_error) == :bootstrap) ? (mean, std) : (mean, sem),
                     nbins = 30,
                     kwargs...)
+    Base.depwarn("`groupapply` is deprecated: its functionality has been moved to the GroupedErrors.jl package", :groupapply)
     added_cols = Symbol[]
     if !(eltype(df[args[1]])<:Real)
         (axis_type in [:discrete, :auto]) || warn("Changing to discrete axis, x values are not real numbers!")
@@ -326,6 +328,7 @@ Equivalent to `groupapply(:locreg, df::AbstractDataFrame, x, y; kwargs...)`
 groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, y; kwargs...)
 
 @recipe function f(g::GroupedError)
+    Base.depwarn("`GroupedError` is deprecated: its functionality has been moved to the GroupedErrors.jl package", :GroupedError)
     if !(:seriestype in keys(d)) || (d[:seriestype] == :path)
         for i = 1:length(g.group)
             @series begin
