@@ -207,7 +207,7 @@ groupedbar([1, 2, 1, 2, 1, 2], rand(6), group = [1, 1, 2, 2, 3, 3])
 
 ## GroupedErrors.jl for population analysis
 
-Population analysis on a table-like data structures can be done using the [GroupedErrors](https://github.com/piever/GroupedErrors.jl) package.
+Population analysis on a table-like data structures can be done using the highly recommended [GroupedErrors](https://github.com/piever/GroupedErrors.jl) package.
 
 This external package, in combination with StatPlots, greatly simplifies the creation of two types of plots:
 
