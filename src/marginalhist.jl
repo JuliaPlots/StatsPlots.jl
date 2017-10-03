@@ -1,8 +1,8 @@
 @shorthands marginalhist
 
 @recipe function f(::Type{Val{:marginalhist}}, plt::AbstractPlot; density = false)
-    x, y = d[:x], d[:y]
-    bns = get(d, :bins, :auto)
+    x, y = plotattributes[:x], plotattributes[:y]
+    bns = get(plotattributes, :bins, :auto)
     edges1, edges2 = Plots._hist_edges((x,y), bns)
 
     # set up the subplots
@@ -27,8 +27,8 @@
     ticks := nothing
     guide := ""
     foreground_color_border := nothing
-    fillcolor --> Plots.fg_color(d)
-    linecolor --> Plots.fg_color(d)
+    fillcolor --> Plots.fg_color(plotattributes)
+    linecolor --> Plots.fg_color(plotattributes)
 
     if density
         trim := true

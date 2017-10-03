@@ -18,11 +18,11 @@ end
 @recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both)
     # if only y is provided, then x will be UnitRange 1:length(y)
     if typeof(x) <: UnitRange
-        x = [getindex(x, d[:series_plotindex])]
+        x = [getindex(x, plotattributes[:series_plotindex])]
     end
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
-    bw = d[:bar_width]
+    bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
     for (i,glabel) in enumerate(glabels)
         widths, centers = violin_coords(y[filter(i -> _cycle(x,i) == glabel, 1:length(y))], trim=trim)
@@ -33,7 +33,7 @@ end
         widths = hw * widths / Plots.ignorenan_maximum(widths)
 
         # make the violin
-        xcenter = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
+        xcenter = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
         if (side==:right)
           xcoords = vcat(widths, zeros(length(widths))) + xcenter
         elseif (side==:left)
