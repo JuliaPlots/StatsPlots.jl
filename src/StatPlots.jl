@@ -4,6 +4,7 @@ module StatPlots
 using Reexport
 @reexport using Plots
 import Plots: _cycle
+using Plots.PlotMeasures
 using StatsBase
 using Distributions
 using DataFrames
