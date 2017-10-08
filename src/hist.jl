@@ -4,7 +4,7 @@
 
 @recipe function f(::Type{Val{:density}}, x, y, z; trim=false)
     newx, newy = violin_coords(y, trim=trim)
-    if Plots.isvertical(d)
+    if Plots.isvertical(plotattributes)
         newx, newy = newy, newx
     end
     x := newx
@@ -22,7 +22,7 @@ Plots.@deps density path
                    npoints = 200)
     newx, newy = violin_coords(y, trim=trim)
 
-    if Plots.isvertical(d)
+    if Plots.isvertical(plotattributes)
         newx, newy = newy, newx
     end
 
@@ -41,7 +41,7 @@ ea_binnumber(y, bin::Int) = bin
 ea_binnumber(y, bin::Symbol) = Plots._auto_binning_nbins((y,), 1, mode = bin)
 
 @recipe function f(::Type{Val{:ea_histogram}}, x, y, z)
-    bin = ea_binnumber(y, d[:bins])
+    bin = ea_binnumber(y, plotattributes[:bins])
     bins := quantile(y, linspace(0,1,bin+1))
     normalize --> :density
     seriestype := :barhist

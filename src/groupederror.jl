@@ -328,8 +328,8 @@ Equivalent to `groupapply(:locreg, df::AbstractDataFrame, x, y; kwargs...)`
 groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, y; kwargs...)
 
 @recipe function f(g::GroupedError)
+    if !(:seriestype in keys(plotattributes)) || (plotattributes[:seriestype] == :path)
     Base.depwarn("`GroupedError` is deprecated: its functionality has been moved to the GroupedErrors.jl package", :GroupedError)
-    if !(:seriestype in keys(d)) || (d[:seriestype] == :path)
         for i = 1:length(g.group)
             @series begin
                 seriestype := :shadederror
@@ -340,7 +340,7 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
                 ()
             end
         end
-    elseif d[:seriestype] == :scatter
+    elseif plotattributes[:seriestype] == :scatter
         for i = 1:length(g.group)
             @series begin
                 seriestype := :scatter
@@ -353,7 +353,7 @@ groupapply(df::AbstractDataFrame, x, y; kwargs...) = groupapply(_locreg, df, x, 
                 ()
             end
         end
-    elseif d[:seriestype] == :bar
+    elseif plotattributes[:seriestype] == :bar
         if g.axis_type == :continuous
             warn("Bar plot with continuous x axis doesn't make sense!")
         end

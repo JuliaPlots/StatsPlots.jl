@@ -7,13 +7,13 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 @recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true, whisker_width=:match)
     # if only y is provided, then x will be UnitRange 1:length(y)
     if typeof(x) <: UnitRange
-        x = [getindex(x, d[:series_plotindex])]
+        x = [getindex(x, plotattributes[:series_plotindex])]
     end
     xsegs, ysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     warning = false
     outliers_x, outliers_y = zeros(0), zeros(0)
-    bw = d[:bar_width]
+    bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
     @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
     ww = whisker_width == :match ? bw : whisker_width
@@ -34,7 +34,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         end
 
         # make the shape
-        center = Plots.discrete_value!(d[:subplot][:xaxis], glabel)[1]
+        center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
         hw = 0.5_cycle(bw, i) # Box width
         HW = 0.5_cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
@@ -87,19 +87,19 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     end
 
     # To prevent linecolor equal to fillcolor (It makes the median visible)
-    if d[:linecolor] == d[:fillcolor]
-	d[:linecolor] = d[:markerstrokecolor]
+    if plotattributes[:linecolor] == plotattributes[:fillcolor]
+	plotattributes[:linecolor] = plotattributes[:markerstrokecolor]
     end
 
     # Outliers
     if outliers
         @series begin
             seriestype  := :scatter
-	    if get!(d, :markershape, :circle) == :none
-            	d[:markershape] = :circle
+	    if get!(plotattributes, :markershape, :circle) == :none
+            	plotattributes[:markershape] = :circle
 	    end
-            markercolor := d[:fillcolor]
-            markerstrokecolor := d[:linecolor]
+            markercolor := plotattributes[:fillcolor]
+            markerstrokecolor := plotattributes[:linecolor]
             fillrange   := nothing
             x           := outliers_x
             y           := outliers_y
