@@ -3,6 +3,11 @@
 
 ## 0.5 current version
 
+### 0.5.1
+- remove groupederror, as that is now in it's own package
+- add `qqnorm` and `qqplot`
+- fix 2d density plots
+
 ### 0.5.0
 - major reconfiguring of the support for tables:
     - change the syntax to `@df mydataframe plot(:a, :b)`
