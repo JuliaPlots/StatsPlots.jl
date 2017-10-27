@@ -202,22 +202,15 @@ groupedbar(rand(10,3), bar_position = :dodge, bar_width=0.7)
 The `group` syntax is also possible in combination with `groupedbar`:
 
 ```julia
-groupedbar([1, 2, 1, 2, 1, 2], rand(6), group = [1, 1, 2, 2, 3, 3])
-```
-A more complex example is also possible:
-
-```julia
-mn = [20, 35, 30, 35, 27,25, 32, 34, 20, 25]
-sx = repeat(["Men", "Women"], inner = 5)
-std = [2, 3, 4, 1, 2, 3, 5, 2, 3, 3]
+ctg = repeat(["Category 1", "Category 2"], inner = 5)
 nam = repeat("G" .* string.(1:5), outer = 2)
 
-groupedbar(nam, mn, yerr = std, group = sx, ylabel = "Scores", 
-        title = "Scores by group and gender", bar_width = 0.67, 
-        lw = 0, c = [:red :darkkhaki], markerstrokewidth = 1.5,
-        framestyle = :box, grid = false, yticks = 0:5:35)
+groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores", 
+        title = "Scores by group and category", bar_width = 0.67, 
+        lw = 0, framestyle = :box)
 ```
-![](https://user-images.githubusercontent.com/6645258/32000116-5b80e284-b974-11e7-8ab5-a6dec3b38f4b.png)
+
+![](https://user-images.githubusercontent.com/6645258/32116755-b7018f02-bb2a-11e7-82c7-ca471ecaeecf.png)
 
 ## GroupedErrors.jl for population analysis
 
