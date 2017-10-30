@@ -9,6 +9,15 @@ end
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
 @recipe f(dist::Distribution) = (dist, default_range(dist)...)
 
+@recipe function f(distvec::AbstractArray{<:Distribution}, yz...)
+    for di in distvec
+        @series begin
+            seriesargs = isempty(yz) ? default_range(di) : yz
+            (di, seriesargs...)
+        end
+    end
+end
+
 # this "type recipe" replaces any instance of a distribution with a function mapping xi to yi
 @recipe function f(::Type{T}, dist::T; func = pdf) where T<:Distribution
     xi -> func(dist, xi)
