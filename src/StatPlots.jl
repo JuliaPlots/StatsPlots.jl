@@ -20,8 +20,6 @@ import Loess
 
 @shorthands cdensity
 
-export groupapply
-export get_groupederror
 export @df
 
 include("df.jl")
@@ -34,8 +32,6 @@ include("violin.jl")
 include("hist.jl")
 include("marginalhist.jl")
 include("bar.jl")
-include("shadederror.jl")
-include("groupederror.jl")
 
 
 
