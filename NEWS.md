@@ -1,7 +1,13 @@
 
 # StatPlots.jl NEWS
 
-## 0.5 current version
+## 0.6 current version
+
+### 0.6.0
+- deprecate the `plot(df, :x, :y)` syntax
+- complete the removal of groupederror
+- remove shadederror
+- suppress axis labels in marginalhist
 
 ### 0.5.1
 - remove groupederror, as that is now in it's own package
