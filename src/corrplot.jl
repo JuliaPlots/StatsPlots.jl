@@ -27,7 +27,6 @@ end
     indices = reshape(1:n^2, n, n)'
     title = get(plotattributes,:title,"")
     title := ""
-    # ticks --> false
 
     # histograms on the diagonal
     for i=1:n
