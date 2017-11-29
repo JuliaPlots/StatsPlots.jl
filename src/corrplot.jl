@@ -27,7 +27,7 @@ end
     indices = reshape(1:n^2, n, n)'
     title = get(plotattributes,:title,"")
     title := ""
-    ticks --> false
+    # ticks --> false
 
     # histograms on the diagonal
     for i=1:n
@@ -35,6 +35,8 @@ end
             seriestype := :histogram
             subplot := indices[i,i]
             grid := false
+            xformatter --> ((i == n) ? :auto : (x -> ""))
+            yformatter --> ((i == 1) ? :auto : (y -> ""))
             update_ticks_guides(plotattributes, labs, i, i, n)
             view(mat,:,i)
         end
@@ -56,6 +58,8 @@ end
                     markercolor := grad[0.5 + 0.5C[i,j]]
                     smooth := true
                     markerstrokewidth --> 0
+                    xformatter --> ((i == n) ? :auto : (x -> ""))
+                    yformatter --> ((j == 1) ? :auto : (y -> ""))
                     vj, vi
                 end
             else
@@ -65,6 +69,8 @@ end
                     if title != "" && i == 1 && j == div(n,2)+1
                         title := title
                     end
+                    xformatter --> ((i == n) ? :auto : (x -> ""))
+                    yformatter --> ((j == 1) ? :auto : (y -> ""))
                     vj, vi
                 end
             end
