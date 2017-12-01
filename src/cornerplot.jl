@@ -44,7 +44,8 @@
     linecolor --> Plots.fg_color(plotattributes)
     grid      --> true
     ticks     := nothing
-    formatter := v->""
+    xformatter := x -> ""
+    yformatter := y -> ""
     link      := :both
     grad = cgrad(get(plotattributes, :markercolor, cgrad()))
 
