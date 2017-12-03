@@ -14,6 +14,9 @@ macro df(d, x)
     plot_call = parse_iterabletable_call!(d, x, syms, vars)
     compute_vars = Expr(:(=), Expr(:tuple, vars...),
         Expr(:call, :(StatPlots.extract_columns_from_iterabletable), d, syms...))
+    argnames = _argnames(d, x)
+    i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
+    (i == 0) || insert_kw!(plot_call, :label, argnames[i])	
     esc(Expr(:block, compute_vars, plot_call))
 end
 
@@ -55,6 +58,11 @@ end
 
 not_kw(x) = true
 not_kw(x::Expr) = !(x.head in [:kw, :parameters])
+
+function insert_kw!(x::Expr, s::Symbol, v)
+    index = isa(x.args[2], Expr) && x.args[2].head == :parameters ? 3 : 2		
+    x.args = vcat(x.args[1:index-1], Expr(:kw, s, v), x.args[index:end])		
+end
 
 _arg2string(d, x) = stringify(x)
 function _arg2string(d, x::Expr)
