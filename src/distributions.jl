@@ -12,7 +12,7 @@ yz_args(dist::Distribution{N, T}) where N where T<:Discrete = (UnitRange(default
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
 @recipe function f(dist::Distribution)
     if dist isa Distribution{Univariate,Discrete}
-        seriestype --> :steppost
+        seriestype --> :scatterpath
     end
     (dist, yz_args(dist)...)
 end
@@ -22,7 +22,7 @@ end
         @series begin
             seriesargs = isempty(yz) ? yz_args(di) : yz
             if di isa Distribution{Univariate,Discrete}
-                seriestype --> :steppost
+                seriestype --> :scatterpath
             end
             (di, seriesargs...)
         end
