@@ -1,7 +1,7 @@
 julia 0.6
 
 Reexport
-Plots 0.13
+Plots 0.14
 StatsBase
 Distributions
 DataFrames
