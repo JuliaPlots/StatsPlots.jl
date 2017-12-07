@@ -6,13 +6,24 @@ function default_range(dist::Distribution, alpha = 0.0001)
     minval, maxval
 end
 
+yz_args(dist) = default_range(dist)
+yz_args(dist::Distribution{N, T}) where N where T<:Discrete = (UnitRange(default_range(dist)...),)
+
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
-@recipe f(dist::Distribution) = (dist, default_range(dist)...)
+@recipe function f(dist::Distribution)
+    if dist isa Distribution{Univariate,Discrete}
+        seriestype --> :scatterpath
+    end
+    (dist, yz_args(dist)...)
+end
 
 @recipe function f(distvec::AbstractArray{<:Distribution}, yz...)
     for di in distvec
         @series begin
-            seriesargs = isempty(yz) ? default_range(di) : yz
+            seriesargs = isempty(yz) ? yz_args(di) : yz
+            if di isa Distribution{Univariate,Discrete}
+                seriestype --> :scatterpath
+            end
             (di, seriesargs...)
         end
     end
