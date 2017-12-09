@@ -7,17 +7,26 @@ If you want to avoid replacing the symbol, escape it with `^`.
 
 `NA` values are replaced with `NaN` for columns of `Float64` and `""` or `Symbol()`
 for strings and symbols respectively.
+
+`x` can be either a plot command or a block of plot commands.
 """
 macro df(d, x)
-    syms = Any[]
-    vars = Symbol[]
-    plot_call = parse_iterabletable_call!(d, x, syms, vars)
-    compute_vars = Expr(:(=), Expr(:tuple, vars...),
-        Expr(:call, :(StatPlots.extract_columns_from_iterabletable), d, syms...))
-    argnames = _argnames(d, x)
-    i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
-    (i == 0) || insert_kw!(plot_call, :label, argnames[i])	
-    esc(Expr(:block, compute_vars, plot_call))
+    if isa(x, Expr) && x.head == :block
+        commands = [:(@df($(esc(d)), $(esc(xx)))) for xx in x.args if !(isa(xx, Expr) && xx.head == :line)]
+        return Expr(:block, commands...)
+    elseif isa(x, Expr) && x.head == :call
+        syms = Any[]
+        vars = Symbol[]
+        plot_call = parse_iterabletable_call!(d, x, syms, vars)
+        compute_vars = Expr(:(=), Expr(:tuple, vars...),
+            Expr(:call, :(StatPlots.extract_columns_from_iterabletable), d, syms...))
+        argnames = _argnames(d, x)
+        i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
+        (i == 0) || insert_kw!(plot_call, :label, argnames[i])	
+        return esc(Expr(:block, compute_vars, plot_call))
+    else
+        error("Second argument can only be a block or function call")
+    end
 end
 
 """
