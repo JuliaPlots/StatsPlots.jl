@@ -42,13 +42,14 @@ end
 parse_iterabletable_call!(d, x, syms, vars) = x
 
 function parse_iterabletable_call!(d, x::Expr, syms, vars)
-    if x.head == :quote
+    if x.head == :. && length(x.args) == 2
+        isa(x.args[2], Expr) && (x.args[2].head == :quote) && return x
+    elseif x.head == :quote
         new_var = gensym(x.args[1])
         push!(syms, x)
         push!(vars, new_var)
         return new_var
-    end
-    if x.head == :call
+    elseif x.head == :call
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
             range = eval(x.args[2])
