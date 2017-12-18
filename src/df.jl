@@ -20,10 +20,9 @@ macro df(d, x)
         plot_call = parse_iterabletable_call!(d, x, syms, vars)
         compute_vars = Expr(:(=), Expr(:tuple, vars...),
             Expr(:call, :(StatPlots.extract_columns_from_iterabletable), d, syms...))
-        #argnames = _argnames(d, x)
-        #i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
-        #(i == 0) || insert_kw!(plot_call, :label, argnames[i])	
-        return esc(Expr(:block, compute_vars, plot_call))
+        argnames = _argnames(d, x)
+        label_plot_call = Expr(:call, :(StatPlots.add_label), argnames, plot_call.args...) 
+        return esc(Expr(:block, compute_vars, label_plot_call))
     else
         error("Second argument can only be a block or function call")
     end
@@ -63,7 +62,7 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
 end
 
 function _argnames(d, x::Expr)
-    [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]
+    Expr(:vect, [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]...)
 end
 
 not_kw(x) = true
@@ -77,7 +76,7 @@ end
 _arg2string(d, x) = stringify(x)
 function _arg2string(d, x::Expr)
     if x.head == :call && x.args[1] == :cols
-        return :(reshape([StatPlots.compute_name($d, i) for i in $(x.args[2])], 1, :))
+        return :(StatPlots.compute_name($d, $(x.args[2])))
     elseif x.head == :call && x.args[1] == :hcat
         return hcat(stringify.(x.args[2:end])...)
     elseif x.head == :hcat
@@ -89,7 +88,18 @@ end
 
 stringify(x) = filter(t -> t != ':', string(x))
 
-compute_name(df, i) = column_names(getiterator(df))[i]
+compute_name(df, i::Int) = column_names(getiterator(df))[i]
+compute_name(df, i::Symbol) = i
+compute_name(df, i) = reshape([compute_name(df, ii) for ii in i], 1, :)
+
+function add_label(argnames, f, args...; kwargs...)
+    i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
+    if (i == 0)
+        return f(args...; kwargs...)
+    else
+        return f(label = argnames[i], args...; kwargs...)
+    end
+end
 
 get_col_from_dict(s::Int, col_dict, name2index) = col_dict[s]
 get_col_from_dict(s::Symbol, col_dict, name2index) = 
