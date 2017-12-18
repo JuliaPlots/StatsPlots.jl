@@ -21,7 +21,12 @@ macro df(d, x)
         compute_vars = Expr(:(=), Expr(:tuple, vars...),
             Expr(:call, :(StatPlots.extract_columns_from_iterabletable), d, syms...))
         argnames = _argnames(d, x)
-        label_plot_call = Expr(:call, :(StatPlots.add_label), argnames, plot_call.args...) 
+        if (length(plot_call.args) >= 2) && isa(plot_call.args[2], Expr) && (plot_call.args[2].head == :parameters)
+            label_plot_call = Expr(:call, :(StatPlots.add_label), plot_call.args[2], argnames,
+                plot_call.args[1], plot_call.args[3:end]...)
+        else
+            label_plot_call = Expr(:call, :(StatPlots.add_label), argnames, plot_call.args...)
+        end
         return esc(Expr(:block, compute_vars, label_plot_call))
     else
         error("Second argument can only be a block or function call")
