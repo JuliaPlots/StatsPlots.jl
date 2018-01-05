@@ -21,9 +21,13 @@ macro df(d, x)
         compute_vars = Expr(:(=), Expr(:tuple, vars...),
             Expr(:call, :(StatPlots.extract_columns_from_iterabletable), d, syms...))
         argnames = _argnames(d, x)
-        i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
-        (i == 0) || insert_kw!(plot_call, :label, argnames[i])	
-        return esc(Expr(:block, compute_vars, plot_call))
+        if (length(plot_call.args) >= 2) && isa(plot_call.args[2], Expr) && (plot_call.args[2].head == :parameters)
+            label_plot_call = Expr(:call, :(StatPlots.add_label), plot_call.args[2], argnames,
+                plot_call.args[1], plot_call.args[3:end]...)
+        else
+            label_plot_call = Expr(:call, :(StatPlots.add_label), argnames, plot_call.args...)
+        end
+        return esc(Expr(:block, compute_vars, label_plot_call))
     else
         error("Second argument can only be a block or function call")
     end
@@ -52,18 +56,18 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
     elseif x.head == :call
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
-            range = eval(x.args[2])
-            new_vars = gensym.(string.(range))
-            append!(syms, range)
-            append!(vars, new_vars)
-            return Expr(:hcat, new_vars...)
+            range = x.args[2]
+            new_vars = gensym("range")
+            push!(syms, range)
+            push!(vars, new_vars)
+            return new_vars
         end
     end
     return Expr(x.head, (parse_iterabletable_call!(d, arg, syms, vars) for arg in x.args)...)
 end
 
 function _argnames(d, x::Expr)
-    [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]
+    Expr(:vect, [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]...)
 end
 
 not_kw(x) = true
@@ -77,7 +81,7 @@ end
 _arg2string(d, x) = stringify(x)
 function _arg2string(d, x::Expr)
     if x.head == :call && x.args[1] == :cols
-        return :(reshape([StatPlots.compute_name($d, i) for i in $(x.args[2])], 1, :))
+        return :(StatPlots.compute_name($d, $(x.args[2])))
     elseif x.head == :call && x.args[1] == :hcat
         return hcat(stringify.(x.args[2:end])...)
     elseif x.head == :hcat
@@ -89,16 +93,37 @@ end
 
 stringify(x) = filter(t -> t != ':', string(x))
 
-compute_name(df, i) = column_names(getiterator(df))[i]
+compute_name(df, i::Int) = column_names(getiterator(df))[i]
+compute_name(df, i::Symbol) = i
+compute_name(df, i) = reshape([compute_name(df, ii) for ii in i], 1, :)
+
+function add_label(argnames, f, args...; kwargs...)
+    i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
+    if (i == 0)
+        return f(args...; kwargs...)
+    else
+        return f(label = argnames[i], args...; kwargs...)
+    end
+end
+
+get_col_from_dict(s::Int, col_dict, name2index) = col_dict[s]
+get_col_from_dict(s::Symbol, col_dict, name2index) = 
+    haskey(name2index, s) ? col_dict[name2index[s]] : s
+
+get_col_from_dict(s, col_dict, name2index) = 
+    hcat(get_col_from_dict.(s, col_dict, name2index)...)
 
 function extract_columns_from_iterabletable(df, syms...)
     isiterabletable(df) || error("Only iterable tables are supported")
     iter = getiterator(df)
     name2index = Dict(zip(column_names(iter), 1:length(column_names(iter))))
-    col_index = [isa(s, Integer) ? s : get(name2index, s, 0) for s in syms]
-    cols = convert(Array{Any}, collect(syms))
-    cols[col_index .!= 0] = create_columns_from_iterabletable(df, filter(t -> t != 0, col_index))[1]
-    return Tuple(convert_missing.(t) for t in cols)
+
+    col_indices = union(Iterators.filter(t -> t != 0, 
+        (isa(s, Integer) ? s : get(name2index, s, 0) for s in vcat(syms...))))
+    col_values = create_columns_from_iterabletable(df, col_indices)[1]
+    col_dict = Dict(zip(col_indices, [convert_missing.(t) for t in col_values]))
+
+    return Tuple(get_col_from_dict(s, col_dict, name2index) for s in syms)
 end
 
 convert_missing(el) = el

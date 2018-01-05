@@ -31,8 +31,21 @@ using DataFrames, IndexedTables
 df = DataFrame(a = 1:10, b = 10*rand(10), c = 10 * rand(10))
 @df df plot(:a, [:b :c], colour = [:red :blue])
 @df df scatter(:a, :b, markersize = 4 * log.(:c + 0.1))
-t = IndexedTable(Columns(a = collect(1:10)), Columns(b = rand(10)))
+t = table(1:10, rand(10), names = [:a, :b]) # IndexedTable
 @df t scatter(2 * :b)
+```
+
+Inside a `@df` macro call, the `cols` utility function can be used to refer to a range of columns:
+
+```julia
+@df df plot(:a, cols(2:3), colour = [:red :blue])
+```
+
+or to refer to a column whose symbol is represented by a variable:
+
+```julia
+s = :b
+@df df plot(:a, cols(s))
 ```
 
 In case of ambiguity, symbols not referring to `DataFrame` columns must be escaped by `^()`:
@@ -41,13 +54,13 @@ df[:red] = rand(10)
 @df df plot(:a, [:b :c], colour = ^([:red :blue]))
 ```
 
-The `@df` macro plays nicely with the new syntax of the [Query.jl](https://github.com/davidanthoff/Query.jl) data manipulation package (v0.7 and above), in that a plot command can be added at the end of a query pipeline, without having to explicitly collect the outcome of the query first:
+The `@df` macro plays nicely with the new syntax of the [Query.jl](https://github.com/davidanthoff/Query.jl) data manipulation package (v0.8 and above), in that a plot command can be added at the end of a query pipeline, without having to explicitly collect the outcome of the query first:
 
 ```julia
 using Query, StatPlots
 df |>
-    @where(_.a > 5) |>
-    @select({_.b, d = _.c-10}) |>
+    @filter(_.a > 5) |>
+    @map({_.b, d = _.c-10}) |>
     @df scatter(:b, :d)
 ```
 
