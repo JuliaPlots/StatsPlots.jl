@@ -64,10 +64,26 @@ df |>
     @df scatter(:b, :d)
 ```
 
-The old syntax, passing the `DataFrame` as the first argument to the `plot` call is still supported, but has several limitations (the most important being incompatibility with user recipes):
+The `@df` syntax is also compatible with Plots grouping machinery:
+
 ```julia
-plot(df, :a, [:b :c], colour = [:red :blue])
+using RDatasets
+school = RDatasets.dataset("mlmRev","Hsb82")
+@df school density(:MAch, group = :Sx)
 ```
+
+To group by more than one column, use a tuple of symbols:
+
+```julia
+@df school density(:MAch, group = (:Sx, :Sector), legend = :topleft)
+```
+
+![grouped](https://user-images.githubusercontent.com/6333339/35101563-eacf9be4-fc57-11e7-88d3-db5bb47b08ac.png)
+
+---
+
+The old syntax, passing the `DataFrame` as the first argument to the `plot` call is no longer supported.
+
 ---
 
 ## marginalhist with DataFrames
