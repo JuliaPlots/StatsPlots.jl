@@ -8,7 +8,7 @@
 This package contains many statistical recipes for concepts and types introduced in the JuliaStats organization, intended to be used with [Plots.jl](https://juliaplots.github.io):
 
 - Types:
-    - DataFrames (for DataTables support, checkout the `DataTables` branch)
+    - DataFrames
     - Distributions
 - Recipes:
     - histogram/histogram2d
