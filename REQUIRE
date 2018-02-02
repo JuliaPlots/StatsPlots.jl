@@ -4,7 +4,6 @@ Reexport
 Plots 0.14
 StatsBase
 Distributions
-DataFrames
 KernelDensity
 Loess
 IterableTables 0.5.0
