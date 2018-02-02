@@ -1,7 +1,14 @@
 
 # StatPlots.jl NEWS
 
-## 0.6 current version
+## 0.7 current version
+
+### 0.7.0
+- remove DataFrames dependency
+- improve tick handling in correlation plots
+- add support for discrete distributions
+- add automatic legend with `@df`
+- allow passing columns of a data table programmatically with `cols`
 
 ### 0.6.0
 - deprecate the `plot(df, :x, :y)` syntax
