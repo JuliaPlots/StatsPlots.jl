@@ -7,7 +7,6 @@ import Plots: _cycle
 using Plots.PlotMeasures
 using StatsBase
 using Distributions
-using DataFrames
 import IterableTables
 import DataValues: DataValue
 import TableTraits: column_types, column_names, getiterator, isiterabletable
@@ -23,7 +22,6 @@ import Loess
 export @df
 
 include("df.jl")
-include("dataframes.jl")
 include("corrplot.jl")
 include("cornerplot.jl")
 include("distributions.jl")
