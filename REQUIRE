@@ -5,7 +5,6 @@ Plots 0.14
 StatsBase
 Distributions
 KernelDensity
-Loess
 IterableTables 0.5.0
 TableTraitsUtils 0.1.0
 TableTraits
