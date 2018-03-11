@@ -21,7 +21,7 @@ Curried version of `@df d x`. Outputs an anonymous function `d -> @df d x`.
 """
 macro df(x)
     i = gensym()
-    esc(Expr(:(->), i, df_helper(i, x))
+    esc(Expr(:(->), i, df_helper(i, x)))
 end
 
 function df_helper(d, x)
