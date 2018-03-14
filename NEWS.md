@@ -3,6 +3,13 @@
 
 ## 0.7 current version
 
+### 0.7.1
+
+- remove Loess dependency
+- fix hygien macro issue in `@df`
+- add curly bracket syntax for automatic naming of groups
+- add `cols()` to select all columns
+
 ### 0.7.0
 - remove DataFrames dependency
 - improve tick handling in correlation plots
