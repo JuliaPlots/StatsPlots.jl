@@ -60,6 +60,10 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
     elseif x.head == :call
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
+            if length(x.args) == 1
+                push!(x.args, :(StatPlots.column_names(StatPlots.getiterator(df))))
+                return parse_iterabletable_call!(d, x, syms, vars)
+            end
             range = x.args[2]
             new_vars = gensym("range")
             push!(syms, range)

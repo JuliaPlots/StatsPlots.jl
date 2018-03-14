@@ -48,6 +48,8 @@ s = :b
 @df df plot(:a, cols(s))
 ```
 
+`cols()` will refer to all columns of the data table.
+
 In case of ambiguity, symbols not referring to `DataFrame` columns must be escaped by `^()`:
 ```julia
 df[:red] = rand(10)
@@ -79,6 +81,8 @@ To group by more than one column, use a tuple of symbols:
 ```
 
 ![grouped](https://user-images.githubusercontent.com/6333339/35101563-eacf9be4-fc57-11e7-88d3-db5bb47b08ac.png)
+
+To name the legend entries with custom or automatic names (i.e. `Sex = Male, Sector = Public`) use the curly bracket syntax `group = {Sex = :Sx, :Sector}`. Entries with `=` get the custom name you give, whereas entries without `=` take the name of the column.
 
 ---
 
