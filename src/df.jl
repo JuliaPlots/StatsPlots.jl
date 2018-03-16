@@ -11,7 +11,7 @@ for strings and symbols respectively.
 `x` can be either a plot command or a block of plot commands.
 """
 macro df(d, x)
-    esc(df_helper(d, x))
+    esc(Expr(:call, df_helper(x), d))
 end
 
 """
@@ -20,13 +20,17 @@ end
 Curried version of `@df d x`. Outputs an anonymous function `d -> @df d x`.
 """
 macro df(x)
+    esc(df_helper(x))
+end
+
+function df_helper(x)
     i = gensym()
-    esc(Expr(:(->), i, df_helper(i, x)))
+    Expr(:(->), i, df_helper(i, x))
 end
 
 function df_helper(d, x)
     if isa(x, Expr) && x.head == :block
-        commands = [:(@df($d, $x)) for xx in x.args if !(isa(xx, Expr) && xx.head == :line)]
+        commands = [df_helper(d, xx) for xx in x.args if !(isa(xx, Expr) && xx.head == :line)]
         return Expr(:block, commands...)
     elseif isa(x, Expr) && x.head == :call
         syms = Any[]
@@ -61,7 +65,7 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
             if length(x.args) == 1
-                push!(x.args, :(StatPlots.column_names(StatPlots.getiterator(df))))
+                push!(x.args, :(StatPlots.column_names(StatPlots.getiterator($d))))
                 return parse_iterabletable_call!(d, x, syms, vars)
             end
             range = x.args[2]
