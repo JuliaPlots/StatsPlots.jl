@@ -3,6 +3,11 @@
 
 ## 0.7 current version
 
+### 0.7.2
+
+- fix stack overflow with `@df` and `begin ... end` blocks
+- avoid recomputing data unnecessarily in `@df`
+
 ### 0.7.1
 
 - remove Loess dependency
