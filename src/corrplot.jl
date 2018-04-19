@@ -70,6 +70,9 @@ end
                 @series begin
                     seriestype := get(plotattributes, :seriestype, :histogram2d)
                     if title != "" && i == 1 && ((title_location == :center && j == div(n,2)+1) || (title_location == :right && j == n))
+                        if iseven(n)
+                            title_location := :left
+                        end
                         title := title
                     end
                     xformatter --> ((i == n) ? :auto : (x -> ""))
