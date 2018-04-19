@@ -26,11 +26,15 @@ end
     grad = cgrad(get(plotattributes, :markercolor, cgrad()))
     indices = reshape(1:n^2, n, n)'
     title = get(plotattributes,:title,"")
+    title_location = get(plotattributes, :title_location, :center)
     title := ""
 
     # histograms on the diagonal
     for i=1:n
         @series begin
+            if title != "" && title_location == :left && i == 1
+                title := title
+            end
             seriestype := :histogram
             subplot := indices[i,i]
             grid := false
@@ -65,7 +69,10 @@ end
                 #above diag... hist2d
                 @series begin
                     seriestype := get(plotattributes, :seriestype, :histogram2d)
-                    if title != "" && i == 1 && j == div(n,2)+1
+                    if title != "" && i == 1 && ((title_location == :center && j == div(n,2)+1) || (title_location == :right && j == n))
+                        if iseven(n)
+                            title_location := :left
+                        end
                         title := title
                     end
                     xformatter --> ((i == n) ? :auto : (x -> ""))
