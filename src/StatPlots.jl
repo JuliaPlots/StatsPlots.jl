@@ -24,8 +24,8 @@ import KernelDensity
 
 export @df
 
-include("interact.jl")
 include("df.jl")
+include("interact.jl")
 include("corrplot.jl")
 include("cornerplot.jl")
 include("distributions.jl")

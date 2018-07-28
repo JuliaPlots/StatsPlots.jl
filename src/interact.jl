@@ -26,6 +26,6 @@
         $(:plot)
         y = (:y_toggle[] && !isempty(:y[])) ? [:y[]] : []
         by = (:by_toggle[] && !isempty(:by[])) ? [(^(:group), :by[])] : []
-        @df t :plot_type(:x[], y..., by..., nbins = $(:nbins_throttle))
+        @df t :plot_type[](:x[], y..., by..., nbins = $(:nbins_throttle))
     end
 end
