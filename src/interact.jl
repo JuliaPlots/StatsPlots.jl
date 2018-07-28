@@ -4,18 +4,18 @@
     :y =  @nodeps dropdown(:names, placeholder = "Second axis", multiple = true)
     wdg[:y_toggle] = @nodeps togglecontent(wdg[:y], value = false, label = "Second axis")
     :plot_type = @nodeps dropdown(
-        [
-            plot,
-            scatter,
-            groupedbar,
-            boxplot,
-            corrplot,
-            cornerplot,
-            density,
-            histogram,
-            marginalhist,
-            violin
-        ],
+        OrderedDict(
+            "line"         => plot,
+            "scatter"      => scatter,
+            "bar"          => groupedbar,
+            "boxplot"      => boxplot,
+            "corrplot"     => corrplot,
+            "cornerplot"   => cornerplot,
+            "density"      => density,
+            "histogram"    => histogram,
+            "marginalhist" => marginalhist,
+            "violin"       => violin
+        ),
         placeholder = "Plot type")
     :nbins =  @nodeps slider(1:100, value = 30, label = "number of bins")
     :nbins_throttle = Observables.throttle(throttle, :nbins)
