@@ -1,13 +1,13 @@
 @widget wdg function interactstats(t; throttle = 0.1)
     :names = StatPlots.column_names(StatPlots.getiterator(t))
-    :x =  @nodeps dropdown(:names, placeholder = "First axis")
-    :y =  @nodeps dropdown(:names, placeholder = "Second axis")
+    :x =  @nodeps dropdown(:names, placeholder = "First axis", multiple = true)
+    :y =  @nodeps dropdown(:names, placeholder = "Second axis", multiple = true)
     wdg[:y_toggle] = @nodeps togglecontent(wdg[:y], value = false, label = "Second axis")
     :plot_type = @nodeps dropdown(
         [
             plot,
             scatter,
-            grupedbar,
+            groupedbar,
             boxplot,
             corrplot,
             cornerplot,
@@ -26,6 +26,26 @@
         $(:plot)
         y = (:y_toggle[] && !isempty(:y[])) ? [:y[]] : []
         by = (:by_toggle[] && !isempty(:by[])) ? [(^(:group), :by[])] : []
-        @df t :plot_type[](:x[], y..., by..., nbins = $(:nbins_throttle))
+        if (:plot[] == 0)
+            plot()
+        else
+            @df t :plot_type[](:x[], y..., by..., nbins = $(:nbins_throttle))
+        end
     end
+    @layout! wdg Widgets.div(
+        Widgets.div(
+            :x,
+            :y_toggle,
+            :plot_type,
+            :by_toggle,
+            :plot,
+            className = "column is-4"
+        ),
+        Widgets.div(
+            _.output,
+            :nbins,
+            className = "column is-8"
+        ),
+        className = "columns"
+    )
 end
