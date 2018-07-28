@@ -24,11 +24,15 @@ end
 @recipe function f(hc::Hclust; useheight=true)
     typeof(useheight) <: Bool || error("'useheight' argument must be true or false")
 
-    xlims := (0.5, length(hc.order) + 0.5)
     legend := false
-    color := :black
-    yticks --> useheight
+    xforeground_color_axis := :white
+    xgrid := false
+    xlims := (0.5, length(hc.order) + 0.5)
+
+    linecolor --> :black
     xticks --> (1:length(hc.labels), hc.labels[hc.order])
+    ylims --> (0, Inf)
+    yshowaxis --> useheight
 
     treepositions(hc, useheight)
 end
