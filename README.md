@@ -90,6 +90,22 @@ The old syntax, passing the `DataFrame` as the first argument to the `plot` call
 
 ---
 
+## Visualizing a table interactively
+
+An experimental GUI based on Interact package is available to create plots from a table interactively, using any of the recipes defined below. This small app can be deployed in a Jupyter lab / notebook, Juno plot pane, a Blink window or in the browser, see [here](https://juliagizmos.github.io/Interact.jl/latest/deploying.html) for instructions.
+
+Note: the GUI is experimental and requires the unreleased version of Interact.
+
+```julia
+import RDatasets
+iris = RDatasets.dataset("datasets", "iris")
+using StatPlots, Interact
+interactstats(iris)
+```
+
+![interactstats](https://user-images.githubusercontent.com/6333339/43359702-abd82d74-929e-11e8-8fc9-b589287f1c23.png)
+
+
 ## marginalhist with DataFrames
 
 ```julia
@@ -238,8 +254,8 @@ The `group` syntax is also possible in combination with `groupedbar`:
 ctg = repeat(["Category 1", "Category 2"], inner = 5)
 nam = repeat("G" .* string.(1:5), outer = 2)
 
-groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores", 
-        title = "Scores by group and category", bar_width = 0.67, 
+groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores",
+        title = "Scores by group and category", bar_width = 0.67,
         lw = 0, framestyle = :box)
 ```
 

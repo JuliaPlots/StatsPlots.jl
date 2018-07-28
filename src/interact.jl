@@ -45,14 +45,13 @@
             :y_toggle,
             :plot_type,
             :by_toggle,
-            :plot,
-            className = "column is-4"
+            :plot
         ),
+        Widgets.div(style = Dict("width" => "3em")),
         Widgets.div(
             _.output,
-            :nbins,
-            className = "column is-8"
+            :nbins
         ),
-        className = "columns"
+        style = Dict("display" => "flex", "direction" => "row")
     )
 end
