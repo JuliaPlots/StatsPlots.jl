@@ -1,5 +1,7 @@
 @widget wdg function interactstats(t; throttle = 0.1)
-    :names = StatPlots.column_names(StatPlots.getiterator(t))
+    cols, colnames = create_columns_from_iterabletable(getiterator(t))
+    :names = colnames
+    d = Dict((key, convert_missing.(val)) for (key, val)  in zip(colnames, cols))
     :x =  @nodeps dropdown(:names, placeholder = "First axis", multiple = true)
     :y =  @nodeps dropdown(:names, placeholder = "Second axis", multiple = true)
     wdg[:y_toggle] = @nodeps togglecontent(wdg[:y], value = false, label = "Second axis")
@@ -29,7 +31,10 @@
         if (:plot[] == 0)
             plot()
         else
-            @df t :plot_type[](:x[], y..., by..., nbins = $(:nbins_throttle))
+            x = hcat(getindex.(d, :x[])...)
+            y = (:y_toggle[] && !isempty(:y[])) ? [hcat(getindex.(d, :y[])...)] : []
+            by = (:by_toggle[] && !isempty(:by[])) ? [(^(:group), Tuple(getindex.(d, :by[])))] : []
+            :plot_type[](x, y...; nbins = $(:nbins_throttle), by...)
         end
     end
     @layout! wdg Widgets.div(
