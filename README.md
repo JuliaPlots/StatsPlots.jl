@@ -245,6 +245,18 @@ groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores",
 
 ![](https://user-images.githubusercontent.com/6645258/32116755-b7018f02-bb2a-11e7-82c7-ca471ecaeecf.png)
 
+## Dendrograms
+
+```julia
+using Clustering
+D = rand(10, 10)
+D += D'
+hc = hclust(D, :single)
+plot(hc)
+```
+
+![dendrogram](https://user-images.githubusercontent.com/381464/43355211-855d5aa2-920d-11e8-82d7-2bf1a7aeccb5.png)
+
 ## GroupedErrors.jl for population analysis
 
 Population analysis on a table-like data structures can be done using the highly recommended [GroupedErrors](https://github.com/piever/GroupedErrors.jl) package.
