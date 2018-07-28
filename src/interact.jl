@@ -34,7 +34,9 @@
             x = hcat(getindex.(d, :x[])...)
             y = (:y_toggle[] && !isempty(:y[])) ? [hcat(getindex.(d, :y[])...)] : []
             by = (:by_toggle[] && !isempty(:by[])) ? [(^(:group), Tuple(getindex.(d, :by[])))] : []
-            :plot_type[](x, y...; nbins = $(:nbins_throttle), by...)
+            label = length(:x[]) > 1 ? [(^(:label), :x[])] :
+                    (:y_toggle[] && length(:y[]) > 1) ? [(^(:label), :y[])] : []
+            :plot_type[](x, y...; nbins = $(:nbins_throttle), by..., label...)
         end
     end
     @layout! wdg Widgets.div(
