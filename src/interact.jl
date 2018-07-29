@@ -1,4 +1,4 @@
-@widget wdg function dataviewer(t; throttle = 0.1)
+@widget wdg function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
     cols, colnames = create_columns_from_iterabletable(getiterator(t))
     :names = colnames
     d = Dict((key, convert_missing.(val)) for (key, val)  in zip(colnames, cols))
@@ -19,8 +19,12 @@
             "violin"       => violin
         ),
         placeholder = "Plot type")
-    :nbins =  @nodeps slider(1:100, value = 30, label = "number of bins")
+
+    # Add bins if the plot allows it
+    :display_nbins = $(:plot_type) in [corrplot, cornerplot, histogram, marginalhist] ? "block" : "none"
+    :nbins =  (@nodeps slider(nbins_range, value = nbins, label = "number of bins"))(style = Dict("display" => $(:display_nbins)))
     :nbins_throttle = Observables.throttle(throttle, :nbins)
+
     :by = @nodeps dropdown(:names, multiple = true, placeholder="Group by")
     wdg[:by_toggle] = @nodeps togglecontent(wdg[:by], value = false, label = "Split data")
     :plot = @nodeps button("plot")
