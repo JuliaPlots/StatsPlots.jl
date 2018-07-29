@@ -94,13 +94,11 @@ The old syntax, passing the `DataFrame` as the first argument to the `plot` call
 
 An experimental GUI based on Interact package is available to create plots from a table interactively, using any of the recipes defined below. This small app can be deployed in a Jupyter lab / notebook, Juno plot pane, a Blink window or in the browser, see [here](https://juliagizmos.github.io/Interact.jl/latest/deploying.html) for instructions.
 
-Note: the GUI is experimental and requires the unreleased version of Interact.
-
 ```julia
 import RDatasets
 iris = RDatasets.dataset("datasets", "iris")
-using StatPlots, Interact
-interactstats(iris)
+using StatPlots, InteractBulma
+dataviewer(iris)
 ```
 
 ![interactstats](https://user-images.githubusercontent.com/6333339/43359702-abd82d74-929e-11e8-8fc9-b589287f1c23.png)

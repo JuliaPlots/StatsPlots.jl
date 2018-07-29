@@ -1,4 +1,4 @@
-@widget wdg function interactstats(t; throttle = 0.1)
+@widget wdg function dataviewer(t; throttle = 0.1)
     cols, colnames = create_columns_from_iterabletable(getiterator(t))
     :names = colnames
     d = Dict((key, convert_missing.(val)) for (key, val)  in zip(colnames, cols))
