@@ -22,7 +22,8 @@
 
     # Add bins if the plot allows it
     :display_nbins = $(:plot_type) in [corrplot, cornerplot, histogram, marginalhist] ? "block" : "none"
-    :nbins =  (@nodeps slider(nbins_range, value = nbins, label = "number of bins"))(style = Dict("display" => $(:display_nbins)))
+    :nbins =  (@nodeps slider(nbins_range, extra_obs = ["display" => :display_nbins], value = nbins, label = "number of bins"))
+    wdg[:nbins].scope.dom = Widgets.div(wdg[:nbins].scope.dom, attributes = Dict("data-bind" => "style: {display: display}"))
     :nbins_throttle = Observables.throttle(throttle, :nbins)
 
     :by = @nodeps dropdown(:names, multiple = true, placeholder="Group by")
