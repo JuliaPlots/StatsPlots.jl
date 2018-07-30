@@ -37,11 +37,17 @@
             plot()
         else
             x = hcat(getindex.(d, :x[])...)
-            y = (:y_toggle[] && !isempty(:y[])) ? [hcat(getindex.(d, :y[])...)] : []
-            by = (:by_toggle[] && !isempty(:by[])) ? [(^(:group), Tuple(getindex.(d, :by[])))] : []
+            has_y = (:y_toggle[] && !isempty(:y[]))
+            y = has_y ? [hcat(getindex.(d, :y[])...)] : []
+            by = (:by_toggle[] && !isempty(:by[])) ? [(^(:group), NamedTuples.make_tuple(:by[])(getindex.(d, :by[])...))] : []
             label = length(:x[]) > 1 ? [(^(:label), :x[])] :
-                    (:y_toggle[] && length(:y[]) > 1) ? [(^(:label), :y[])] : []
-            :plot_type[](x, y...; nbins = $(:nbins_throttle), by..., label...)
+                    (:y_toggle[] && length(:y[]) > 1) ? [(^(:label), :y[])] :
+                    isempty(by) ? [(^(:label), "")] : []
+            densityplot1D = :plot_type[] in [density, histogram]
+            xlabel = (length(:x[]) == 1 && (densityplot1D || has_y)) ? [(^(:xlabel), :x[][1])] : []
+            ylabel = (:y_toggle[] && length(:y[]) == 1) ? [(^(:ylabel), :y[][1])] :
+                     (!has_y && !densityplot1D && length(:x[]) == 1) ? [(^(:ylabel), :x[][1])] : []
+            :plot_type[](x, y...; nbins = $(:nbins_throttle), by..., label..., xlabel..., ylabel...)
         end
     end
     @layout! wdg Widgets.div(
