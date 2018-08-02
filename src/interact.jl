@@ -1,4 +1,4 @@
-@widget wdg function dataviewer(t::Observable; throttle = 0.1, nbins = 30, nbins_range = 1:100)
+@widget wdg function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
     (t isa Observable) || (t = Observable{Any}(t))
     :table = t
     :columns_and_names = create_columns_from_iterabletable(getiterator($(:table)))
