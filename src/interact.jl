@@ -1,7 +1,15 @@
-@widget wdg function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
-    cols, colnames = create_columns_from_iterabletable(getiterator(t))
-    :names = colnames
-    d = Dict((key, convert_missing.(val)) for (key, val)  in zip(colnames, cols))
+@widget wdg function dataviewer(t::Observable; throttle = 0.1, nbins = 30, nbins_range = 1:100)
+    (t isa Observable) || (t = Observable{Any}(t))
+    :table = t
+    :columns_and_names = create_columns_from_iterabletable(getiterator($(:table)))
+
+    # hack before dropdown is set to remember value on InteractBase
+    :names = Observable{Any}(:columns_and_names[][2])
+    on(wdg[:columns_and_names]) do val
+        (wdg[:names][] != val[2]) && (wdg[:names][] = val[2])
+    end
+
+    :dict = Dict((key, convert_missing.(val)) for (val, key)  in zip($(:columns_and_names)...))
     :x =  @nodeps dropdown(:names, placeholder = "First axis", multiple = true)
     :y =  @nodeps dropdown(:names, placeholder = "Second axis", multiple = true)
     wdg[:y_toggle] = @nodeps togglecontent(wdg[:y], value = false, label = "Second axis")
@@ -36,10 +44,10 @@
         if (:plot[] == 0)
             plot()
         else
-            x = hcat(getindex.(d, :x[])...)
+            x = hcat(getindex.($(:dict), :x[])...)
             has_y = (:y_toggle[] && !isempty(:y[]))
-            y = has_y ? [hcat(getindex.(d, :y[])...)] : []
-            by = (:by_toggle[] && !isempty(:by[])) ? [(^(:group), NamedTuples.make_tuple(:by[])(getindex.(d, :by[])...))] : []
+            y = has_y ? [hcat(getindex.($(:dict), :y[])...)] : []
+            by = (:by_toggle[] && !isempty(:by[])) ? [(^(:group), NamedTuples.make_tuple(:by[])(getindex.($(:dict), :by[])...))] : []
             label = length(:x[]) > 1 ? [(^(:label), :x[])] :
                     (:y_toggle[] && length(:y[]) > 1) ? [(^(:label), :y[])] :
                     isempty(by) ? [(^(:label), "")] : []
