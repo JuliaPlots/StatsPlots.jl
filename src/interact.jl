@@ -3,11 +3,7 @@
     :table = t
     :columns_and_names = create_columns_from_iterabletable(getiterator($(:table)))
 
-    # hack before dropdown is set to remember value on InteractBase
-    :names = Observable{Any}(:columns_and_names[][2])
-    on(wdg[:columns_and_names]) do val
-        (wdg[:names][] != val[2]) && (wdg[:names][] = val[2])
-    end
+    :names = $(:columns_and_names)[2]
 
     :dict = Dict((key, convert_missing.(val)) for (val, key)  in zip($(:columns_and_names)...))
     :x =  @nodeps dropdown(:names, placeholder = "First axis", multiple = true)
