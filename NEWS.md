@@ -3,6 +3,14 @@
 
 ## 0.7 current version
 
+### 0.7.3
+
+- fixed out of bound error with `violin` and `boxplot`
+- fixed title location in `corrplot`
+- better handling of `NaN` and `Inf`
+- recipe for `hclust` dendrogram (clustering visualization)
+- `dataviewer` recipe for interactive GUIs
+
 ### 0.7.2
 
 - fix stack overflow with `@df` and `begin ... end` blocks
