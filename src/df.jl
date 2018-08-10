@@ -92,6 +92,12 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
     return Expr(x.head, (parse_iterabletable_call!(d, arg, syms, vars) for arg in x.args)...)
 end
 
+column_names(t) = column_names(eltype(t))
+column_names(::Type{T}) where {T} = fieldnames(T)
+
+column_types(t) = column_types(eltype(t))
+column_types(::Type{T}) where {T} = map(f -> fieldtype(T, f), fieldnames(T))
+
 function _argnames(d, x::Expr)
     Expr(:vect, [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]...)
 end
@@ -146,7 +152,7 @@ function extract_columns_from_iterabletable(df, syms...)
 
     col_indices = union(Iterators.filter(t -> t != 0,
         (isa(s, Integer) ? s : get(name2index, s, 0) for s in vcat(syms...))))
-    col_values = create_columns_from_iterabletable(df, col_indices)[1]
+    col_values = create_columns_from_iterabletable(df, sel_cols = col_indices)[1]
     col_dict = Dict(zip(col_indices, [convert_missing.(t) for t in col_values]))
 
     return Tuple(get_col_from_dict(s, col_dict, name2index) for s in syms)
