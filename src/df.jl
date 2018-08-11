@@ -53,14 +53,17 @@ end
 
 parse_iterabletable_call!(d, x, syms, vars) = x
 
+function parse_iterabletable_call!(d, x::QuoteNode, syms, vars)
+    new_var = gensym(x.value)
+    push!(syms, x)
+    push!(vars, new_var)
+    return new_var
+end
+
+
 function parse_iterabletable_call!(d, x::Expr, syms, vars)
     if x.head == :. && length(x.args) == 2
-        isa(x.args[2], Expr) && (x.args[2].head == :quote) && return x
-    elseif x.head == :quote
-        new_var = gensym(x.args[1])
-        push!(syms, x)
-        push!(vars, new_var)
-        return new_var
+        isa(x.args[2], QuoteNode) && return x
     elseif x.head == :call
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
@@ -131,7 +134,7 @@ compute_name(df, i) = reshape([compute_name(df, ii) for ii in i], 1, :)
 
 function add_label(argnames, f, args...; kwargs...)
     i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
-    if (i == 0)
+    if (i === nothing)
         return f(args...; kwargs...)
     else
         return f(label = argnames[i], args...; kwargs...)

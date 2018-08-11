@@ -17,8 +17,8 @@ end
 
 @recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both)
     # if only y is provided, then x will be UnitRange 1:length(y)
-    if typeof(x) <: Range
-        if step(x) == start(x) == 1
+    if typeof(x) <: AbstractRange
+        if step(x) == first(x) == 1
             x = plotattributes[:series_plotindex]
         else
             x = [getindex(x, plotattributes[:series_plotindex])]

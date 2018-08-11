@@ -6,8 +6,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
 @recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true, whisker_width=:match)
     # if only y is provided, then x will be UnitRange 1:length(y)
-    if typeof(x) <: Range
-        if step(x) == start(x) == 1
+    if typeof(x) <: AbstractRange
+        if step(x) == first(x) == 1
             x = plotattributes[:series_plotindex]
         else
             x = [getindex(x, plotattributes[:series_plotindex])]
@@ -26,7 +26,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         values = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
 
         # compute quantiles
-        q1,q2,q3,q4,q5 = quantile(values, linspace(0,1,5))
+        q1,q2,q3,q4,q5 = quantile(values, Base.range(0,stop=1,length=5))
 
         # notch
         n = notch_width(q2, q4, length(values))
