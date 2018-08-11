@@ -6,8 +6,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
 @recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true, whisker_width=:match)
     # if only y is provided, then x will be UnitRange 1:length(y)
-    if typeof(x) <: Range
-        if step(x) == start(x) == 1
+    if typeof(x) <: AbstractRange
+        if step(x) == first(x) == 1
             x = plotattributes[:series_plotindex]
         else
             x = [getindex(x, plotattributes[:series_plotindex])]
