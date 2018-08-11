@@ -11,8 +11,8 @@ import IterableTables
 import DataValues: DataValue
 import TableTraits: getiterator, isiterabletable
 import TableTraitsUtils: create_columns_from_iterabletable
-using Widgets, Observables
-import Widgets: @nodeps
+#using Widgets, Observables
+#import Widgets: @nodeps
 import DataStructures: OrderedDict
 import NamedTuples
 import Clustering: Hclust
@@ -26,7 +26,7 @@ import KernelDensity
 export @df
 
 include("df.jl")
-include("interact.jl")
+# include("interact.jl")
 include("corrplot.jl")
 include("cornerplot.jl")
 include("distributions.jl")
