@@ -20,7 +20,7 @@ This package contains many statistical recipes for concepts and types introduced
 Initialize:
 
 ```julia
-#Pkg.clone("git@github.com:JuliaPlots/StatPlots.jl.git")
+#]add StatPlots # install the package if it isn't installed
 using StatPlots
 gr(size=(400,300))
 ```
