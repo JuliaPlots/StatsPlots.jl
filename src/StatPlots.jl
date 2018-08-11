@@ -14,7 +14,6 @@ import TableTraitsUtils: create_columns_from_iterabletable
 #using Widgets, Observables
 #import Widgets: @nodeps
 import DataStructures: OrderedDict
-import NamedTuples
 import Clustering: Hclust
 
 import KernelDensity
