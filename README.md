@@ -28,11 +28,11 @@ gr(size=(400,300))
 Table-like data structures, including `DataFrames`, `IndexedTables`, `DataStreams`, etc... (see [here](https://github.com/davidanthoff/IterableTables.jl) for an exhaustive list), are supported thanks to the macro `@df` which allows passing columns as symbols. Those columns can then be manipulated inside the `plot` call, like normal `Arrays`:
 ```julia
 using DataFrames, IndexedTables
-df = DataFrame(a = 1:10, b = 10*rand(10), c = 10 * rand(10))
+df = DataFrame(a = 1:10, b = 10 .* rand(10), c = 10 .* rand(10))
 @df df plot(:a, [:b :c], colour = [:red :blue])
-@df df scatter(:a, :b, markersize = 4 * log.(:c .+ 0.1))
+@df df scatter(:a, :b, markersize = 4 .* log.(:c .+ 0.1))
 t = table(1:10, rand(10), names = [:a, :b]) # IndexedTable
-@df t scatter(2 * :b)
+@df t scatter(2 .* :b)
 ```
 
 Inside a `@df` macro call, the `cols` utility function can be used to refer to a range of columns:
@@ -133,8 +133,8 @@ A correlation plot may also be produced from a matrix:
 
 ```julia
 M = randn(1000,4)
-M[:,2] += 0.8sqrt.(abs.(M[:,1])) - 0.5M[:,3] + 5
-M[:,3] -= 0.7M[:,1].^2 + 2
+M[:,2] .+= 0.8sqrt.(abs.(M[:,1])) .- 0.5M[:,3] .+ 5
+M[:,3] .-= 0.7M[:,1].^2 .+ 2
 corrplot(M, label = ["x$i" for i=1:4])
 ```
 
@@ -170,9 +170,9 @@ Asymmetric violin plots can be created using the `side` keyword (`:both` - defau
 
 ```julia
 singers_moscow = deepcopy(singers)
-singers_moscow[:Height] = singers_moscow[:Height]+5
-@df singers violin(:VoicePart,:Height, side=:right, marker=(0.2,:blue,stroke(0)), label="Scala")
-@df singers_moscow violin!(:VoicePart,:Height, side=:left, marker=(0.2,:red,stroke(0)), label="Moscow")
+singers_moscow[:Height] = singers_moscow[:Height] .+ 5
+@df singers violin(:VoicePart,:Height, side=:right, marker=(0.2, :blue, stroke(0)), label="Scala")
+@df singers_moscow violin!(:VoicePart,:Height, side=:left, marker=(0.2, :red, stroke(0)), label="Moscow")
 ```
 
 ![2violin](https://user-images.githubusercontent.com/6333339/29870110-d90ed468-8d7d-11e7-8ebb-008323dff8b8.png)
@@ -188,7 +188,7 @@ histogram shows spikes well, but may oversmooth in the tails. The y axis is not
 intuitively interpretable.
 
 ```julia
-a = [randn(100); randn(100).+3; randn(100)./2.+3]
+a = [randn(100); randn(100) .+ 3; randn(100) ./ 2 .+ 3]
 ea_histogram(a, bins = :scott, fillalpha = 0.4)
 ```
 

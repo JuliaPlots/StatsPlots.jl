@@ -42,7 +42,7 @@ ea_binnumber(y, bin::Symbol) = Plots._auto_binning_nbins((y,), 1, mode = bin)
 
 @recipe function f(::Type{Val{:ea_histogram}}, x, y, z)
     bin = ea_binnumber(y, plotattributes[:bins])
-    bins := quantile(y, linspace(0,1,bin+1))
+    bins := quantile(y, range(0, stop = 1, length = bin+1))
     normalize --> :density
     seriestype := :barhist
     ()
@@ -66,7 +66,7 @@ function wand_bins(x, scalest = :minim, gridsize = 401, range_x = extrema(x), tr
 
     n = length(x)
     minx, maxx = range_x
-    gpoints = linspace(minx, maxx, gridsize)
+    gpoints = range(minx, stop = maxx, length = gridsize)
     gcounts = linbin(x, gpoints, trun = trun)
 
     scalest = if scalest == :stdev
@@ -84,7 +84,7 @@ function wand_bins(x, scalest = :minim, gridsize = 401, range_x = extrema(x), tr
     sa = (minx - mean(x))/scalest
     sb = (maxx - mean(x))/scalest
 
-    gpoints = linspace(sa, sb, gridsize)
+    gpoints = range(sa, stop = sb, length = gridsize)
     gcounts = linbin(sx, gpoints, trun = trun)
 
     hpi = begin
@@ -142,7 +142,7 @@ function bkfe(gcounts, drv, bandwidth, range_x)
     a, b = range_x
     h = bandwidth
     M = length(gcounts)
-    gpoints = linspace(a, b, M)
+    gpoints = range(a, stop = b, length = M)
 
     ## Set the sample size and bin width
 
