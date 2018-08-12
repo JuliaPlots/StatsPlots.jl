@@ -188,7 +188,7 @@ histogram shows spikes well, but may oversmooth in the tails. The y axis is not
 intuitively interpretable.
 
 ```julia
-a = [randn(100); randn(100)+3; randn(100)/2+3]
+a = [randn(100); randn(100).+3; randn(100)./2.+3]
 ea_histogram(a, bins = :scott, fillalpha = 0.4)
 ```
 
