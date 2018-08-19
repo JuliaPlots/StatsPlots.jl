@@ -145,8 +145,8 @@ get_col_from_dict(s::Int, col_dict, name2index) = col_dict[s]
 get_col_from_dict(s::Symbol, col_dict, name2index) =
     haskey(name2index, s) ? col_dict[name2index[s]] : s
 
-get_col_from_dict(s, col_dict, name2index) =
-    hcat(get_col_from_dict.(s, col_dict, name2index)...)
+get_col_from_dict(syms, col_dict, name2index) =
+    hcat((get_col_from_dict(s, col_dict, name2index) for s in syms)...)
 
 function extract_columns_from_iterabletable(df, syms...)
     isiterabletable(df) || error("Only iterable tables are supported")
