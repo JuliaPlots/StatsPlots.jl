@@ -39,11 +39,11 @@ end
         # make the violin
         xcenter = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
         if (side==:right)
-          xcoords = vcat(widths, zeros(length(widths))) + xcenter
+          xcoords = vcat(widths, zeros(length(widths))) .+ xcenter
         elseif (side==:left)
-          xcoords = vcat(zeros(length(widths)), -reverse(widths)) + xcenter
+          xcoords = vcat(zeros(length(widths)), -reverse(widths)) .+ xcenter
         else
-          xcoords = vcat(widths, -reverse(widths)) + xcenter
+          xcoords = vcat(widths, -reverse(widths)) .+ xcenter
         end
         ycoords = vcat(centers, reverse(centers))
 
