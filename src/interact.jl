@@ -1,7 +1,7 @@
 function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
-    (t isa AbsrtactObservable) || (t = Observable{Any}(t))
+    (t isa AbstractObservable) || (t = Observable{Any}(t))
 
-    columns_and_names = create_columns_from_iterabletable(@map getiterator(&t))
+    columns_and_names = @map create_columns_from_iterabletable(getiterator(&t))
 
     names = @map (&columns_and_names)[2]
 
