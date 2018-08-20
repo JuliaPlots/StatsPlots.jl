@@ -145,16 +145,19 @@ get_col_from_dict(s::Int, col_dict, name2index) = col_dict[s]
 get_col_from_dict(s::Symbol, col_dict, name2index) =
     haskey(name2index, s) ? col_dict[name2index[s]] : s
 
-get_col_from_dict(s, col_dict, name2index) =
-    hcat(get_col_from_dict.(s, col_dict, name2index)...)
+get_col_from_dict(syms, col_dict, name2index) =
+    hcat((get_col_from_dict(s, col_dict, name2index) for s in syms)...)
 
 function extract_columns_from_iterabletable(df, syms...)
     isiterabletable(df) || error("Only iterable tables are supported")
     iter = getiterator(df)
     name2index = Dict(zip(column_names(iter), 1:length(column_names(iter))))
 
-    col_indices = union(Iterators.filter(t -> t != 0,
-        (isa(s, Integer) ? s : get(name2index, s, 0) for s in vcat(syms...))))
+    _convert(s::Integer) = s
+    _convert(s::Symbol) = get(name2index, s, 0)
+    _convert(s) = map(_convert, s)
+
+    col_indices = union(Iterators.filter(t -> t != 0, Iterators.flatten(_convert(s) for s in syms)))
     col_values = create_columns_from_iterabletable(df, sel_cols = col_indices)[1]
     col_dict = Dict(zip(col_indices, [convert_missing.(t) for t in col_values]))
 
