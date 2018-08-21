@@ -44,14 +44,14 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
             y_cols = has_y ? [hcat(getindex.((&dict,), y[])...)] : []
             by_tup = Tuple(getindex(&dict, b) for b in by[])
             by_kwarg = has_by ? [(:group, NamedTuple{Tuple(by[])}(by_tup))] : []
-            label = length(x_cols[]) > 1 ? [(:label, x_cols[])] :
-                    (y_toggle[] && length(y[]) > 1) ? [(:label, y_cols[])] :
+            label = length(x_cols) > 1 ? [(:label, x_cols)] :
+                    (y_toggle[] && length(y[]) > 1) ? [(:label, y_cols)] :
                     has_by ? [(:label, "")] : []
             densityplot1D = plot_type[] in [density, histogram]
             xlabel = (length(x[]) == 1 && (densityplot1D || has_y)) ? [(:xlabel, x[][1])] : []
             ylabel = (has_y && length(y[]) == 1) ? [(:ylabel, y[][1])] :
                      (!has_y && !densityplot1D && length(x[]) == 1) ? [(:ylabel, x[][1])] : []
-            plot_type[](x, y...; nbins = &nbins_throttle, by..., label..., xlabel..., ylabel...)
+            plot_type[](x_cols, y_cols...; nbins = &nbins_throttle, by_kwarg..., label..., xlabel..., ylabel...)
         end
     end
     wdg = Widget{:dataviewer}(["x" => x, "y" => y, "y_toggle" => y_toggle, "by" => by, "by_toggle" => by_toggle,
