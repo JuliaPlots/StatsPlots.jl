@@ -12,7 +12,7 @@ import DataValues: DataValue
 import TableTraits: getiterator, isiterabletable
 import TableTraitsUtils: create_columns_from_iterabletable
 using Widgets, Observables
-import Observables: AbstractObservable, @map
+import Observables: AbstractObservable, @map, observe
 import Widgets: @nodeps
 import DataStructures: OrderedDict
 import Clustering: Hclust

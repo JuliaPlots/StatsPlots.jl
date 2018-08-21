@@ -6,21 +6,21 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
     names = @map (&columns_and_names)[2]
 
     dict = @map Dict((key, convert_missing.(val)) for (val, key)  in zip((&columns_and_names)...))
-    x =  @map @nodeps dropdown(names, placeholder = "First axis", multiple = true)
-    y =  @map @nodeps dropdown(names, placeholder = "Second axis", multiple = true)
+    x =  @nodeps dropdown(names, placeholder = "First axis", multiple = true)
+    y =  @nodeps dropdown(names, placeholder = "Second axis", multiple = true)
     y_toggle = @nodeps togglecontent(y, value = false, label = "Second axis")
     plot_type = @nodeps dropdown(
         OrderedDict(
-            "line"         => plot,
-            "scatter"      => scatter,
-            "bar"          => groupedbar,
-            "boxplot"      => boxplot,
-            "corrplot"     => corrplot,
-            "cornerplot"   => cornerplot,
-            "density"      => density,
-            "histogram"    => histogram,
-            "marginalhist" => marginalhist,
-            "violin"       => violin
+            "line"         => Plots.plot,
+            "scatter"      => Plots.scatter,
+            "bar"          => StatPlots.groupedbar,
+            "boxplot"      => StatPlots.boxplot,
+            "corrplot"     => StatPlots.corrplot,
+            "cornerplot"   => StatPlots.cornerplot,
+            "density"      => StatPlots.density,
+            "histogram"    => StatPlots.histogram,
+            "marginalhist" => StatPlots.marginalhist,
+            "violin"       => StatPlots.violin
         ),
         placeholder = "Plot type")
 
