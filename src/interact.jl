@@ -40,7 +40,7 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
         else
             x_cols = hcat(getindex.((&dict,), x[])...)
             has_y = y_toggle[] && !isempty(y[])
-            has_by = (by_toggle[] && !isempty(by[]))
+            has_by = by_toggle[] && !isempty(by[])
             y_cols = has_y ? [hcat(getindex.((&dict,), y[])...)] : []
             by_tup = Tuple(getindex(&dict, b) for b in by[])
             by_kwarg = has_by ? [(:group, NamedTuple{Tuple(by[])}(by_tup))] : []
@@ -49,7 +49,7 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
                     has_by ? [(:label, "")] : []
             densityplot1D = plot_type[] in [density, histogram]
             xlabel = (length(x[]) == 1 && (densityplot1D || has_y)) ? [(:xlabel, x[][1])] : []
-            ylabel = (has_y && length(y[]) == 1) ? [(ylabel, y[][1])] :
+            ylabel = (has_y && length(y[]) == 1) ? [(:ylabel, y[][1])] :
                      (!has_y && !densityplot1D && length(x[]) == 1) ? [(:ylabel, x[][1])] : []
             plot_type[](x, y...; nbins = &nbins_throttle, by..., label..., xlabel..., ylabel...)
         end
