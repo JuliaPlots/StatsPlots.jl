@@ -26,7 +26,7 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
 
     # Add bins if the plot allows it
     display_nbins = @map (&plot_type) in [corrplot, cornerplot, histogram, marginalhist] ? "block" : "none"
-    nbins =  (@nodeps slider(nbins_range, extra_obs = ["display" => :display_nbins], value = nbins, label = "number of bins"))
+    nbins =  (@nodeps slider(nbins_range, extra_obs = ["display" => display_nbins], value = nbins, label = "number of bins"))
     nbins.scope.dom = Widgets.div(nbins.scope.dom, attributes = Dict("data-bind" => "style: {display: display}"))
     nbins_throttle = Observables.throttle(throttle, nbins)
 
