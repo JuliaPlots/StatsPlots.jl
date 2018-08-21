@@ -55,14 +55,14 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
         end
     end
     wdg = Widget{:dataviewer}(["x" => x, "y" => y, "y_toggle" => y_toggle, "by" => by, "by_toggle" => by_toggle,
-        "plot_type" => plot_type, "plot" => plt, "nbins" => nbins], output = output)
+        "plot_type" => plot_type, "plot_button" => plt, "nbins" => nbins], output = output)
     @layout! wdg Widgets.div(
         Widgets.div(
             :x,
             :y_toggle,
             :plot_type,
             :by_toggle,
-            :plot
+            :plot_button
         ),
         Widgets.div(style = Dict("width" => "3em")),
         Widgets.div(
