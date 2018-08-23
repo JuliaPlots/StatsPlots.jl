@@ -43,7 +43,7 @@ ea_binnumber(y, bin::Symbol) = Plots._auto_binning_nbins((y,), 1, mode = bin)
 @recipe function f(::Type{Val{:ea_histogram}}, x, y, z)
     bin = ea_binnumber(y, plotattributes[:bins])
     bins := quantile(y, range(0, stop = 1, length = bin+1))
-    normalize --> :density
+    normalize := :density
     seriestype := :barhist
     ()
 end
@@ -54,6 +54,12 @@ push!(Plots._histogram_like, :ea_histogram)
 @shorthands ea_histogram
 
 
+@recipe function f(::Type{Val{:testhist}}, x, y, z)
+    markercolor --> :red
+    seriestype := :scatter
+    ()
+end
+@shorthands testhist
 # ---------------------------------------------------------------------------
 # Compute binsizes using Wand (1997)'s criterion
 # Ported from R code located here https://github.com/cran/KernSmooth/tree/master/R
