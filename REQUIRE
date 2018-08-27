@@ -9,7 +9,7 @@ IterableTables 0.5
 TableTraitsUtils 0.1
 TableTraits
 DataValues
-#Widgets
-#Observables
+Widgets 0.4.0
+Observables 0.2.2
 DataStructures
 Clustering
