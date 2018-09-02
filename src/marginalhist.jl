@@ -3,8 +3,9 @@
 @recipe function f(::Type{Val{:marginalhist}}, plt::AbstractPlot; density = false)
     x, y = plotattributes[:x], plotattributes[:y]
     bns = get(plotattributes, :bins, :auto)
+    scale = get(plotattributes, :scale, :identity)
     edges1, edges2 = Plots._hist_edges((x,y), bns)
-    xlims, ylims = Plots.ignorenan_extrema(x), Plots.ignorenan_extrema(y)
+    xlims, ylims = Plots.widen(Plots.ignorenan_extrema(x)..., scale), Plots.widen(Plots.ignorenan_extrema(y)..., scale)
 
     # set up the subplots
     legend --> false
