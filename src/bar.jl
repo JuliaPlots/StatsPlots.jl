@@ -6,6 +6,7 @@ end
 
 grouped_xy(x::AbstractVector, y::AbstractMatrix) = x, y
 grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
+grouped_xy(x::AbstractVector, y::AbstractVector{<:AbstractVector}) = x, hcat(y...)
 
 @recipe function f(g::GroupedBar)
     x, y = grouped_xy(g.args...)
