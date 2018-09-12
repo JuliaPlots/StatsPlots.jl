@@ -165,7 +165,7 @@ function extract_columns_from_iterabletable(df, syms...)
 end
 
 convert_missing(el) = el
-convert_missing(el::DataValue{T}) where {T} = isnull(el) ? error("Missing data of type $T is not supported") : el.value
+convert_missing(el::DataValue{T}) where {T} = isna(el) ? missing : el.value
 convert_missing(el::DataValue{<:AbstractString}) = get(el, "")
 convert_missing(el::DataValue{Symbol}) = get(el, Symbol())
 convert_missing(el::DataValue{<:Real}) = get(convert(DataValue{Float64}, el), NaN)

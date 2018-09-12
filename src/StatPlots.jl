@@ -8,7 +8,7 @@ using Plots.PlotMeasures
 using StatsBase
 using Distributions
 import IterableTables
-import DataValues: DataValue
+import DataValues: DataValue, isna
 import TableTraits: getiterator, isiterabletable
 import TableTraitsUtils: create_columns_from_iterabletable
 using Widgets, Observables
