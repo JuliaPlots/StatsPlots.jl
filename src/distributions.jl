@@ -43,7 +43,7 @@ end
         if qqline == :identity
             ys = xs
         elseif qqline == :fit
-            itc, slp = linreg(h.qx, h.qy)
+            itc, slp = hcat(fill!(similar(h.qx), 1), h.qx) \ h.qy
             ys = slp .* xs .+ itc
         else # if qqline == :quantile || qqline == :R
             quantx, quanty = quantile(h.qx, [0.25, 0.75]), quantile(h.qy, [0.25, 0.75])
