@@ -45,9 +45,9 @@ end
         @series begin
             primary := false
             ys     = zeros(length(x))
-            sinmat = [sin((i÷2).*ti) for i = 2:cols, ti=x]
+            terms = [isodd(i) ? cos((i÷2).*ti) : sin((i÷2).*ti) for i = 2:cols, ti=x]
             for ti = eachindex(x)
-                ys[ti] = y[j,1]/sqrt(2) + sum(y[j,i].*sinmat[i-1,ti] for i = 2:cols)
+                ys[ti] = y[j,1]/sqrt(2) + sum(y[j,i].*terms[i-1,ti] for i = 2:cols)
             end
 
             x := x
