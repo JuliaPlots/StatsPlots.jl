@@ -27,7 +27,7 @@ andrewsplot
     # series in a user recipe will have different colors
     for g in unique(x)
         @series begin
-            label --> "$g"
+            label := "$g"
             range(-π, stop = π, length = 200), Surface(y[g .== x,:]) #surface needed, or the array will be split into columns
         end
     end
