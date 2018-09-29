@@ -16,6 +16,7 @@ This package contains many statistical recipes for concepts and types introduced
     - violin
     - marginalhist
     - corrplot/cornerplot
+    - andrewsplot
 
 Initialize:
 
@@ -194,6 +195,22 @@ ea_histogram(a, bins = :scott, fillalpha = 0.4)
 
 <img width="487" alt="equal area histogram"
 src ="https://user-images.githubusercontent.com/8429802/29754490-8d1b01f6-8b86-11e7-9f86-e1063a88dfd8.png">
+
+---
+
+## AndrewsPlot
+
+AndrewsPlots are a way to visualize structure in high-dimensional data by depicting each
+row of an array or table as a line that varies with the values in columns.
+https://en.wikipedia.org/wiki/Andrews_plot
+
+```julia
+using RDatasets
+iris = dataset("datasets", "iris")
+@df iris andrewsplot(:Species, cols(1:4), legend = :topleft)
+```
+
+<img width="575" alt="iris_andrews_curve" src="https://user-images.githubusercontent.com/1159782/46241166-c392e800-c368-11e8-93de-125c6eb38b52.png">
 
 ---
 
