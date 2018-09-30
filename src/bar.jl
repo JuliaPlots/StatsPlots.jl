@@ -7,12 +7,54 @@ end
 grouped_xy(x::AbstractVector, y::AbstractMatrix) = x, y
 grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
 
+function homogenous_signs(y::AbstractMatrix)
+     for i in 1:size(y, 1)
+        sgn = 0.0
+        for j in 1:size(y,2)
+            testsgn = sign(y[i,j])
+            if sgn == 0.0
+                sgn = testsgn
+            end
+            if sgn != testsgn && testsgn != 0.0
+                return false
+            end
+        end
+    end
+    true
+end
+
+function groupedbar_fillrange(y::AbstractMatrix)
+    nr, nc = size(y)
+    y = copy(y)
+        y[.!isfinite.(y)] .= 0
+        fr = zeros(nr, nc)
+        for c=2:nc
+            for r=1:nr
+                fr[r,c] = y[r,c-1]
+                y[r,c] += fr[r,c]
+            end
+        end
+        y, fr
+end
+
+#=
+    @assert homogenous_signs(rand(10,3))
+    @assert homogenous_signs([-0.5 0.0 0.5; rand(9,3)]) == false
+    @assert homogenous_signs([rand(9,3); -0.5 0.0 -0.5]) == true
+    @assert homogenous_signs([-rand(9,3); 0.5 -0.0 0.5]) == true
+=#
+
 @recipe function f(g::GroupedBar)
     x, y = grouped_xy(g.args...)
 
     nr, nc = size(y)
     isstack = pop!(plotattributes, :bar_position, :dodge) == :stack
-
+    
+    if isstack && !homogenous_signs(y)
+        y_neg = y .* (y .< 0)
+        y_pos = y .* (y .> 0)
+    end
+        
     # extract xnums and set default bar width.
     # might need to set xticks as well
     xnums = if eltype(x) <: Number
@@ -45,17 +87,18 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
     end
 
     # compute fillrange
-    fillrange := if isstack
-        # shift y/fillrange up
-        y = copy(y)
-        y[.!isfinite.(y)] .= 0
-        fr = zeros(nr, nc)
-        for c=2:nc
-            for r=1:nr
-                fr[r,c] = y[r,c-1]
-                y[r,c] += fr[r,c]
-            end
+    if isstack
+        if homogenous_signs(y)
+            y, fr = groupedbar_fillrange(y)
+        else
+            y_neg, fr_neg = groupedbar_fillrange(y_neg)
+            y_pos, fr_pos = groupedbar_fillrange(y_pos)
+            y = [y_neg, y_pos]
+            fr = [fr_neg, fr_pos]
         end
+    end
+    
+    fillrange := if isstack
         fr
     else
         get(plotattributes, :fillrange, nothing)
