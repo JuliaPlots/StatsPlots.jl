@@ -21,6 +21,24 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     bw == nothing && (bw = 0.8)
     @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
     ww = whisker_width == :match ? bw : whisker_width
+
+    nr, nc = size(y)
+    x = if nc == 1
+        x
+    else
+        bws = bw / nc
+        bar_width := bws
+        xmat = zeros(nr,nc)
+        for r=1:nr
+            loopbw = _cycle(bws, r)
+            farleft = xnums[r] - 0.5 * (loopbw * nc)
+            for c=1:nc
+                xmat[r,c] = farleft + 0.5loopbw + (c-1)*loopbw
+            end
+        end
+        xmat
+    end
+
     for (i,glabel) in enumerate(glabels)
         # filter y
         values = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
