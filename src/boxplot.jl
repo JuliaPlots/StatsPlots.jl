@@ -99,9 +99,9 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     if outliers
         @series begin
             seriestype  := :scatter
-	    if get!(plotattributes, :markershape, :circle) == :none
-            	plotattributes[:markershape] = :circle
-	    end
+        if get!(plotattributes, :markershape, :circle) == :none
+                plotattributes[:markershape] = :circle
+        end
             markercolor := plotattributes[:fillcolor]
             markerstrokecolor := plotattributes[:linecolor]
             fillrange   := nothing
