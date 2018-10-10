@@ -22,7 +22,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
     ww = whisker_width == :match ? bw : whisker_width
 
-    nr, nc = size(y)
+    nr, nc = size(y) # size(y) == (6,)
+
     x = if nc == 1
         x
     else
@@ -110,7 +111,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
     # To prevent linecolor equal to fillcolor (It makes the median visible)
     if plotattributes[:linecolor] == plotattributes[:fillcolor]
-	plotattributes[:linecolor] = plotattributes[:markerstrokecolor]
+        plotattributes[:linecolor] = plotattributes[:markerstrokecolor]
     end
 
     # Outliers
