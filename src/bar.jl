@@ -36,7 +36,7 @@ end
     # if :stack, check if the signs are constant within each group
     constant_signs = isstack ? constant_sign_rowwise(y) : true
     # if not, split the data into a positive and negative parts
-    if isstack && !constant_signs    
+    if isstack && !constant_signs
         y_neg = y .* (y .< 0)
         y_pos = y .* (y .> 0)
     end
@@ -72,6 +72,9 @@ end
         xmat
     end
 
+    # colors
+    group_id = [j for i in 1:nr, j in 1:nc]
+
     # compute fillrange
     if isstack
         if constant_signs
@@ -79,8 +82,18 @@ end
         else
             y_neg, fr_neg = groupedbar_fillrange(y_neg)
             y_pos, fr_pos = groupedbar_fillrange(y_pos)
-            y = [y_neg, y_pos]
-            fr = [fr_neg, fr_pos]
+            @series begin
+                seriestype := :bar
+                x := x
+                y := y_neg
+                fillrange := fr_neg
+                label := ""
+                color := group_id
+                primary := false
+                ()
+            end
+            y = y_pos
+            fr = fr_pos
         end
     end
 
@@ -91,5 +104,6 @@ end
     end
 
     seriestype := :bar
+    color := group_id
     x, y
 end
