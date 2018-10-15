@@ -6,6 +6,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
 @recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true, whisker_width=:match)
     # if only y is provided, then x will be UnitRange 1:length(y)
+
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
             x = plotattributes[:series_plotindex]
@@ -22,28 +23,20 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
     ww = whisker_width == :match ? bw : whisker_width
 
-    nr, nc = size(y) # size(y) == (6,)
+    ngroups = length(unique(plotattributes[:group]))
+    thisgroup = plotattributes[:series_plotindex]
 
-    x = if nc == 1
-        x
-    else
-        bws = bw / nc
-        bar_width := bws
-        xmat = zeros(nr,nc)
-        for r=1:nr
-            loopbw = _cycle(bws, r)
-            farleft = xnums[r] - 0.5 * (loopbw * nc)
-            for c=1:nc
-                xmat[r,c] = farleft + 0.5loopbw + (c-1)*loopbw
-            end
-        end
-        xmat
-    end
+    outercenter = 0.5 * bw - bw / 2ngroups
+    offsets = collect(-outercenter:(bw / ngroups):outercenter)
 
+    @info "offsets" offsets
+    # x = x .+ offsets[thisgroup]
+
+    @info "x" x
     for (i,glabel) in enumerate(glabels)
         # filter y
         values = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
-
+        @info "y" y
         # compute quantiles
         q1,q2,q3,q4,q5 = quantile(values, Base.range(0,stop=1,length=5))
 
@@ -58,6 +51,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
         # make the shape
         center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
+
         hw = 0.5_cycle(bw, i) # Box width
         HW = 0.5_cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
