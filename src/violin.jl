@@ -28,6 +28,14 @@ end
     glabels = sort(collect(unique(x)))
     bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
+
+    ngroups = length(unique(plotattributes[:group]))
+    thisgroup = plotattributes[:series_plotindex]
+
+    outercenter = 0.5 * bw - bw / 2ngroups
+    offsets = collect(-outercenter:(bw / ngroups):outercenter)
+    bw = bw / ngroups
+
     for (i,glabel) in enumerate(glabels)
         widths, centers = violin_coords(y[filter(i -> _cycle(x,i) == glabel, 1:length(y))], trim=trim)
         isempty(widths) && continue
@@ -38,6 +46,8 @@ end
 
         # make the violin
         xcenter = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
+        xcenter = xcenter + offsets[thisgroup]
+
         if (side==:right)
           xcoords = vcat(widths, zeros(length(widths))) .+ xcenter
         elseif (side==:left)
