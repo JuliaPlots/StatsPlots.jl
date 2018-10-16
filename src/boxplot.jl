@@ -31,8 +31,6 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     bw = bw / ngroups
     ww = ww / ngroups
 
-    @info "offset" offsets[thisgroup]
-
     for (i,glabel) in enumerate(glabels)
         # filter y
         values = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
@@ -51,8 +49,6 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         # make the shape
         center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
         center = center + offsets[thisgroup]
-        @warn center
-        @warn typeof(center)
 
         hw = 0.5_cycle(bw, i) # Box width
         HW = 0.5_cycle(ww, i) # Whisker width
