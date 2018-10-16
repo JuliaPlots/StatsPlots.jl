@@ -29,7 +29,7 @@ end
     bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
 
-    ngroups = length(unique(plotattributes[:group]))
+    plotattributes[:group] == nothing ? ngroups = 1 : ngroups = length(unique(plotattributes[:group]))
     thisgroup = plotattributes[:series_plotindex]
 
     outercenter = 0.5 * bw - bw / 2ngroups

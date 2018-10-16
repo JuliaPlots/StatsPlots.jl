@@ -23,7 +23,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
     ww = whisker_width == :match ? bw : whisker_width
 
-    ngroups = length(unique(plotattributes[:group]))
+    plotattributes[:group] == nothing ? ngroups = 1 : ngroups = length(unique(plotattributes[:group]))
     thisgroup = plotattributes[:series_plotindex]
 
     outercenter = 0.5 * bw - bw / 2ngroups
