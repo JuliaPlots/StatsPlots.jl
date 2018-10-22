@@ -6,6 +6,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
 @recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true, whisker_width=:match)
     # if only y is provided, then x will be UnitRange 1:length(y)
+
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
             x = plotattributes[:series_plotindex]
@@ -21,10 +22,18 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     bw == nothing && (bw = 0.8)
     @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
     ww = whisker_width == :match ? bw : whisker_width
+
+    isa(plotattributes[:group], Nothing) ? ngroups = 1 : ngroups = length(unique(plotattributes[:group]))
+    thisgroup = plotattributes[:series_plotindex]
+
+    outercenter = 0.5 * bw - bw / 2ngroups
+    offsets = collect(-outercenter:(bw / ngroups):outercenter)
+    bw = bw / ngroups
+    ww = ww / ngroups
+
     for (i,glabel) in enumerate(glabels)
         # filter y
         values = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
-
         # compute quantiles
         q1,q2,q3,q4,q5 = quantile(values, Base.range(0,stop=1,length=5))
 
@@ -39,6 +48,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
         # make the shape
         center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
+        center = center + offsets[thisgroup]
+
         hw = 0.5_cycle(bw, i) # Box width
         HW = 0.5_cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
@@ -92,16 +103,16 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
     # To prevent linecolor equal to fillcolor (It makes the median visible)
     if plotattributes[:linecolor] == plotattributes[:fillcolor]
-	plotattributes[:linecolor] = plotattributes[:markerstrokecolor]
+        plotattributes[:linecolor] = plotattributes[:markerstrokecolor]
     end
 
     # Outliers
     if outliers
         @series begin
             seriestype  := :scatter
-	    if get!(plotattributes, :markershape, :circle) == :none
-            	plotattributes[:markershape] = :circle
-	    end
+        if get!(plotattributes, :markershape, :circle) == :none
+                plotattributes[:markershape] = :circle
+        end
             markercolor := plotattributes[:fillcolor]
             markerstrokecolor := plotattributes[:linecolor]
             fillrange   := nothing
