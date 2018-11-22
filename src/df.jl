@@ -77,17 +77,18 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
             push!(vars, new_vars)
             return new_vars
         end
-    elseif x.head==:cell1d # From Query: use curly brackets to simplify writing named tuples
-        new_ex = Expr(:macrocall, Expr(:., :(StatPlots.NamedTuples), QuoteNode(Symbol("@NT"))), x.args...)
-        for (j,field_in_NT) in enumerate(new_ex.args[2:end])
+    elseif x.head==:braces # From Query: use curly brackets to simplify writing named tuples
+        new_ex = Expr(:tuple, x.args...)
+
+        for (j,field_in_NT) in enumerate(new_ex.args)
             if isa(field_in_NT, Expr) && field_in_NT.head==:(=)
-                new_ex.args[j+1] = Expr(:kw, field_in_NT.args...)
-            elseif isa(field_in_NT, Expr) && field_in_NT.head==:quote
-                new_ex.args[j+1] = Expr(:kw, field_in_NT.args[1], field_in_NT)
+                new_ex.args[j] = Expr(:(=), field_in_NT.args...)
+            elseif field_in_NT isa QuoteNode
+                new_ex.args[j] = Expr(:(=), field_in_NT.value, field_in_NT)
             elseif isa(field_in_NT, Expr)
-                new_ex.args[j+1] = Expr(:kw, Symbol(stringify(field_in_NT)), field_in_NT)
+                new_ex.args[j] = Expr(:(=), Symbol(filter(t -> t != ':', string(field_in_NT))), field_in_NT)
             elseif isa(field_in_NT, Symbol)
-               new_ex.args[j+1] = Expr(:kw, field_in_NT, field_in_NT)
+               new_ex.args[j] = Expr(:(=), field_in_NT, field_in_NT)
             end
         end
         return parse_iterabletable_call!(d, new_ex, syms, vars)
