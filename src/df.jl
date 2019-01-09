@@ -30,7 +30,7 @@ end
 
 function df_helper(d, x)
     if isa(x, Expr) && x.head == :block
-        commands = [df_helper(d, xx) for xx in x.args if !(isa(xx, Expr) && xx.head == :line)]
+        commands = [df_helper(d, xx) for xx in x.args if !(isa(xx, Expr) && xx.head == :line || isa(xx, LineNumberNode))]
         return Expr(:block, commands...)
     elseif isa(x, Expr) && x.head == :call
         syms = Any[]
@@ -47,7 +47,7 @@ function df_helper(d, x)
         end
         return Expr(:block, compute_vars, label_plot_call)
     else
-        error("Second argument can only be a block or function call")
+        error("Second argument ($x) can only be a block or function call")
     end
 end
 
