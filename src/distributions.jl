@@ -67,7 +67,9 @@ loc(D::Type{T}, x) where T<:Distribution = fit(D, x), x
 loc(D, x) = D, x
 
 @userplot QQPlot
+recipetype(::Val{:qqplot}, args...) = QQPlot(args)
 @recipe f(h::QQPlot) = qqbuild(loc(h.args[1], h.args[2])...)
 
 @userplot QQNorm
+recipetype(::Val{:qqnorm}, args...) = QQNorm(args)
 @recipe f(h::QQNorm) = QQPlot((Normal, h.args[1]))

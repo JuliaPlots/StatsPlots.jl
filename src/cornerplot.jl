@@ -1,5 +1,7 @@
 @userplot CornerPlot
 
+recipetype(::Val{:cornerplot}, args...) = CornerPlot(args)
+
 @recipe function f(cp::CornerPlot; compact=false, maxvariables=30, histpct = 0.1)
     mat = cp.args[1]
     C = cor(mat)

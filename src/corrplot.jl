@@ -1,5 +1,7 @@
 @userplot CorrPlot
 
+recipetype(::Val{:corrplot}, args...) = CorrPlot(args)
+
 function update_ticks_guides(d::KW, labs, i, j, n)
     # d[:title]  = (i==1 ? _cycle(labs,j) : "")
     # d[:xticks] = (i==n)

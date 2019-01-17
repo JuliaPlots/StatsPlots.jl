@@ -1,6 +1,7 @@
 module StatPlots
 
 using Reexport
+import RecipesBase: recipetype
 @reexport using Plots
 import Plots: _cycle
 using Plots.PlotMeasures
