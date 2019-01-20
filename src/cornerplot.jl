@@ -49,12 +49,13 @@ recipetype(::Val{:cornerplot}, args...) = CornerPlot(args)
     xformatter := x -> ""
     yformatter := y -> ""
     link      := :both
+    markercolor --> :Spectral
     grad = cgrad(get(plotattributes, :markercolor, cgrad()))
 
     # figure out good defaults for scatter plot dots:
     pltarea = 1 / (2n)
     nsamples = size(mat,1)
-    markersize  --> clamp(pltarea * 1000 / sqrt(nsamples), 1,     10)
+    markersize  --> clamp(pltarea * 800 / sqrt(nsamples), 1,     10)
     markeralpha --> clamp(pltarea * 100 / nsamples^0.42,   0.005, 0.4)
 
     # histograms in the right column
