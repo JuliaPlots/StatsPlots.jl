@@ -120,7 +120,12 @@ iris = dataset("datasets","iris")
 ---
 
 ## corrplot and cornerplot
+This plot type shows the correlation among input variables. The marker color in scatter plots reveal the degree of correlation. Pass the desired colorgradient to `markercolor`. With the default gradient positive correlations are blue, neutral are yellow and negative are red. In the 2d-histograms the color gradient show the frequency of points in that bin (as usual controlled by `seriescolor`).
 
+```julia
+gr(size = (600, 500))
+```
+then
 ```julia
 @df iris corrplot([:SepalLength :SepalWidth :PetalLength :PetalWidth], grid = false)
 ```
@@ -129,7 +134,7 @@ or also:
 @df iris corrplot(cols(1:4), grid = false)
 ```
 
-![corrplot](https://user-images.githubusercontent.com/6333339/29870023-7b07b010-8d7d-11e7-901c-3ef9a6af78bb.png)
+![corrplot](https://user-images.githubusercontent.com/8429802/51600111-8a771880-1f01-11e9-818f-6cbfc5efad74.png)
 
 
 A correlation plot may also be produced from a matrix:
@@ -141,20 +146,20 @@ M[:,3] .-= 0.7M[:,1].^2 .+ 2
 corrplot(M, label = ["x$i" for i=1:4])
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/19213784/c5e09fde-8d42-11e6-8bda-b339ebfa8bd6.png)
+![](https://user-images.githubusercontent.com/8429802/51600126-91059000-1f01-11e9-9d37-f49bee5ff534.png)
 
 ```julia
 cornerplot(M)
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/19213788/de307db6-8d42-11e6-917a-5de3ff6a8666.png)
+![](https://user-images.githubusercontent.com/8429802/51600133-96fb7100-1f01-11e9-9943-4a10f1ad2907.png)
 
 
 ```julia
 cornerplot(M, compact=true)
 ```
 
-![](https://cloud.githubusercontent.com/assets/933338/19213790/ec530b52-8d42-11e6-9139-e674558c65e9.png)
+![](https://user-images.githubusercontent.com/8429802/51600140-9bc02500-1f01-11e9-87e3-746ae4daccbb.png)
 
 ---
 
