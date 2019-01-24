@@ -1,6 +1,6 @@
-# StatPlots
+# StatsPlots
 
-[![Build Status](https://travis-ci.org/JuliaPlots/StatPlots.jl.svg?branch=master)](https://travis-ci.org/JuliaPlots/StatPlots.jl)
+[![Build Status](https://travis-ci.org/JuliaPlots/StatsPlots.jl.svg?branch=master)](https://travis-ci.org/JuliaPlots/StatsPlots.jl)
 
 
 ### Primary author: Thomas Breloff (@tbreloff)
@@ -21,8 +21,8 @@ This package contains many statistical recipes for concepts and types introduced
 Initialize:
 
 ```julia
-#]add StatPlots # install the package if it isn't installed
-using StatPlots
+#]add StatsPlots # install the package if it isn't installed
+using StatsPlots
 gr(size=(400,300))
 ```
 
@@ -60,7 +60,7 @@ df[:red] = rand(10)
 The `@df` macro plays nicely with the new syntax of the [Query.jl](https://github.com/davidanthoff/Query.jl) data manipulation package (v0.8 and above), in that a plot command can be added at the end of a query pipeline, without having to explicitly collect the outcome of the query first:
 
 ```julia
-using Query, StatPlots
+using Query, StatsPlots
 df |>
     @filter(_.a > 5) |>
     @map({_.b, d = _.c-10}) |>
@@ -98,7 +98,7 @@ A GUI based on the Interact package is available to create plots from a table in
 ```julia
 import RDatasets
 iris = RDatasets.dataset("datasets", "iris")
-using StatPlots, Interact
+using StatsPlots, Interact
 using Blink
 w = Window()
 body!(w, dataviewer(iris))
@@ -299,7 +299,7 @@ plot(hc)
 
 Population analysis on a table-like data structures can be done using the highly recommended [GroupedErrors](https://github.com/piever/GroupedErrors.jl) package.
 
-This external package, in combination with StatPlots, greatly simplifies the creation of two types of plots:
+This external package, in combination with StatsPlots, greatly simplifies the creation of two types of plots:
 
 ### 1. Subject by subject plot (generally a scatter plot)
 
@@ -312,4 +312,4 @@ Some statistical analysis is computed at the single subject level (for example t
 
 For more information please refer to the [README](https://github.com/piever/GroupedErrors.jl/blob/master/README.md).
 
-A GUI based on QML and the GR Plots.jl backend to simplify the use of StatPlots.jl and GroupedErrors.jl even further can be found [here](https://github.com/piever/PlugAndPlot.jl) (usable but still in alpha stage).
+A GUI based on QML and the GR Plots.jl backend to simplify the use of StatsPlots.jl and GroupedErrors.jl even further can be found [here](https://github.com/piever/PlugAndPlot.jl) (usable but still in alpha stage).

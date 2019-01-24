@@ -1,5 +1,8 @@
 
-# StatPlots.jl NEWS
+# StatsPlots.jl NEWS
+## 0.10
+- Rename package from StatPlots to StatsPlots
+
 
 ## 0.7 current version
 
