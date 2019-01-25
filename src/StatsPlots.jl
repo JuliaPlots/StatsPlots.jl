@@ -1,4 +1,4 @@
-module StatPlots
+module StatsPlots
 
 using Reexport
 import RecipesBase: recipetype
@@ -37,18 +37,5 @@ include("marginalhist.jl")
 include("bar.jl")
 include("dendrogram.jl")
 include("andrews.jl")
-
-__init__() = println("""
-
-This package has been renamed to StatsPlots.
-The name StatPlots has been deprecated.
-
-Please run
-
-\`]rm StatPlots\`
-\`]add StatsPlots\`
-
-Failure to update will mean that you do not receive new developments.
-""")
 
 end # module

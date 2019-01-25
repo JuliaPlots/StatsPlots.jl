@@ -1,4 +1,4 @@
-using StatPlots
+using StatsPlots
 using Test
 
 # write your own tests here

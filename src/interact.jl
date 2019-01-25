@@ -13,14 +13,14 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
         OrderedDict(
             "line"         => Plots.plot,
             "scatter"      => Plots.scatter,
-            "bar"          => StatPlots.groupedbar,
-            "boxplot"      => StatPlots.boxplot,
-            "corrplot"     => StatPlots.corrplot,
-            "cornerplot"   => StatPlots.cornerplot,
-            "density"      => StatPlots.density,
-            "histogram"    => StatPlots.histogram,
-            "marginalhist" => StatPlots.marginalhist,
-            "violin"       => StatPlots.violin
+            "bar"          => StatsPlots.groupedbar,
+            "boxplot"      => StatsPlots.boxplot,
+            "corrplot"     => StatsPlots.corrplot,
+            "cornerplot"   => StatsPlots.cornerplot,
+            "density"      => StatsPlots.density,
+            "histogram"    => StatsPlots.histogram,
+            "marginalhist" => StatsPlots.marginalhist,
+            "violin"       => StatsPlots.violin
         ),
         placeholder = "Plot type")
 

@@ -1,4 +1,4 @@
-The StatPlots.jl package is licensed under the MIT "Expat" License:
+The StatsPlots.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2016: Thomas Breloff.
 >

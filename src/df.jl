@@ -37,13 +37,13 @@ function df_helper(d, x)
         vars = Symbol[]
         plot_call = parse_iterabletable_call!(d, x, syms, vars)
         compute_vars = Expr(:(=), Expr(:tuple, vars...),
-            Expr(:call, :(StatPlots.extract_columns_from_iterabletable), d, syms...))
+            Expr(:call, :(StatsPlots.extract_columns_from_iterabletable), d, syms...))
         argnames = _argnames(d, x)
         if (length(plot_call.args) >= 2) && isa(plot_call.args[2], Expr) && (plot_call.args[2].head == :parameters)
-            label_plot_call = Expr(:call, :(StatPlots.add_label), plot_call.args[2], argnames,
+            label_plot_call = Expr(:call, :(StatsPlots.add_label), plot_call.args[2], argnames,
                 plot_call.args[1], plot_call.args[3:end]...)
         else
-            label_plot_call = Expr(:call, :(StatPlots.add_label), argnames, plot_call.args...)
+            label_plot_call = Expr(:call, :(StatsPlots.add_label), argnames, plot_call.args...)
         end
         return Expr(:block, compute_vars, label_plot_call)
     else
@@ -68,7 +68,7 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
             if length(x.args) == 1
-                push!(x.args, :(StatPlots.column_names(StatPlots.getiterator($d))))
+                push!(x.args, :(StatsPlots.column_names(StatsPlots.getiterator($d))))
                 return parse_iterabletable_call!(d, x, syms, vars)
             end
             range = x.args[2]
@@ -117,7 +117,7 @@ end
 _arg2string(d, x) = stringify(x)
 function _arg2string(d, x::Expr)
     if x.head == :call && x.args[1] == :cols
-        return :(StatPlots.compute_name($d, $(x.args[2])))
+        return :(StatsPlots.compute_name($d, $(x.args[2])))
     elseif x.head == :call && x.args[1] == :hcat
         return hcat(stringify.(x.args[2:end])...)
     elseif x.head == :hcat
