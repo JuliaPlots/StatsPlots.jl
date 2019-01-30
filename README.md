@@ -3,9 +3,9 @@
 [![Build Status](https://travis-ci.org/JuliaPlots/StatsPlots.jl.svg?branch=master)](https://travis-ci.org/JuliaPlots/StatsPlots.jl)
 
 
-### Primary author: Thomas Breloff (@tbreloff)
+### Original author: Thomas Breloff (@tbreloff), maintained by the JuliaPlots members
 
-This package contains many statistical recipes for concepts and types introduced in the JuliaStats organization, intended to be used with [Plots.jl](https://juliaplots.github.io):
+This package is a drop-in replacement for Plots.jl that contains many statistical recipes for concepts and types introduced in the JuliaStats organization. 
 
 - Types:
     - DataFrames
@@ -18,11 +18,14 @@ This package contains many statistical recipes for concepts and types introduced
     - corrplot/cornerplot
     - andrewsplot
 
+It is thus slightly less lightweight, but has more functionality. Main documentation is found in the Plots.jl documentation (https://juliaplots.github.io).
+
+
 Initialize:
 
 ```julia
 #]add StatsPlots # install the package if it isn't installed
-using StatsPlots
+using StatsPlots # no need for `using Plots` as that is reexported here
 gr(size=(400,300))
 ```
 
