@@ -42,7 +42,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
         # warn on inverted notches?
         if notch && !warning && ( (q2>(q3-n)) || (q4<(q3+n)) )
-            warn("Boxplot's notch went outside hinges. Set notch to false.")
+            @warn("Boxplot's notch went outside hinges. Set notch to false.")
             warning = true # Show the warning only one time
         end
 
