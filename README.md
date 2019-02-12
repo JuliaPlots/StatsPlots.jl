@@ -96,7 +96,7 @@ The old syntax, passing the `DataFrame` as the first argument to the `plot` call
 
 ## Visualizing a table interactively
 
-A GUI based on the Interact package is available to create plots from a table interactively, using any of the recipes defined below. This small app can be deployed in a Jupyter lab / notebook, Juno plot pane, a Blink window or in the browser, see [here](https://juliagizmos.github.io/Interact.jl/latest/deploying.html) for instructions.
+A GUI based on the Interact package is available to create plots from a table interactively, using any of the recipes defined below. This small app can be deployed in a Jupyter lab / notebook, Juno plot pane, a Blink window or in the browser, see [here](http://juliagizmos.github.io/Interact.jl/latest/deploying/) for instructions.
 
 ```julia
 import RDatasets
