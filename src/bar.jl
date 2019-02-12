@@ -4,8 +4,8 @@ recipetype(::Val{:groupedbar}, args...) = GroupedBar(args)
 
 Plots.group_as_matrix(g::GroupedBar) = true
 
-grouped_xy(x::AbstractVector, y::AbstractMatrix) = x, y
-grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
+grouped_xy(x::AbstractVector, y::AbstractArray) = x, y
+grouped_xy(y::AbstractArray) = 1:size(y,1), y
 
 @recipe function f(g::GroupedBar)
     x, y = grouped_xy(g.args...)

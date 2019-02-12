@@ -118,3 +118,47 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     ()
 end
 Plots.@deps boxplot shape scatter
+
+
+# ------------------------------------------------------------------------------
+# Grouped Boxplot
+
+@userplot GroupedBoxplot
+
+recipetype(::Val{:groupedboxplot}, args...) = GroupedBoxplot(args)
+
+@recipe function f(g::GroupedBoxplot)
+    x, y = grouped_xy(g.args...)
+
+    # extract xnums and set default bar width.
+    # might need to set xticks as well
+    x = if eltype(x) <: Number
+		bar_width --> (0.8 * mean(diff(x)))
+        float.(x)
+    else
+		bar_width --> 0.8
+        ux = unique(x)
+        xnums = [findfirst(isequal(xi), ux) for xi in x] .- 0.5
+        xticks --> (eachindex(ux) .- 0.5, ux)
+        xnums
+    end
+
+	# shift x values for each group
+    group = get(plotattributes, :group, nothing)
+	if group != nothing
+		ug = unique(group)
+		n = length(ug)
+		bws = plotattributes[:bar_width] / n
+	    bar_width := bws
+		for i in 1:n
+			groupinds = findall(isequal(ug[i]), group)
+			Δx = _cycle(bws, i) * (i - (n + 1) / 2)
+			x[groupinds] .+= Δx
+		end
+	end
+
+	seriestype := :boxplot
+	x, y
+end
+
+Plots.@deps groupedboxplot boxplot
