@@ -15,7 +15,7 @@ using Widgets, Observables
 import Observables: AbstractObservable, @map, observe
 import Widgets: @nodeps
 import DataStructures: OrderedDict
-import Clustering: Hclust
+import Clustering: Hclust, nnodes
 
 import KernelDensity
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
