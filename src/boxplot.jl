@@ -127,7 +127,7 @@ Plots.@deps boxplot shape scatter
 
 recipetype(::Val{:groupedboxplot}, args...) = GroupedBoxplot(args)
 
-@recipe function f(g::GroupedBoxplot)
+@recipe function f(g::GroupedBoxplot; spacing = 0)
     x, y = grouped_xy(g.args...)
 
     # extract xnums and set default bar width.
@@ -149,7 +149,7 @@ recipetype(::Val{:groupedboxplot}, args...) = GroupedBoxplot(args)
 		ug = unique(group)
 		n = length(ug)
 		bws = plotattributes[:bar_width] / n
-	    bar_width := bws
+	    bar_width := bws * clamp(1 - spacing, 0, 1)
 		for i in 1:n
 			groupinds = findall(isequal(ug[i]), group)
 			Δx = _cycle(bws, i) * (i - (n + 1) / 2)
