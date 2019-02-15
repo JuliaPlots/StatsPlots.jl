@@ -7,7 +7,7 @@ Plots.group_as_matrix(g::GroupedBar) = true
 grouped_xy(x::AbstractVector, y::AbstractArray) = x, y
 grouped_xy(y::AbstractArray) = 1:size(y,1), y
 
-@recipe function f(g::GroupedBar; spacing = 0)
+@recipe function f(g::GroupedBar; spacing = 0.1)
     x, y = grouped_xy(g.args...)
 
     nr, nc = size(y)

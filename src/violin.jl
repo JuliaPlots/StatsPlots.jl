@@ -66,7 +66,7 @@ Plots.@deps violin shape
 
 recipetype(::Val{:groupedviolin}, args...) = GroupedViolin(args)
 
-@recipe function f(g::GroupedViolin; spacing = 0)
+@recipe function f(g::GroupedViolin; spacing = 0.1)
     x, y = grouped_xy(g.args...)
 
     # extract xnums and set default bar width.
