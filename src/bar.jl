@@ -4,10 +4,10 @@ recipetype(::Val{:groupedbar}, args...) = GroupedBar(args)
 
 Plots.group_as_matrix(g::GroupedBar) = true
 
-grouped_xy(x::AbstractVector, y::AbstractMatrix) = x, y
-grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
+grouped_xy(x::AbstractVector, y::AbstractArray) = x, y
+grouped_xy(y::AbstractArray) = 1:size(y,1), y
 
-@recipe function f(g::GroupedBar)
+@recipe function f(g::GroupedBar; spacing = 0)
     x, y = grouped_xy(g.args...)
 
     nr, nc = size(y)
@@ -32,7 +32,7 @@ grouped_xy(y::AbstractMatrix) = 1:size(y,1), y
         x
     else
         bws = plotattributes[:bar_width] / nc
-        bar_width := bws
+        bar_width := bws * clamp(1 - spacing, 0, 1)
         xmat = zeros(nr,nc)
         for r=1:nr
             bw = _cycle(bws, r)

@@ -57,3 +57,47 @@ end
     ()
 end
 Plots.@deps violin shape
+
+
+# ------------------------------------------------------------------------------
+# Grouped Violin
+
+@userplot GroupedViolin
+
+recipetype(::Val{:groupedviolin}, args...) = GroupedViolin(args)
+
+@recipe function f(g::GroupedViolin; spacing = 0.1)
+    x, y = grouped_xy(g.args...)
+
+    # extract xnums and set default bar width.
+    # might need to set xticks as well
+    ux = unique(x)
+    x = if eltype(x) <: Number
+        bar_width --> (0.8 * mean(diff(sort(ux))))
+        float.(x)
+    else
+        bar_width --> 0.8
+        xnums = [findfirst(isequal(xi), ux) for xi in x] .- 0.5
+        xticks --> (eachindex(ux) .- 0.5, ux)
+        xnums
+    end
+
+    # shift x values for each group
+    group = get(plotattributes, :group, nothing)
+    if group != nothing
+        ug = unique(group)
+        n = length(ug)
+        bws = plotattributes[:bar_width] / n
+        bar_width := bws * clamp(1 - spacing, 0, 1)
+        for i in 1:n
+            groupinds = findall(isequal(ug[i]), group)
+            Δx = _cycle(bws, i) * (i - (n + 1) / 2)
+            x[groupinds] .+= Δx
+        end
+    end
+
+    seriestype := :violin
+    x, y
+end
+
+Plots.@deps groupedviolin violin
