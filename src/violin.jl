@@ -34,7 +34,8 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
     bw == nothing && (bw = 0.8)
     msc = plotattributes[:markerstrokecolor]
     for (i,glabel) in enumerate(glabels)
-        widths, centers = violin_coords(y[filter(i -> _cycle(x,i) == glabel, 1:length(y))], trim=trim)
+        fy = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
+        widths, centers = violin_coords(fy, trim=trim)
         isempty(widths) && continue
 
         # normalize
@@ -60,7 +61,7 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
         end
 
         if median
-            med = StatsBase.median(y)
+            med = StatsBase.median(fy)
             mw = maximum(widths)
             mx = xcenter .+ [-mw[i], mw[i]] / 2
             my = [med, med]
@@ -81,7 +82,7 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
         quantiles = get_quantiles(quantiles)
         if !isempty(quantiles)
-            qy = quantile(y, quantiles)
+            qy = quantile(fy, quantiles)
             maxw = maximum(widths)
 
             for i in eachindex(qy)
