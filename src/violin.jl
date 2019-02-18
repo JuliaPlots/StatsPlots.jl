@@ -14,8 +14,12 @@ function violin_coords(y; trim::Bool=false)
     kd.density, kd.x
 end
 
+get_quantiles(quantiles::AbstractVector) = quantiles
+get_quantiles(x::Real) = [x]
+get_quantiles(b::Bool) = b ? [0.5] : Float64[]
+get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
-@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both)
+@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both, median = false, quantiles = Float64[])
     # if only y is provided, then x will be UnitRange 1:length(y)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -28,6 +32,7 @@ end
     glabels = sort(collect(unique(x)))
     bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
+    msc = plotattributes[:markerstrokecolor]
     for (i,glabel) in enumerate(glabels)
         widths, centers = violin_coords(y[filter(i -> _cycle(x,i) == glabel, 1:length(y))], trim=trim)
         isempty(widths) && continue
@@ -47,17 +52,72 @@ end
         end
         ycoords = vcat(centers, reverse(centers))
 
-        push!(xsegs, xcoords)
-        push!(ysegs, ycoords)
+        @series begin
+            seriestype := :shape
+            x := xcoords
+            y := ycoords
+            ()
+        end
+
+        if median
+            med = StatsBase.median(y)
+            mw = maximum(widths)
+            mx = xcenter .+ [-mw[i], mw[i]] / 2
+            my = [med, med]
+            if side == :right
+                mx[1] = xcenter
+            elseif side == :left
+                mx[2] = xcenter
+            end
+
+            @series begin
+                primary := false
+                seriestype := :shape
+                x := mx
+                y := my
+                ()
+            end
+        end
+
+        quantiles = get_quantiles(quantiles)
+        if !isempty(quantiles)
+            qy = quantile(y, quantiles)
+            maxw = maximum(widths)
+
+            for i in eachindex(qy)
+                qxi = xcenter .+ [-maxw, maxw] * (0.5 - abs(0.5 - quantiles[i]))
+                qyi = [qy[i], qy[i]]
+                if side == :right
+                    qxi[1] = xcenter
+                elseif side == :left
+                    qxi[2] = xcenter
+                end
+
+                @series begin
+                    primary := false
+                    seriestype := :shape
+                    x := qxi
+                    y := qyi
+                    ()
+                end
+            end
+
+            @series begin
+                primary :=false
+                seriestype := :shape
+                x := [xcenter, xcenter]
+                y := [extrema(qy)...]
+            end
+        end
     end
 
     seriestype := :shape
-    x := xsegs.pts
-    y := ysegs.pts
+    primary := false
+    x := []
+    y := []
     ()
 end
 Plots.@deps violin shape
-
 
 # ------------------------------------------------------------------------------
 # Grouped Violin
