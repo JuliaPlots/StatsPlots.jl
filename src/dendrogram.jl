@@ -2,15 +2,15 @@ function treepositions(hc::Hclust, useheight::Bool)
     order = StatsBase.indexmap(hc.order)
     nodepos = Dict(-i => (float(order[i]), 0.0) for i in hc.order)
 
-    xs = Array{Float64}(4, size(hc.merge, 1))
-    ys = Array{Float64}(4, size(hc.merge, 1))
+    xs = Array{Float64}(undef, 4, size(hc.merges, 1))
+    ys = Array{Float64}(undef, 4, size(hc.merges, 1))
 
-    for i in 1:size(hc.merge, 1)
-        x1, y1 = nodepos[hc.merge[i, 1]]
-        x2, y2 = nodepos[hc.merge[i, 2]]
+    for i in 1:size(hc.merges, 1)
+        x1, y1 = nodepos[hc.merges[i, 1]]
+        x2, y2 = nodepos[hc.merges[i, 2]]
 
         xpos = (x1 + x2) / 2
-        useheight ? h = hc.height[i] : h = 1
+        useheight ? h = hc.heights[i] : h = 1
         ypos = max(y1, y2) + h
 
         nodepos[i] = (xpos, ypos)
@@ -30,7 +30,7 @@ end
     xlims := (0.5, length(hc.order) + 0.5)
 
     linecolor --> :black
-    xticks --> (1:length(hc.labels), hc.labels[hc.order])
+    xticks --> (1:nnodes(hc), (1:nnodes(hc))[hc.order])
     ylims --> (0, Inf)
     yshowaxis --> useheight
 

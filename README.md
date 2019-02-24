@@ -5,7 +5,7 @@
 
 ### Original author: Thomas Breloff (@tbreloff), maintained by the JuliaPlots members
 
-This package is a drop-in replacement for Plots.jl that contains many statistical recipes for concepts and types introduced in the JuliaStats organization. 
+This package is a drop-in replacement for Plots.jl that contains many statistical recipes for concepts and types introduced in the JuliaStats organization.
 
 - Types:
     - DataFrames
@@ -292,7 +292,7 @@ groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores",
 using Clustering
 D = rand(10, 10)
 D += D'
-hc = hclust(D, :single)
+hc = hclust(D, linkage=:single)
 plot(hc)
 ```
 
