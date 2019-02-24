@@ -6,10 +6,10 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
     names = @map (&columns_and_names)[2]
 
     dict = @map Dict((key, convert_missing.(val)) for (val, key)  in zip((&columns_and_names)...))
-    x =  @nodeps dropdown(names, placeholder = "First axis", multiple = true)
-    y =  @nodeps dropdown(names, placeholder = "Second axis", multiple = true)
-    y_toggle = @nodeps togglecontent(y, value = false, label = "Second axis")
-    plot_type = @nodeps dropdown(
+    x =  Widgets.dropdown(names, placeholder = "First axis", multiple = true)
+    y =  Widgets.dropdown(names, placeholder = "Second axis", multiple = true)
+    y_toggle = Widgets.togglecontent(y, value = false, label = "Second axis")
+    plot_type = Widgets.dropdown(
         OrderedDict(
             "line"         => Plots.plot,
             "scatter"      => Plots.scatter,
@@ -26,13 +26,13 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
 
     # Add bins if the plot allows it
     display_nbins = @map (&plot_type) in [corrplot, cornerplot, histogram, marginalhist] ? "block" : "none"
-    nbins =  (@nodeps slider(nbins_range, extra_obs = ["display" => display_nbins], value = nbins, label = "number of bins"))
+    nbins =  (Widgets.slider(nbins_range, extra_obs = ["display" => display_nbins], value = nbins, label = "number of bins"))
     nbins.scope.dom = Widgets.div(nbins.scope.dom, attributes = Dict("data-bind" => "style: {display: display}"))
     nbins_throttle = Observables.throttle(throttle, nbins)
 
-    by = @nodeps dropdown(names, multiple = true, placeholder="Group by")
-    by_toggle = @nodeps togglecontent(by, value = false, label = "Split data")
-    plt = @nodeps button("plot")
+    by = Widgets.dropdown(names, multiple = true, placeholder="Group by")
+    by_toggle = Widgets.togglecontent(by, value = false, label = "Split data")
+    plt = Widgets.button("plot")
     output = @map begin
         &plt
         if (plt[] == 0)
