@@ -146,12 +146,13 @@ recipetype(::Val{:groupedboxplot}, args...) = GroupedBoxplot(args)
     # shift x values for each group
     group = get(plotattributes, :group, nothing)
     if group != nothing
-        ug = unique(group)
-        n = length(ug)
+        gb = Plots.extractGroupArgs(group)
+        labels, idxs = getfield(gb, 1), getfield(gb, 2)
+        n = length(labels)
         bws = plotattributes[:bar_width] / n
         bar_width := bws * clamp(1 - spacing, 0, 1)
         for i in 1:n
-            groupinds = findall(isequal(ug[i]), group)
+            groupinds = idxs[i]
             Δx = _cycle(bws, i) * (i - (n + 1) / 2)
             x[groupinds] .+= Δx
         end
