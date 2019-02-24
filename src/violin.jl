@@ -19,7 +19,7 @@ get_quantiles(x::Real) = [x]
 get_quantiles(b::Bool) = b ? [0.5] : Float64[]
 get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
-@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both, mean = false, median = false, quantiles = Float64[])
+@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both, show_mean = false, show_median = false, quantiles = Float64[])
     # if only y is provided, then x will be UnitRange 1:length(y)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -60,7 +60,7 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
             ()
         end
 
-        if mean
+        if show_mean
             mea = StatsBase.mean(fy)
             mw = maximum(widths)
             mx = xcenter .+ [-mw, mw] * 0.75
@@ -81,7 +81,7 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
             end
         end
 
-        if median
+        if show_median
             med = StatsBase.median(fy)
             mw = maximum(widths)
             mx = xcenter .+ [-mw, mw] / 2
