@@ -29,6 +29,8 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
         end
     end
     xsegs, ysegs = Segments(), Segments()
+    qxsegs, qysegs = Segments(), Segments()
+    mxsegs, mysegs = Segments(), Segments()
     glabels = sort(collect(unique(x)))
     bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
@@ -44,21 +46,17 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
         # make the violin
         xcenter = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
-        if (side==:right)
-          xcoords = vcat(widths, zeros(length(widths))) .+ xcenter
+        xcoords = if (side==:right)
+            vcat(widths, zeros(length(widths))) .+ xcenter
         elseif (side==:left)
-          xcoords = vcat(zeros(length(widths)), -reverse(widths)) .+ xcenter
+            vcat(zeros(length(widths)), -reverse(widths)) .+ xcenter
         else
-          xcoords = vcat(widths, -reverse(widths)) .+ xcenter
+            vcat(widths, -reverse(widths)) .+ xcenter
         end
         ycoords = vcat(centers, reverse(centers))
 
-        @series begin
-            seriestype := :shape
-            x := xcoords
-            y := ycoords
-            ()
-        end
+        push!(xsegs, xcoords)
+        push!(ysegs, ycoords)
 
         if show_mean
             mea = StatsBase.mean(fy)
@@ -71,14 +69,8 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
                 mx[2] = xcenter
             end
 
-            @series begin
-                primary := false
-                seriestype := :shape
-                linestyle := :dot
-                x := mx
-                y := my
-                ()
-            end
+            push!(mxsegs, mx)
+            push!(mysegs, my)
         end
 
         if show_median
@@ -92,13 +84,8 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
                 mx[2] = xcenter
             end
 
-            @series begin
-                primary := false
-                seriestype := :shape
-                x := mx
-                y := my
-                ()
-            end
+            push!(qxsegs, mx)
+            push!(qysegs, my)
         end
 
         quantiles = get_quantiles(quantiles)
@@ -115,14 +102,12 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
                     qxi[2] = xcenter
                 end
 
-                @series begin
-                    primary := false
-                    seriestype := :shape
-                    x := qxi
-                    y := qyi
-                    ()
-                end
+                push!(qxsegs, qxi)
+                push!(qysegs, qyi)
             end
+
+            push!(qxsegs, [xcenter, xcenter])
+            push!(qysegs, [extrema(qy)...])
 
             @series begin
                 primary :=false
@@ -130,6 +115,34 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
                 x := [xcenter, xcenter]
                 y := [extrema(qy)...]
             end
+        end
+    end
+
+    @series begin
+        seriestype := :shape
+        x := xsegs.pts
+        y := ysegs.pts
+        ()
+    end
+
+    if !isempty(mxsegs.pts)
+        @series begin
+            primary := false
+            seriestype := :shape
+            linestyle := :dot
+            x := mxsegs.pts
+            y := mysegs.pts
+            ()
+        end
+    end
+
+    if !isempty(qxsegs.pts)
+        @series begin
+            primary := false
+            seriestype := :shape
+            x := qxsegs.pts
+            y := qysegs.pts
+            ()
         end
     end
 
