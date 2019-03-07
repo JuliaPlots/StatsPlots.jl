@@ -108,13 +108,6 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
             push!(qxsegs, [xcenter, xcenter])
             push!(qysegs, [extrema(qy)...])
-
-            @series begin
-                primary :=false
-                seriestype := :shape
-                x := [xcenter, xcenter]
-                y := [extrema(qy)...]
-            end
         end
     end
 
