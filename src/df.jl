@@ -35,10 +35,11 @@ function df_helper(d, x)
     elseif isa(x, Expr) && x.head == :call
         syms = Any[]
         vars = Symbol[]
-        plot_call = parse_iterabletable_call!(d, x, syms, vars)
-        compute_vars = Expr(:(=), Expr(:tuple, vars...),
-            Expr(:call, :(StatsPlots.extract_columns_from_iterabletable), d, syms...))
-        argnames = _argnames(d, x)
+        plot_call = parse_table_call!(d, x, syms, vars)
+        names = gensym()
+        compute_vars = Expr(:(=), Expr(:tuple, Expr(:tuple, vars...), names),
+            Expr(:call, :(StatsPlots.extract_columns_and_names), d, syms...))
+        argnames = _argnames(names, x)
         if (length(plot_call.args) >= 2) && isa(plot_call.args[2], Expr) && (plot_call.args[2].head == :parameters)
             label_plot_call = Expr(:call, :(StatsPlots.add_label), plot_call.args[2], argnames,
                 plot_call.args[1], plot_call.args[3:end]...)
@@ -51,9 +52,9 @@ function df_helper(d, x)
     end
 end
 
-parse_iterabletable_call!(d, x, syms, vars) = x
+parse_table_call!(d, x, syms, vars) = x
 
-function parse_iterabletable_call!(d, x::QuoteNode, syms, vars)
+function parse_table_call!(d, x::QuoteNode, syms, vars)
     new_var = gensym(x.value)
     push!(syms, x)
     push!(vars, new_var)
@@ -61,7 +62,7 @@ function parse_iterabletable_call!(d, x::QuoteNode, syms, vars)
 end
 
 
-function parse_iterabletable_call!(d, x::Expr, syms, vars)
+function parse_table_call!(d, x::Expr, syms, vars)
     if x.head == :. && length(x.args) == 2
         isa(x.args[2], QuoteNode) && return x
     elseif x.head == :call
@@ -69,7 +70,7 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
         if x.args[1] == :cols
             if length(x.args) == 1
                 push!(x.args, :(StatsPlots.column_names(StatsPlots.getiterator($d))))
-                return parse_iterabletable_call!(d, x, syms, vars)
+                return parse_table_call!(d, x, syms, vars)
             end
             range = x.args[2]
             new_vars = gensym("range")
@@ -91,19 +92,14 @@ function parse_iterabletable_call!(d, x::Expr, syms, vars)
                new_ex.args[j] = Expr(:(=), field_in_NT, field_in_NT)
             end
         end
-        return parse_iterabletable_call!(d, new_ex, syms, vars)
+        return parse_table_call!(d, new_ex, syms, vars)
     end
-    return Expr(x.head, (parse_iterabletable_call!(d, arg, syms, vars) for arg in x.args)...)
+    return Expr(x.head, (parse_table_call!(d, arg, syms, vars) for arg in x.args)...)
 end
 
-column_names(t) = column_names(eltype(t))
-column_names(::Type{T}) where {T} = fieldnames(T)
-
-column_types(t) = column_types(eltype(t))
-column_types(::Type{T}) where {T} = map(f -> fieldtype(T, f), fieldnames(T))
-
-function _argnames(d, x::Expr)
-    Expr(:vect, [_arg2string(d, s) for s in x.args[2:end] if not_kw(s)]...)
+function column_names(t)
+    s = schema(t)
+    s === nothing ? propertynames(first(rows(t))) : s.names
 end
 
 not_kw(x) = true
@@ -114,10 +110,14 @@ function insert_kw!(x::Expr, s::Symbol, v)
     x.args = vcat(x.args[1:index-1], Expr(:kw, s, v), x.args[index:end])
 end
 
-_arg2string(d, x) = stringify(x)
-function _arg2string(d, x::Expr)
+function _argnames(names, x::Expr)
+    Expr(:vect, [_arg2string(names, s) for s in x.args[2:end] if not_kw(s)]...)
+end
+
+_arg2string(names, x) = stringify(x)
+function _arg2string(names, x::Expr)
     if x.head == :call && x.args[1] == :cols
-        return :(StatsPlots.compute_name($d, $(x.args[2])))
+        return :(StatsPlots.compute_name($names, $(x.args[2])))
     elseif x.head == :call && x.args[1] == :hcat
         return hcat(stringify.(x.args[2:end])...)
     elseif x.head == :hcat
@@ -129,9 +129,9 @@ end
 
 stringify(x) = filter(t -> t != ':', string(x))
 
-compute_name(df, i::Int) = column_names(getiterator(df))[i]
-compute_name(df, i::Symbol) = i
-compute_name(df, i) = reshape([compute_name(df, ii) for ii in i], 1, :)
+compute_name(names, i::Int) = names[i]
+compute_name(names, i::Symbol) = i
+compute_name(names, i) = reshape([compute_name(names, ii) for ii in i], 1, :)
 
 function add_label(argnames, f, args...; kwargs...)
     i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
@@ -142,27 +142,22 @@ function add_label(argnames, f, args...; kwargs...)
     end
 end
 
-get_col_from_dict(s::Int, col_dict, name2index) = col_dict[s]
-get_col_from_dict(s::Symbol, col_dict, name2index) =
-    haskey(name2index, s) ? col_dict[name2index[s]] : s
+get_col(s::Int, col_nt, names) = col_nt[names[s]]
+get_col(s::Symbol, col_nt, names) = get(col_nt, s, s)
+get_col(syms, col_nt, names) = hcat((get_col(s, col_nt, names) for s in syms)...)
 
-get_col_from_dict(syms, col_dict, name2index) =
-    hcat((get_col_from_dict(s, col_dict, name2index) for s in syms)...)
+function extract_columns_and_names(df, syms...)
+    istable(df) || error("Only tables are supported")
+    names = column_names(df)
 
-function extract_columns_from_iterabletable(df, syms...)
-    isiterabletable(df) || error("Only iterable tables are supported")
-    iter = getiterator(df)
-    name2index = Dict(zip(column_names(iter), 1:length(column_names(iter))))
+    selected_cols = Symbol[]
+    add_sym!(s::Integer) = push!(selected_cols, names[s])
+    add_sym!(s::Symbol) = s in names && push!(selected_cols, s)
+    add_sym!(s) = foreach(add_sym!, s)
+    foreach(add_sym!, syms)
 
-    _convert(s::Integer) = s
-    _convert(s::Symbol) = get(name2index, s, 0)
-    _convert(s) = map(_convert, s)
-
-    col_indices = union(Iterators.filter(t -> t != 0, Iterators.flatten(_convert(s) for s in syms)))
-    col_values = create_columns_from_iterabletable(df, sel_cols = col_indices)[1]
-    col_dict = Dict(zip(col_indices, [convert_missing.(t) for t in col_values]))
-
-    return Tuple(get_col_from_dict(s, col_dict, name2index) for s in syms)
+    cols = columntable(select(df, unique(selected_cols)...))
+    return Tuple(get_col(s, cols, names) for s in syms), names
 end
 
 convert_missing(el) = el
