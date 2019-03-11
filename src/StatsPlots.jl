@@ -2,15 +2,13 @@ module StatsPlots
 
 using Reexport
 import RecipesBase: recipetype
+import Tables: istable, columntable, select, schema
 @reexport using Plots
 import Plots: _cycle
 using Plots.PlotMeasures
 using StatsBase
 using Distributions
-import IterableTables
 import DataValues: DataValue
-import TableTraits: getiterator, isiterabletable
-import TableTraitsUtils: create_columns_from_iterabletable
 using Widgets, Observables
 import Observables: AbstractObservable, @map, observe
 import Widgets: @nodeps
