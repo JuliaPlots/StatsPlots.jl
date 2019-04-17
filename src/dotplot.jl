@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 # Dot Plot
 
-@recipe function f(::Type{Val{:dotplot}}, x, y, z)
+@recipe function f(::Type{Val{:dotplot}}, x, y, z; widthwindow=0.1)
     # if only y is provided, then x will be UnitRange 1:length(y)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -16,6 +16,7 @@
     points_x, points_y = zeros(0), zeros(0)
     bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
+    0.0 ≤ widthwindow ≤ 1.0 || throw(ArgumentError("$(:widthwindow) must be in the range [0,1]"))
     for (i,glabel) in enumerate(glabels)
         # filter y
         values = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
@@ -27,7 +28,7 @@
         center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
         hw = 0.5_cycle(bw, i) # Box width
 
-        nearby = 0.01 * abs(q5 - q1)
+        nearby = widthwindow * abs(q5 - q1)
         countnear = [count((values .< (x + nearby)) .& (values .> (x - nearby))) for x ∈ values]
 
         pw = hw / maximum(countnear)
