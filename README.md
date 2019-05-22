@@ -340,3 +340,5 @@ M = fit(PCA, Xtr; maxoutdim=2)
 
 plot(M, group=iris.Species)
 ```
+
+![PCA](https://user-images.githubusercontent.com/3502975/58210442-64973000-7cb7-11e9-95bb-aead76241cae.png)
