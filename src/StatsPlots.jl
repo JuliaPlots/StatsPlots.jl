@@ -14,7 +14,6 @@ import Observables: AbstractObservable, @map, observe
 import Widgets: @nodeps
 import DataStructures: OrderedDict
 import Clustering: Hclust, nnodes
-import MultivariateStats: MDS, eigvals, projection
 
 import KernelDensity
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
@@ -36,6 +35,5 @@ include("marginalhist.jl")
 include("bar.jl")
 include("dendrogram.jl")
 include("andrews.jl")
-include("mds_scatter.jl")
 
 end # module
