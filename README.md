@@ -18,6 +18,7 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
     - marginalhist
     - corrplot/cornerplot
     - andrewsplot
+    - PCA / MDS plot
 
 It is thus slightly less lightweight, but has more functionality. Main documentation is found in the Plots.jl documentation (https://juliaplots.github.io).
 
@@ -325,3 +326,17 @@ Some statistical analysis is computed at the single subject level (for example t
 For more information please refer to the [README](https://github.com/piever/GroupedErrors.jl/blob/master/README.md).
 
 A GUI based on QML and the GR Plots.jl backend to simplify the use of StatsPlots.jl and GroupedErrors.jl even further can be found [here](https://github.com/piever/PlugAndPlot.jl) (usable but still in alpha stage).
+
+## Ordinations
+
+Ordinations from [`MultivariateStats.jl`](https://github.com/JuliaStats/MultivariateStats.jl) (PCA and MDS) can be plotted as scatter plots.
+
+```julia
+using MultivariateStats, RDatasets, StatsPlots
+
+iris = dataset("datasets", "iris")
+Xtr = convert(Matrix, iris[:, 1:4])
+M = fit(PCA, Xtr; maxoutdim=2)
+
+plot(M, group=iris.Species)
+```
