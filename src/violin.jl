@@ -4,8 +4,9 @@
 
 const _violin_warned = [false]
 
-function violin_coords(y; trim::Bool=false)
-    kd = KernelDensity.kde(y, npoints = 200)
+function violin_coords(y; wts = nothing, trim::Bool=false)
+
+    kd = isnothing(wts) ? KernelDensity.kde(y, npoints = 200) : KernelDensity.kde(y, weights = weights(wts), npoints = 200)
     if trim
         xmin, xmax = Plots.ignorenan_extrema(y)
         inside = Bool[ xmin <= x <= xmax for x in kd.x]
@@ -37,7 +38,7 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
     msc = plotattributes[:markerstrokecolor]
     for (i,glabel) in enumerate(glabels)
         fy = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
-        widths, centers = violin_coords(fy, trim=trim)
+        widths, centers = violin_coords(fy, trim=trim, wts = plotattributes[:weights])
         isempty(widths) && continue
 
         # normalize
