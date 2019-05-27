@@ -1,6 +1,6 @@
 name = "StatsPlots"
 uuid = "f3b207a7-027a-5e70-b257-86293d7955fd"
-version = "0.11.0" 
+version = "0.11.0"
 
 [deps]
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
@@ -18,7 +18,7 @@ Widgets = "cc8bc4a8-27d6-5769-a93b-9d913e69aa62"
 
 [compat]
 julia = "1.0, 1.1"
-Plots = "0.14, 0.25"
+Plots = "0.25"
 Widgets = "0.5, 0.6"
 Observables = "0.2.2"
 RecipesBase = "0.5, 0.6"
