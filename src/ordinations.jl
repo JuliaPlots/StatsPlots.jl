@@ -9,8 +9,8 @@
     xlabel --> "MDS$xax ($(round(var_explained[xax] * 100, digits = 2))%)"
     ylabel --> "MDS$yax ($(round(var_explained[yax] * 100, digits = 2))%)"
     seriestype := :scatter
-    xticks := false
-    yticks := false
+    xticks --> false
+    yticks --> false
 
     if length(mds_axes) == 3
         zax = mds_axes[3]
@@ -32,8 +32,8 @@ end
     xlabel --> "PCA$xax ($(round(var_explained[xax] * 100, digits = 2))%)"
     ylabel --> "PCA$yax ($(round(var_explained[yax] * 100, digits = 2))%)"
     seriestype := :scatter
-    xticks := false
-    yticks := false
+    xticks --> false
+    yticks --> false
 
     if length(pca_axes) == 3
         zax = pca_axes[3]
