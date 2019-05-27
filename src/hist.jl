@@ -3,7 +3,7 @@
 # density
 
 @recipe function f(::Type{Val{:density}}, x, y, z; trim=false)
-    newx, newy = violin_coords(y, trim=trim)
+    newx, newy = violin_coords(y, trim=trim, wts = plotattributes[:weights])
     if Plots.isvertical(plotattributes)
         newx, newy = newy, newx
     end
@@ -20,7 +20,7 @@ Plots.@deps density path
 
 @recipe function f(::Type{Val{:cdensity}}, x, y, z; trim=false,
                    npoints = 200)
-    newx, newy = violin_coords(y, trim=trim)
+    newx, newy = violin_coords(y, trim=trim, wts = plotattributes[:weights])
 
     if Plots.isvertical(plotattributes)
         newx, newy = newy, newx
