@@ -3,7 +3,7 @@
 # Dot Plot (strip plot, beeswarm)
 
 @recipe function f(::Type{Val{:dotplot}}, x, y, z; mode = :density, side=:both)
-    # if only y is provided, then x will be UnitRange 1:length(y)
+    # if only y is provided, then x will be UnitRange 1:size(y, 2) or if a vector of vectors, 1:length(y)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
             x = plotattributes[:series_plotindex]
