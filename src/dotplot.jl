@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 # Dot Plot (strip plot, beeswarm)
 
-@recipe function f(::Type{Val{:dotplot}}, x, y, z; mode = :none, side=:both, dy = 0.1)
+@recipe function f(::Type{Val{:dotplot}}, x, y, z; mode = :density, side=:both)
     # if only y is provided, then x will be UnitRange 1:length(y)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -12,114 +12,65 @@
         end
     end
 
-    if mode != :none
-        grouplabels = sort(collect(unique(x)))
-        barwidth = plotattributes[:bar_width]
-        barwidth == nothing && (barwidth = 0.8)
+    grouplabels = sort(collect(unique(x)))
+    barwidth = plotattributes[:bar_width]
+    barwidth == nothing && (barwidth = 0.8)
 
-        if mode == :jitter
-            points_x, points_y = zeros(0), zeros(0)
+    getoffsets(halfwidth, y) =
+        mode == :uniform ?
+            (rand(length(y)) .* 2 .- 1) .* halfwidth :
+        mode == :density ?
+            violinoffsets(halfwidth, y) :
+        zeros(length(y))
 
-            for (i,grouplabel) in enumerate(grouplabels)
-                # filter y
-                groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
+    points_x, points_y = zeros(0), zeros(0)
 
-                center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
-                halfwidth = 0.5_cycle(barwidth, i)
+    for (i,grouplabel) in enumerate(grouplabels)
+        # filter y
+        groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
 
-                offsets = (rand(length(groupy)) .* 2 .- 1) .* halfwidth
+        center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
+        halfwidth = 0.5_cycle(barwidth, i)
 
-                if side == :left
-                    offsets = -abs.(offsets)
-                elseif side == :right
-                    offsets = abs.(offsets)
-                end
+        offsets = getoffsets(halfwidth, groupy)
 
-                append!(points_y, groupy)
-                append!(points_x, center .+ offsets)
-            end
-
-            x = points_x
-            y = points_y
-        elseif mode == :densityjitter
-            0.0 ≤ dy ≤ 1.0 || throw(ArgumentError("$(:dy) must be in the range [0,1]"))
-            points_x, points_y = zeros(0), zeros(0)
-
-            for (i,grouplabel) in enumerate(grouplabels)
-                # filter y
-                groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
-
-                # compute quantiles
-                q2,q1 = quantile(groupy, [0.25, 0.75])
-
-                center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
-                halfwidth = 0.5_cycle(barwidth, i)
-
-                nearby = dy * abs(q2 - q1)
-                nearbycount = [count((groupy .< (x + nearby)) .& (groupy .> (x - nearby))) for x ∈ groupy]
-
-                localwidth = halfwidth / maximum(nearbycount)
-                offsets = [(rand() * 2 - 1) * localwidth * x for x ∈ nearbycount]
-
-                if side == :left
-                    offsets = -abs.(offsets)
-                elseif side == :right
-                    offsets = abs.(offsets)
-                end
-
-                append!(points_y, groupy)
-                append!(points_x, center .+ offsets)
-            end
-
-            x = points_x
-            y = points_y
-        elseif mode == :violinjitter
-            points_x, points_y = zeros(0), zeros(0)
-
-            for (i,grouplabel) in enumerate(grouplabels)
-                # filter y
-                groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
-
-                center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
-                violinwidths, violincenters = violin_coords(groupy)
-
-                # normalize widths
-                halfwidth = 0.5_cycle(barwidth, i)
-                violinwidths = halfwidth * violinwidths / Plots.ignorenan_maximum(violinwidths)
-
-                uppercenters = findmin.([violincenters[violincenters .> yval] for yval ∈ groupy])
-                lowercenters = findmax.([violincenters[violincenters .≤ yval] for yval ∈ groupy])
-                upperbounds, lowerbounds = first.(uppercenters), first.(lowercenters)
-                upperindexes, lowerindexes = last.(uppercenters), last.(lowercenters)
-                upperwidths = [violinwidths[violincenters .> groupy[i]][upperindexes[i]] for i ∈ 1:length(groupy)]
-                lowerwidths = [violinwidths[violincenters .≤ groupy[i]][lowerindexes[i]] for i ∈ 1:length(groupy)]
-                δs = (upperbounds .- groupy) ./ (upperbounds .- lowerbounds)
-                localwidths = upperwidths .* (1 .- δs) .+ lowerwidths .* δs
-                offsets = (rand(length(groupy)) .* 2 .- 1) .* localwidths
-
-                if side == :left
-                    offsets = -abs.(offsets)
-                elseif side == :right
-                    offsets = abs.(offsets)
-                end
-
-                append!(points_y, groupy)
-                append!(points_x, center .+ offsets)
-            end
-
-            x = points_x
-            y = points_y
+        if side == :left
+            offsets = -abs.(offsets)
+        elseif side == :right
+            offsets = abs.(offsets)
         end
+
+        append!(points_y, groupy)
+        append!(points_x, center .+ offsets)
     end
 
     seriestype := :scatter
-    x := x
-    y := y
+    x := points_x
+    y := points_y
     ()
 end
 
 Plots.@deps dotplot scatter
 Plots.@shorthands dotplot
+
+function violinoffsets(maxwidth, y)
+    normalizewidths(maxwidth, widths) = maxwidth * widths / Plots.ignorenan_maximum(widths)
+
+    function getlocalwidths(widths, centers, y)
+        upperbounds = [violincenters[violincenters .> yval] for yval ∈ y] .|> findmin .|> first
+        lowercenters = findmax.([violincenters[violincenters .≤ yval] for yval ∈ y])
+        lowerbounds, lowerindexes = first.(lowercenters), last.(lowercenters)
+        δs = (y .- lowerbounds) ./ (upperbounds .- lowerbounds)
+
+        itp = interpolate(widths, BSpline(Quadratic(Reflect(OnCell()))))
+        localwidths = itp.(lowerindexes .+ δs)
+    end
+
+    violinwidths, violincenters = violin_coords(y)
+    violinwidths = normalizewidths(maxwidth, violinwidths)
+    localwidths = getlocalwidths(violinwidths, violincenters, y)
+    offsets = (rand(length(y)) .* 2 .- 1) .* localwidths
+end
 
 
 # ------------------------------------------------------------------------------
