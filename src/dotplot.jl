@@ -1,8 +1,8 @@
 
 # ---------------------------------------------------------------------------
-# Dot Plot
+# Dot Plot (strip plot, beeswarm)
 
-@recipe function f(::Type{Val{:dotplot}}, x, y, z; widthwindow=0.1)
+@recipe function f(::Type{Val{:dotplot}}, x, y, z; mode = :none, side=:both, dy = 0.1)
     # if only y is provided, then x will be UnitRange 1:length(y)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -10,38 +10,130 @@
         else
             x = [getindex(x, plotattributes[:series_plotindex])]
         end
+
+        x = repeat([x], length(y))
     end
-    glabels = sort(collect(unique(x)))
-    warning = false
-    points_x, points_y = zeros(0), zeros(0)
-    bw = plotattributes[:bar_width]
-    bw == nothing && (bw = 0.8)
-    0.0 ≤ widthwindow ≤ 1.0 || throw(ArgumentError("$(:widthwindow) must be in the range [0,1]"))
-    for (i,glabel) in enumerate(glabels)
-        # filter y
-        values = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
+    x = Float64.(x)
 
-        # compute quantiles
-        q1,q2,q3,q4,q5 = quantile(values, Base.range(0,stop=1,length=5))
+    if mode != :none
+        grouplabels = sort(collect(unique(x)))
+        barwidth = plotattributes[:bar_width]
+        barwidth == nothing && (barwidth = 0.8)
 
-        # make the shape
-        center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
-        hw = 0.5_cycle(bw, i) # Box width
+        if mode == :jitter
+            points_x, points_y = zeros(0), zeros(0)
 
-        nearby = widthwindow * abs(q5 - q1)
-        countnear = [count((values .< (x + nearby)) .& (values .> (x - nearby))) for x ∈ values]
+            for (i,grouplabel) in enumerate(grouplabels)
+                # filter y
+                groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
 
-        pw = hw / maximum(countnear)
-        offsets = [(rand() * 2 - 1) * pw * x for x ∈ countnear]
-        append!(points_y, values)
-        append!(points_x, center .+ offsets)
+                center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
+                halfwidth = 0.5_cycle(barwidth, i)
+
+                offsets = (rand(length(groupy)) .* 2 .- 1) .* halfwidth
+
+                if side == :left
+                    offsets = -abs.(offsets)
+                elseif side == :right
+                    offsets = abs.(offsets)
+                end
+
+                append!(points_y, groupy)
+                append!(points_x, center .+ offsets)
+            end
+
+            x = points_x
+            y = points_y
+        elseif mode == :densityjitter
+            0.0 ≤ dy ≤ 1.0 || throw(ArgumentError("$(:dy) must be in the range [0,1]"))
+            points_x, points_y = zeros(0), zeros(0)
+
+            for (i,grouplabel) in enumerate(grouplabels)
+                # filter y
+                groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
+
+                # compute quantiles
+                q2,q1 = quantile(groupy, [0.25, 0.75])
+
+                center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
+                halfwidth = 0.5_cycle(barwidth, i)
+
+                nearby = dy * abs(q2 - q1)
+                nearbycount = [count((groupy .< (x + nearby)) .& (groupy .> (x - nearby))) for x ∈ groupy]
+
+                localwidth = halfwidth / maximum(nearbycount)
+                offsets = [(rand() * 2 - 1) * localwidth * x for x ∈ nearbycount]
+
+                if side == :left
+                    offsets = -abs.(offsets)
+                elseif side == :right
+                    offsets = abs.(offsets)
+                end
+
+                append!(points_y, groupy)
+                append!(points_x, center .+ offsets)
+            end
+
+            x = points_x
+            y = points_y
+        elseif mode == :violinjitter
+            points_x, points_y = zeros(0), zeros(0)
+
+            for (i,grouplabel) in enumerate(grouplabels)
+                # filter y
+                groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
+
+                center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
+                violinwidths, violincenters = violin_coords(groupy)
+
+                # normalize widths
+                halfwidth = 0.5_cycle(barwidth, i)
+                violinwidths = halfwidth * violinwidths / Plots.ignorenan_maximum(violinwidths)
+
+                uppercenters = findmin.([violincenters[violincenters .> yval] for yval ∈ groupy])
+                lowercenters = findmax.([violincenters[violincenters .≤ yval] for yval ∈ groupy])
+                upperbounds, lowerbounds = first.(uppercenters), first.(lowercenters)
+                upperindexes, lowerindexes = last.(uppercenters), last.(lowercenters)
+                upperwidths = [violinwidths[violincenters .> groupy[i]][upperindexes[i]] for i ∈ 1:length(groupy)]
+                lowerwidths = [violinwidths[violincenters .≤ groupy[i]][lowerindexes[i]] for i ∈ 1:length(groupy)]
+                δs = (upperbounds .- groupy) ./ (upperbounds .- lowerbounds)
+                localwidths = upperwidths .* (1 .- δs) .+ lowerwidths .* δs
+                offsets = (rand(length(groupy)) .* 2 .- 1) .* localwidths
+
+                if side == :left
+                    offsets = -abs.(offsets)
+                elseif side == :right
+                    offsets = abs.(offsets)
+                end
+
+                append!(points_y, groupy)
+                append!(points_x, center .+ offsets)
+            end
+
+            x = points_x
+            y = points_y
+        end
+    elseif mode == :nooverlap
+        points_x, points_y = zeros(0), zeros(0)
+
+        for (i,grouplabel) in enumerate(grouplabels)
+            groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
+            center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
+            offsets, yi = nooverlap_coords(groupy, side)
+            append!(points_y, yi)
+            append!(points_x, center .+ offsets)
+        end
+
+        x = points_x
+        y = points_y
     end
 
-    seriestype  := :scatter
-    x := points_x
-    y := points_y
+    seriestype := :scatter
+    x := x
+    y := y
     ()
 end
+
 Plots.@deps dotplot scatter
 Plots.@shorthands dotplot
 
