@@ -110,19 +110,6 @@
             x = points_x
             y = points_y
         end
-    elseif mode == :nooverlap
-        points_x, points_y = zeros(0), zeros(0)
-
-        for (i,grouplabel) in enumerate(grouplabels)
-            groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
-            center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
-            offsets, yi = nooverlap_coords(groupy, side)
-            append!(points_y, yi)
-            append!(points_x, center .+ offsets)
-        end
-
-        x = points_x
-        y = points_y
     end
 
     seriestype := :scatter
