@@ -10,10 +10,7 @@
         else
             x = [getindex(x, plotattributes[:series_plotindex])]
         end
-
-        x = repeat([x], length(y))
     end
-    x = Float64.(x)
 
     if mode != :none
         grouplabels = sort(collect(unique(x)))
