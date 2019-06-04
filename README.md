@@ -177,8 +177,7 @@ singers = RDatasets.dataset("lattice","singer")
 @df singers dotplot!(:VoicePart,:Height,marker=(:black,stroke(0)))
 ```
 
-![violin](https://user-images.githubusercontent.com/6333339/29870077-b4242e32-8d7d-11e7-9b18-40a57360936d.png)
-ADD NEW GRAPHIC
+![violin](https://user-images.githubusercontent.com/1438610/58917297-13922d80-86f4-11e9-83c0-6133a51d1d4b.png)
 
 Asymmetric violin or dot plots can be created using the `side` keyword (`:both` - default,`:right` or `:left`), e.g.:
 
@@ -196,8 +195,7 @@ Dot plots can spread their dots over the full width of their column `mode = :uni
 each time the plot is recreated.
 
 
-![2violin](https://user-images.githubusercontent.com/6333339/29870110-d90ed468-8d7d-11e7-8ebb-008323dff8b8.png)
-ADD NEW GRAPHIC
+![violin2](https://user-images.githubusercontent.com/1438610/58917360-3e7c8180-86f4-11e9-8150-2d5e07fc0d0e.png)
 
 ---
 
