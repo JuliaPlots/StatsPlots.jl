@@ -191,8 +191,8 @@ singers_moscow[:Height] = singers_moscow[:Height] .+ 5
 ```
 
 Dot plots can spread their dots over the full width of their column `mode = :uniform`, or restricted to the kernel density
-(i.e. width of violin plot) with `mode = :density`. Horizontal position is random, so dots are repositioned
-each time the plot is recreated.
+(i.e. width of violin plot) with `mode = :density` (default). Horizontal position is random, so dots are repositioned
+each time the plot is recreated. `mode = :none` keeps the dots along the center.
 
 
 ![violin2](https://user-images.githubusercontent.com/1438610/58917360-3e7c8180-86f4-11e9-8150-2d5e07fc0d0e.png)
