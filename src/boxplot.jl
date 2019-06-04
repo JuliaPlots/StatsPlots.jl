@@ -5,7 +5,7 @@
 notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
 @recipe function f(::Type{Val{:boxplot}}, x, y, z; notch=false, range=1.5, outliers=true, whisker_width=:match)
-    # if only y is provided, then x will be UnitRange 1:length(y)
+    # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
             x = plotattributes[:series_plotindex]
@@ -132,12 +132,12 @@ recipetype(::Val{:groupedboxplot}, args...) = GroupedBoxplot(args)
 
     # extract xnums and set default bar width.
     # might need to set xticks as well
+    ux = unique(x)
     x = if eltype(x) <: Number
-        bar_width --> (0.8 * mean(diff(x)))
+        bar_width --> (0.8 * mean(diff(sort(ux))))
         float.(x)
     else
         bar_width --> 0.8
-        ux = unique(x)
         xnums = [findfirst(isequal(xi), ux) for xi in x] .- 0.5
         xticks --> (eachindex(ux) .- 0.5, ux)
         xnums
