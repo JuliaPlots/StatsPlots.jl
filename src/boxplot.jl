@@ -138,7 +138,6 @@ recipetype(::Val{:groupedboxplot}, args...) = GroupedBoxplot(args)
         float.(x)
     else
         bar_width --> 0.8
-        ux = unique(x)
         xnums = [findfirst(isequal(xi), ux) for xi in x] .- 0.5
         xticks --> (eachindex(ux) .- 0.5, ux)
         xnums
