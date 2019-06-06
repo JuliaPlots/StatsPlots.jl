@@ -2,6 +2,8 @@
 
 @recipe function f(::Type{Val{:marginalhist}}, plt::AbstractPlot; density = false)
     x, y = plotattributes[:x], plotattributes[:y]
+    i = isfinite.(x) .& isfinite.(y)
+    x, y = x[i], y[i]
     bns = get(plotattributes, :bins, :auto)
     edges1, edges2 = Plots._hist_edges((x,y), bns)
 
