@@ -331,6 +331,8 @@ plot(
     )
 ```
 
+![heatmap dendrogram non-optimal](https://user-images.githubusercontent.com/3502975/59949267-a1824e00-9440-11e9-96dd-4628a8372ae2.png)
+
 Compare to:
 
 ```julia
@@ -342,6 +344,8 @@ plot(
     layout=grid(2,1, heights=[0.2,0.8])
     )
 ```
+
+![heatmap dendrogram optimal](https://user-images.githubusercontent.com/3502975/59949464-20778680-9441-11e9-8ed7-9a639b50dfb2.png)
 
 ## GroupedErrors.jl for population analysis
 
