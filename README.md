@@ -298,6 +298,51 @@ plot(hc)
 
 ![dendrogram](https://user-images.githubusercontent.com/381464/43355211-855d5aa2-920d-11e8-82d7-2bf1a7aeccb5.png)
 
+The `branchorder=:optimal` option in `hclust()` can be used to minimize
+the distance between neighboring leaves:
+
+```julia
+using Clustering
+using Distances
+using StatsPlots
+using Random
+
+n = 40
+
+mat = zeros(Int, n, n)
+# create banded matrix
+for i in 1:n
+    last = minimum([i+Int(floor(n/5)), n])
+    for j in i:last
+        mat[i,j] = 1
+    end
+end
+
+# randomize order
+mat = mat[:, randperm(n)]
+dm = pairwise(Euclidean(), mat, dims=2)
+
+# normal ordering
+hcl1 = hclust(dm, linkage=:average)
+plot(
+    plot(hcl1, xticks=false),
+    heatmap(mat[:, hcl1.order], colorbar=false, xticks=(1:n, ["$i" for i in hcl1.order])),
+    layout=grid(2,1, heights=[0.2,0.8])
+    )
+```
+
+Compare to:
+
+```julia
+# optimal ordering
+hcl2 = hclust(dm, linkage=:average, branchorder=:optimal)
+plot(
+    plot(hcl2, xticks=false),
+    heatmap(mat[:, hcl2.order], colorbar=false, xticks=(1:n, ["$i" for i in hcl2.order])),
+    layout=grid(2,1, heights=[0.2,0.8])
+    )
+```
+
 ## GroupedErrors.jl for population analysis
 
 Population analysis on a table-like data structures can be done using the highly recommended [GroupedErrors](https://github.com/piever/GroupedErrors.jl) package.
