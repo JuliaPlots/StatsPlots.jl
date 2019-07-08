@@ -14,6 +14,7 @@ import Observables: AbstractObservable, @map, observe
 import Widgets: @nodeps
 import DataStructures: OrderedDict
 import Clustering: Hclust, nnodes
+using Interpolations
 
 import KernelDensity
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
@@ -29,6 +30,7 @@ include("corrplot.jl")
 include("cornerplot.jl")
 include("distributions.jl")
 include("boxplot.jl")
+include("dotplot.jl")
 include("violin.jl")
 include("hist.jl")
 include("marginalhist.jl")
