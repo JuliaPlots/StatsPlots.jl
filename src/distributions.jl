@@ -6,6 +6,21 @@ function default_range(dist::Distribution, alpha = 0.0001)
     minval, maxval
 end
 
+function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
+    minval = maxval = 0.0
+    for c in m.components
+        thismin = isfinite(minimum(c)) ? minimum(c) : quantile(c, alpha)
+        thismax = isfinite(maximum(c)) ? maximum(c) : quantile(c, 1-alpha)
+        if thismin < minval
+            minval = thismin
+        end
+        if thismax > maxval
+            maxval = thismax
+        end
+    end
+    minval, maxval
+end
+
 yz_args(dist) = default_range(dist)
 yz_args(dist::Distribution{N, T}) where N where T<:Discrete = (UnitRange(default_range(dist)...),)
 
@@ -15,6 +30,18 @@ yz_args(dist::Distribution{N, T}) where N where T<:Discrete = (UnitRange(default
         seriestype --> :scatterpath
     end
     (dist, yz_args(dist)...)
+end
+
+@recipe function f(m::Distributions.MixtureModel; components = true)
+    if components
+        for c in m.components
+            @series begin
+                (c, yz_args(c)...)
+            end
+        end
+    else
+        (m, yz_args(m)...)
+    end
 end
 
 @recipe function f(distvec::AbstractArray{<:Distribution}, yz...)
