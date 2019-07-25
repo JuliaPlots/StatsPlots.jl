@@ -71,7 +71,7 @@ df |>
     @df scatter(:b, :d)
 ```
 
-The `@df` syntax is also compatible with Plots grouping machinery:
+The `@df` syntax is also compatible with the Plots.jl grouping machinery:
 
 ```julia
 using RDatasets
