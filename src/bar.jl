@@ -46,16 +46,7 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
 
     # compute fillrange
     fillrange := if isstack
-        # shift y/fillrange up
-        y = copy(y)
-        y[.!isfinite.(y)] .= 0
-        fr = zeros(nr, nc)
-        for c=2:nc
-            for r=1:nr
-                fr[r,c] = y[r,c-1]
-                y[r,c] += fr[r,c]
-            end
-        end
+        y, fr = groupedbar_fillrange(y)
         fr
     else
         get(plotattributes, :fillrange, nothing)
@@ -63,4 +54,25 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
 
     seriestype := :bar
     x, y
+end
+
+function groupedbar_fillrange(y)
+    nr, nc = size(y)
+    fr = zeros(nr, nc)
+    y = copy(y)
+    y[.!isfinite.(y)] .= 0
+    for r = 1:nr
+        y_pos = y_neg = 0.0
+        for c = 1:nc
+            el = y[r, c]
+            if el >= 0
+                fr[r, c] = y_pos
+                y[r, c] = y_pos += el
+            else
+                fr[r, c] = y_neg
+                y[r, c] = y_neg += el
+            end
+        end
+    end
+    y, fr
 end
