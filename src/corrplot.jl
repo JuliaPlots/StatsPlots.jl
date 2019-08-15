@@ -2,6 +2,14 @@
 
 recipetype(::Val{:corrplot}, args...) = CorrPlot(args)
 
+"""
+    to_corrplot_matrix(mat)
+
+Transforms the input into a correlation plot matrix.  
+Meant to be overloaded by other types!
+"""
+to_corrplot_matrix(mat::AbstractMatrix) = mat
+
 function update_ticks_guides(d::KW, labs, i, j, n)
     # d[:title]  = (i==1 ? _cycle(labs,j) : "")
     # d[:xticks] = (i==n)
@@ -11,7 +19,7 @@ function update_ticks_guides(d::KW, labs, i, j, n)
 end
 
 @recipe function f(cp::CorrPlot)
-    mat = cp.args[1]
+    mat = to_corrplot_matrix(cp.args[1])
     n = size(mat,2)
     C = cor(mat)
     labs = pop!(plotattributes, :label, [""])
