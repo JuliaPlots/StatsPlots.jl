@@ -1,6 +1,6 @@
 name = "StatsPlots"
 uuid = "f3b207a7-027a-5e70-b257-86293d7955fd"
-version = "0.11.0"
+version = "0.12.0"
 
 [deps]
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
