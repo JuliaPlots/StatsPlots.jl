@@ -15,8 +15,9 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
 
     # extract xnums and set default bar width.
     # might need to set xticks as well
-    xnums = if eltype(x) <: Number && length(x) > 1
-        bar_width --> (0.8 * mean(diff(x)))
+    xnums = if eltype(x) <: Number
+        xdiff = length(x) > 1 ? mean(diff(x)) : 1
+        bar_width --> 0.8 * xdiff
         x
     else
         bar_width --> 0.8
