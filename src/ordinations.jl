@@ -6,14 +6,14 @@
     var_explained = [v / sum(ev) for v in ev]
     tfm = collect(transform(mds)')
 
-    xlabel --> "MDS$xax ($(round(var_explained[xax] * 100, digits = 2))%)"
-    ylabel --> "MDS$yax ($(round(var_explained[yax] * 100, digits = 2))%)"
+    xlabel --> "MDS$xax"
+    ylabel --> "MDS$yax"
     seriestype := :scatter
     aspect_ratio --> 1
 
     if length(mds_axes) == 3
         zax = mds_axes[3]
-        zlabel --> "MDS$zax ($(round(var_explained[zax] * 100, digits = 2))%)"
+        zlabel --> "MDS$zax"
         tfm[:,xax], tfm[:,yax], tfm[:,zax]
     else
         tfm[:,xax], tfm[:,yax]
@@ -28,15 +28,14 @@ end
     var_explained = [v / sum(vars) for v in vars] .* principalratio(pca)
     proj = projection(pca)
 
-    xlabel --> "PCA$xax ($(round(var_explained[xax] * 100, digits = 2))%)"
-    ylabel --> "PCA$yax ($(round(var_explained[yax] * 100, digits = 2))%)"
+    xlabel --> "PCA$xax"
+    ylabel --> "PCA$yax"
     seriestype := :scatter
-    xticks --> false
-    yticks --> false
+    aspect_ratio --> 1
 
     if length(pca_axes) == 3
         zax = pca_axes[3]
-        zlabel --> "PCA$zax ($(round(var_explained[zax] * 100, digits = 2))%)"
+        zlabel --> "PCA$zax"
         proj[:,xax], proj[:,yax], proj[:,zax]
     else
         proj[:,xax], proj[:,yax]

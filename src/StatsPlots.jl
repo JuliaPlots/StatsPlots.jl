@@ -15,7 +15,8 @@ import Widgets: @nodeps
 import DataStructures: OrderedDict
 import Clustering: Hclust, nnodes
 using Interpolations
-import MultivariateStats: MDS, eigvals, projection, PCA, principalvars, principalratio
+import MultivariateStats: MDS, eigvals, projection, PCA, principalvars,
+                            principalratio, transform
 
 import KernelDensity
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density

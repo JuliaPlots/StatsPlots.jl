@@ -335,10 +335,20 @@ Ordinations from [`MultivariateStats.jl`](https://github.com/JuliaStats/Multivar
 using MultivariateStats, RDatasets, StatsPlots
 
 iris = dataset("datasets", "iris")
-Xtr = convert(Matrix, iris[:, 1:4])
-M = fit(PCA, Xtr; maxoutdim=2)
+X = convert(Matrix, iris[:, 1:4])
+M = fit(PCA, X; maxoutdim=2)
 
 plot(M, group=iris.Species)
 ```
 
 ![PCA](https://user-images.githubusercontent.com/3502975/58210442-64973000-7cb7-11e9-95bb-aead76241cae.png)
+
+```julia
+using MultivariateStats, RDatasets, StatsPlots
+
+iris = dataset("datasets", "iris")
+X = convert(Matrix, iris[:, 1:4])
+M = fit(MDS, X'; maxoutdim=2)
+
+plot(M, group=iris.Species)
+```
