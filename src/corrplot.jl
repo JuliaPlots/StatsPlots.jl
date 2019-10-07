@@ -8,7 +8,7 @@ recipetype(::Val{:corrplot}, args...) = CorrPlot(args)
 Transforms the input into a correlation plot matrix.  
 Meant to be overloaded by other types!
 """
-to_corrplot_matrix(mat::AbstractMatrix) = mat
+to_corrplot_matrix(x) = x
 
 function update_ticks_guides(d::KW, labs, i, j, n)
     # d[:title]  = (i==1 ? _cycle(labs,j) : "")
