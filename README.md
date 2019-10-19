@@ -18,7 +18,7 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
     - marginalhist
     - corrplot/cornerplot
     - andrewsplot
-    - PCA / MDS plot
+    - MDS plot
 
 It is thus slightly less lightweight, but has more functionality. Main documentation is found in the Plots.jl documentation (https://juliaplots.github.io).
 
@@ -329,19 +329,8 @@ A GUI based on QML and the GR Plots.jl backend to simplify the use of StatsPlots
 
 ## Ordinations
 
-Ordinations from [`MultivariateStats.jl`](https://github.com/JuliaStats/MultivariateStats.jl) (PCA and MDS) can be plotted as scatter plots.
-
-```julia
-using MultivariateStats, RDatasets, StatsPlots
-
-iris = dataset("datasets", "iris")
-X = convert(Matrix, iris[:, 1:4])
-M = fit(PCA, X; maxoutdim=2)
-
-plot(M, group=iris.Species)
-```
-
-![PCA](https://user-images.githubusercontent.com/3502975/58210442-64973000-7cb7-11e9-95bb-aead76241cae.png)
+MDS from [`MultivariateStats.jl`](https://github.com/JuliaStats/MultivariateStats.jl)
+can be plotted as scatter plots.
 
 ```julia
 using MultivariateStats, RDatasets, StatsPlots
@@ -352,3 +341,8 @@ M = fit(MDS, X'; maxoutdim=2)
 
 plot(M, group=iris.Species)
 ```
+
+![MDS plot](https://user-images.githubusercontent.com/3502975/64883550-a6186600-d62d-11e9-8f6b-c5094abf5573.png)
+
+PCA will be added once the API in MultivariateStats is changed.
+See https://github.com/JuliaStats/MultivariateStats.jl/issues/109 and https://github.com/JuliaStats/MultivariateStats.jl/issues/95.

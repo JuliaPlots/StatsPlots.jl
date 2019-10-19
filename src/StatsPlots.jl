@@ -15,7 +15,7 @@ import Widgets: @nodeps
 import DataStructures: OrderedDict
 import Clustering: Hclust, nnodes
 using Interpolations
-import MultivariateStats: MDS, eigvals, projection, PCA, principalvars,
+import MultivariateStats: MDS, eigvals, projection, principalvars,
                             principalratio, transform
 
 import KernelDensity
