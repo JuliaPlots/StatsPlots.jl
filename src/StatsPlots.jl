@@ -15,6 +15,8 @@ import Widgets: @nodeps
 import DataStructures: OrderedDict
 import Clustering: Hclust, nnodes
 using Interpolations
+import MultivariateStats: MDS, eigvals, projection, principalvars,
+                            principalratio, transform
 
 import KernelDensity
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
@@ -37,5 +39,6 @@ include("marginalhist.jl")
 include("bar.jl")
 include("dendrogram.jl")
 include("andrews.jl")
+include("ordinations.jl")
 
 end # module
