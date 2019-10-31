@@ -135,13 +135,35 @@ compute_name(names, i::Int) = names[i]
 compute_name(names, i::Symbol) = i
 compute_name(names, i) = reshape([compute_name(names, ii) for ii in i], 1, :)
 
-# This function ensures that labels are passed to the plottig command.
+"""
+    add_label(argnames, f, args...; kwargs...)
+
+This function ensures that labels are passed to the plotting command, if it accepts them.
+
+If `f` does not accept keyword arguments, and `kwargs` is empty, it will only
+forward `args...`.
+
+If the user has provided keyword arguments, but `f` does not accept them,
+then it will error.
+"""
 function add_label(argnames, f, args...; kwargs...)
     i = findlast(t -> isa(t, Expr) || isa(t, AbstractArray), argnames)
-    if (i === nothing)
-        return f(args...; kwargs...)
-    else
-        return f(label = argnames[i], args...; kwargs...)
+    try
+        if (i === nothing)
+            return f(args...; kwargs...)
+        else
+            return f(label = argnames[i], args...; kwargs...)
+        end
+    catch e
+        if e isa MethodError ||
+            (e isa ErrorException && occursin("does not accept keyword arguments", e.msg))
+            # check if the user has supplied kwargs, then we need to rethrow the error
+            isempty(kwargs) || rethrow(e)
+            # transmit only args to `f`
+            return f(args...)
+        else
+            rethrow(e)
+        end
     end
 end
 
