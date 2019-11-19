@@ -45,7 +45,7 @@ silhouetteplot
 	# Settings for the axes
 	legend --> false
 	yflip := true
-	xlims := [min(-0.1,minimum(s)),1]
+	xlims --> [min(-0.1,minimum(s)),1]
 	# y ticks used to show cluster boundaries, and labels to show the sizes
 	yticks := cumsum([0;c]),["0",["+$z" for z in c]...]
 
@@ -65,7 +65,8 @@ silhouetteplot
 		end
 		# text label to the left of the bars
 		@series begin
-			linealpha := 0
+			primary := false
+			seriesalpha := 0
 			series_annotations := [ Plots.text("$i",:center,:middle,9) ]
 			[-0.04], [offset+c[i]/2]
 		end
@@ -75,9 +76,9 @@ silhouetteplot
 	# Dashed line for overall average.
 	savg = sum(s)/n
 	@series begin
+		primary := false
 		linecolor := :black
 		linestyle := :dash
-		label := ""
 		[savg,savg], [0,n]
 	end
 end
