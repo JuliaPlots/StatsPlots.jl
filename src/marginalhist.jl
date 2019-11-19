@@ -5,7 +5,9 @@
     i = isfinite.(x) .& isfinite.(y)
     x, y = x[i], y[i]
     bns = get(plotattributes, :bins, :auto)
+    scale = get(plotattributes, :scale, :identity)
     edges1, edges2 = Plots._hist_edges((x,y), bns)
+    xlims, ylims = Plots.widen(Plots.ignorenan_extrema(x)..., scale), Plots.widen(Plots.ignorenan_extrema(y)..., scale)
 
     # set up the subplots
     legend --> false
@@ -23,6 +25,8 @@
         top_margin --> 0mm
         subplot := 2
         bins := (edges1, edges2)
+        xlims --> xlims
+        ylims --> ylims
     end
 
     # these are common to both marginal histograms
@@ -46,6 +50,7 @@
         bottom_margin --> 0mm
         bins := edges1
         y := x
+        xlims --> xlims
     end
 
     # right histogram
@@ -55,6 +60,7 @@
         left_margin --> 0mm
         bins := edges2
         y := y
+        xlims --> ylims
     end
 end
 
