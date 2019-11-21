@@ -357,6 +357,7 @@ plot(
 
 ![heatmap dendrogram optimal](https://user-images.githubusercontent.com/3502975/59949464-20778680-9441-11e9-8ed7-9a639b50dfb2.png)
 
+### Dendrogram on the right side
 
 ```julia
 using Distances
