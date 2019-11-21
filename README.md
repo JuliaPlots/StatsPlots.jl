@@ -357,6 +357,49 @@ plot(
 
 ![heatmap dendrogram optimal](https://user-images.githubusercontent.com/3502975/59949464-20778680-9441-11e9-8ed7-9a639b50dfb2.png)
 
+
+```julia
+using Distances
+using Clustering
+using StatsBase
+using StatsPlots
+
+pd=rand(Float64,16,7)
+
+dist_col=pairwise(CorrDist(),pd,dims=2)
+hc_col=hclust(dist_col, branchorder=:optimal)
+dist_row=pairwise(CorrDist(),pd,dims=1)
+hc_row=hclust(dist_row, branchorder=:optimal)
+
+pdz=similar(pd)
+for row in hc_row.order
+	pdz[row,hc_col.order]=zscore(pd[row,hc_col.order])
+end
+nrows=length(hc_row.order)
+rowlabels=(1:16)[hc_row.order]
+ncols=length(hc_col.order)
+collabels=(1:7)[hc_col.order]
+l = grid(2,2,heights=[0.2,0.8,0.2,0.8],widths=[0.8,0.2,0.8,0.2])
+plot(
+	layout = l,
+	plot(hc_col,xticks=false),
+	plot(ticks=nothing,border=:none),
+	plot(
+		pdz[hc_row.order,hc_col.order],
+		st=:heatmap,
+		#yticks=(1:nrows,rowlabels),
+		yticks=(1:nrows,rowlabels),
+		xticks=(1:ncols,collabels),
+		xrotation=90,
+		colorbar=false
+	),
+	plot(hc_row,yticks=false,xrotation=90,orientation=:h)
+)
+```
+
+![heatmap with dendrograms on top and on the right](https://raw.githubusercontent.com/oheil/StatsPlots.jl/oh/screenshots/heatmapWithDendroOnRight.jpg)
+
+
 ## GroupedErrors.jl for population analysis
 
 Population analysis on a table-like data structures can be done using the highly recommended [GroupedErrors](https://github.com/piever/GroupedErrors.jl) package.
