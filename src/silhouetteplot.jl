@@ -21,7 +21,7 @@ silhouetteplot(R,X,D)
 silhouetteplot
 
 @userplot SilhouettePlot
-@recipe function f(h::SilhouettePlot)#R::ClusteringResult,X::AbstractArray,D::AbstractMatrix=[];distance=Euclidean())
+@recipe function f(h::SilhouettePlot;yflip=true)#R::ClusteringResult,X::AbstractArray,D::AbstractMatrix=[];distance=Euclidean())
 	narg = length(h.args)
 	@assert narg > 1 "At least two arguments are required."
 	R = h.args[1]
@@ -44,7 +44,7 @@ silhouetteplot
 
 	# Settings for the axes
 	legend --> false
-	yflip := true
+	yflip := yflip
 	xlims --> [min(-0.1,minimum(s)),1]
 	# y ticks used to show cluster boundaries, and labels to show the sizes
 	yticks := cumsum([0;c]),["0",["+$z" for z in c]...]
@@ -54,7 +54,7 @@ silhouetteplot
 	plt = plot([],label="")
 	for i in 1:k
 		idx = (a.==i)    # members of cluster i
-		si = sort(s[idx],rev=true)
+		si = yflip ? sort(s[idx],rev=true) : sort(s[idx])
 		@series begin
 			linealpha --> 0
 			seriestype := :shape
