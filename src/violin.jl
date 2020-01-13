@@ -114,8 +114,13 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
     @series begin
         seriestype := :shape
-        x := xsegs.pts
-        y := ysegs.pts
+        if orientation == :horizontal
+            x := ysegs.pts
+            y := xsegs.pts
+        else
+            x := xsegs.pts
+            y := ysegs.pts
+        end
         ()
     end
 
@@ -124,8 +129,13 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
             primary := false
             seriestype := :shape
             linestyle := :dot
-            x := mxsegs.pts
-            y := mysegs.pts
+            if orientation == :horizontal
+                x := mysegs.pts
+                y := mxsegs.pts
+            else
+                x := mxsegs.pts
+                y := mysegs.pts
+
             ()
         end
     end
@@ -134,8 +144,13 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
         @series begin
             primary := false
             seriestype := :shape
-            x := qxsegs.pts
-            y := qysegs.pts
+            if orientation = :horizontal
+                x := qysegs.pts
+                y := qxsegs.pts
+            else
+                x := qxsegs.pts
+                y := qysegs.pts
+            end
             ()
         end
     end

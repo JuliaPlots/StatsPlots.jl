@@ -45,8 +45,13 @@
     end
 
     seriestype := :scatter
-    x := points_x
-    y := points_y
+    if orientation == :horizontal
+        x := points_y
+        y := points_x
+    else
+        x := points_x
+        y := points_y
+    end
     ()
 end
 

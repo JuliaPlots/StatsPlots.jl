@@ -111,10 +111,17 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             ()
         end
     end
+    if orientation == :horizontal
+        xs = ysegs.pts
+        ys = xsegs.pts
+    else
+        xs = xsegs.pts
+        ys = ysegs.pts
+    end
 
     seriestype := :shape
-    x := xsegs.pts
-    y := ysegs.pts
+    x := xs
+    y := ys
     ()
 end
 Plots.@deps boxplot shape scatter
