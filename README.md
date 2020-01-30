@@ -372,6 +372,18 @@ plot(
 
 ![heatmap dendrogram optimal](https://user-images.githubusercontent.com/3502975/59949464-20778680-9441-11e9-8ed7-9a639b50dfb2.png)
 
+## Plotting statistical model objects
+So far there are only recipes for the bivariate case, but the plan is to make this work for all types of statistical models
+
+```julia
+using StatsPlots, GLM, RDatasets
+iris = dataset("datasets", "iris")
+mod = lm(@formula(PetalLength ~ PetalWidth), iris)
+plot(mod)
+@df iris scatter!(:PetalWidth, :PetalLength, ms = 2, c = :black, legend = :topleft)
+```
+![model_example](https://user-images.githubusercontent.com/8429802/73453356-1ff68500-436c-11ea-872c-03ae851be281.png)
+
 ## GroupedErrors.jl for population analysis
 
 Population analysis on a table-like data structures can be done using the highly recommended [GroupedErrors](https://github.com/piever/GroupedErrors.jl) package.
