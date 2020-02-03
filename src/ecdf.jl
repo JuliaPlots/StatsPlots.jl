@@ -17,4 +17,10 @@ end
 
 @userplot ECDFPlot
 recipetype(::Val{:ecdfplot}, args...) = ECDFPlot(args)
-@recipe f(p::ECDFPlot) = ecdf(p.args[1])
+@recipe function f(p::ECDFPlot)
+    x = p.args[1]
+    if !isa(x, StatsBase.ECDF)
+        x = StatsBase.ecdf(x)
+    end
+    x
+end
