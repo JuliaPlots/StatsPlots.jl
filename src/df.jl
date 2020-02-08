@@ -202,9 +202,3 @@ function extract_columns_and_names(df, syms...)
     cols = columntable(select(df, unique(selected_cols)...))
     return Tuple(get_col(s, cols, names) for s in syms), names
 end
-
-convert_missing(el) = el
-convert_missing(el::DataValue{T}) where {T} = get(el, missing)
-convert_missing(el::DataValue{<:AbstractString}) = get(el, "")
-convert_missing(el::DataValue{Symbol}) = get(el, Symbol())
-convert_missing(el::DataValue{<:Real}) = get(convert(DataValue{Float64}, el), NaN)
