@@ -6,11 +6,11 @@ combine_cols(dict, ns) = length(ns) > 1 ? hcat((dict[n] for n in ns)...) : dict[
 function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
     (t isa AbstractObservable) || (t = Observable{Any}(t))
 
-    columns_and_names = @map create_columns_from_iterabletable(getiterator(&t))
+    coltable = map(columntable, t)
 
-    names = @map (&columns_and_names)[2]
+    @show names = map(collect∘keys, coltable)
 
-    dict = @map Dict((key, convert_missing.(val)) for (val, key)  in zip((&columns_and_names)...))
+    dict = @map Dict((key, val) for (key, val)  in pairs(&coltable))
     x =  Widgets.dropdown(names, placeholder = "First axis", multiple = true)
     y =  Widgets.dropdown(names, placeholder = "Second axis", multiple = true)
     y_toggle = Widgets.togglecontent(y, value = false, label = "Second axis")
