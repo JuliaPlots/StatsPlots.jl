@@ -2,7 +2,7 @@ module StatsPlots
 
 using Reexport
 import RecipesBase: recipetype
-import Tables: istable, columntable, select, schema, rows
+using Tables: istable, columntable, schema, rows, getcolumn
 @reexport using Plots
 import Plots: _cycle
 using Plots.PlotMeasures
