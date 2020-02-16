@@ -6,7 +6,7 @@ combine_cols(dict, ns) = length(ns) > 1 ? hcat((dict[n] for n in ns)...) : dict[
 function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
     (t isa AbstractObservable) || (t = Observable{Any}(t))
 
-    coltable = map(columntable, t)
+    coltable = map(Tables.columntable, t)
 
     @show names = map(collect∘keys, coltable)
 

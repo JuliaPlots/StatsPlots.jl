@@ -100,8 +100,8 @@ function parse_table_call!(d, x::Expr, syms, vars)
 end
 
 function column_names(t)
-    s = schema(t)
-    s === nothing ? propertynames(first(rows(t))) : s.names
+    s = Tables.schema(t)
+    s === nothing ? propertynames(first(Tables.rows(t))) : s.names
 end
 
 not_kw(x) = true
@@ -197,12 +197,12 @@ The structure goes as `((columndata...), names)`.  This is unpacked by the [`@df
     function you should overload!
 """
 function extract_columns_and_names(df, syms...)
-    istable(df) || error("Only tables are supported")
+    Tables.istable(df) || error("Only tables are supported")
     names = column_names(df)
 
     # extract selected column names
     selected_cols = add_sym!(Symbol[], syms, names)
 
-    cols = (; (s => getcolumn(df, s) for s in unique(selected_cols))...)
+    cols = Tables.columntable(TableOperations.select(df, unique(selected_cols)...))
     return Tuple(get_col(s, cols, names) for s in syms), names
 end
