@@ -100,8 +100,8 @@ function parse_table_call!(d, x::Expr, syms, vars)
 end
 
 function column_names(t)
-    s = schema(t)
-    s === nothing ? propertynames(first(rows(t))) : s.names
+    s = Tables.schema(t)
+    s === nothing ? propertynames(first(Tables.rows(t))) : s.names
 end
 
 not_kw(x) = true
@@ -171,6 +171,18 @@ get_col(s::Int, col_nt, names) = col_nt[names[s]]
 get_col(s::Symbol, col_nt, names) = get(col_nt, s, s)
 get_col(syms, col_nt, names) = hcat((get_col(s, col_nt, names) for s in syms)...)
 
+# get the appropriate name when passed an Integer
+add_sym!(cols, i::Integer, names) = push!(cols, names[i])
+# check for errors in Symbols
+add_sym!(cols, s::Symbol, names) = s in names ? push!(cols, s) : cols
+# recursively extract column names
+function add_sym!(cols, s, names)
+    for si in s
+        add_sym!(cols, si, names)
+    end
+    cols
+end
+
 """
     extract_columns_and_names(df, syms...)
 
@@ -185,20 +197,12 @@ The structure goes as `((columndata...), names)`.  This is unpacked by the [`@df
     function you should overload!
 """
 function extract_columns_and_names(df, syms...)
-    istable(df) || error("Only tables are supported")
+    Tables.istable(df) || error("Only tables are supported")
     names = column_names(df)
 
-    selected_cols = Symbol[]
+    # extract selected column names
+    selected_cols = add_sym!(Symbol[], syms, names)
 
-    # get the appropriate name when passed an Integer
-    add_sym!(s::Integer) = push!(selected_cols, names[s])
-    # check for errors in Symbols
-    add_sym!(s::Symbol) = s in names && push!(selected_cols, s)
-    # recursively extract column names
-    add_sym!(s) = foreach(add_sym!, s)
-
-    foreach(add_sym!, syms)
-
-    cols = columntable(select(df, unique(selected_cols)...))
+    cols = Tables.columntable(TableOperations.select(df, unique(selected_cols)...))
     return Tuple(get_col(s, cols, names) for s in syms), names
 end
