@@ -59,16 +59,20 @@ end
 
 function groupedbar_fillrange(y)
     nr, nc = size(y)
+    # bar series fills from y[nr, nc] to fr[nr, nc], y .>= fr
     fr = zeros(nr, nc)
     y = copy(y)
     y[.!isfinite.(y)] .= 0
     for r = 1:nr
-        y_pos = y_neg = 0.0
+        y_neg = 0
+        # upper & lower bounds for positive bar
+        y_pos = sum([e for e in y[r, :] if e > 0])
+        # division subtract towards 0
         for c = 1:nc
             el = y[r, c]
             if el >= 0
                 fr[r, c] = y_pos
-                y[r, c] = y_pos += el
+                y[r, c] = y_pos -= el
             else
                 fr[r, c] = y_neg
                 y[r, c] = y_neg += el
