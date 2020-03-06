@@ -71,7 +71,7 @@ function parse_table_call!(d, x::Expr, syms, vars)
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
             if length(x.args) == 1
-                push!(x.args, :(StatsPlots.column_names(StatsPlots.getiterator($d))))
+                push!(x.args, :(StatsPlots.column_names($d)))
                 return parse_table_call!(d, x, syms, vars)
             end
             range = x.args[2]
