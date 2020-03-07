@@ -42,5 +42,6 @@ include("bar.jl")
 include("dendrogram.jl")
 include("andrews.jl")
 include("ordinations.jl")
+include("stackedhist.jl")
 
 end # module
