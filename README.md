@@ -12,6 +12,7 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
     - Distributions
 - Recipes:
     - histogram/histogram2d
+    - stacked histogram (stackedhist)
     - boxplot
     - dotplot
     - violin
@@ -295,6 +296,17 @@ groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores",
 ```
 
 ![](https://user-images.githubusercontent.com/6645258/32116755-b7018f02-bb2a-11e7-82c7-ca471ecaeecf.png)
+
+## Stacked Histogram
+It can stacked collection of data arrays, or collection of already generated histogram from `StatsBase`.
+```julia
+stackedhist([randn(5000), randn(1000)], bins=-3:0.2:3)
+tt = fit(Histogram, rand(2000), 0:0.2:1);  tt2 = fit(Histogram, rand(4000), 0:0.2:1)
+stackedhist([tt, tt2])
+```
+
+![tmp](https://user-images.githubusercontent.com/5306213/76140325-241e5e00-600e-11ea-87d1-37aae4a66306.png)
+![tmp](https://user-images.githubusercontent.com/5306213/76140345-6e074400-600e-11ea-934d-950922b3a0a9.png)
 
 ## Dendrograms
 
