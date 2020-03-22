@@ -72,32 +72,30 @@ Plots.group_as_matrix(g::GroupedHist) = true
     _, v = grouped_xy(p.args...)
 
     group = get(plotattributes, :group, nothing)
-    bins = get(plotattributes, :bins, :auto)
-    normed = get(plotattributes, :normalize, false)
-    weights = get(plotattributes, :weights, nothing)
-
     gb = Plots.extractGroupArgs(group)
     labels, idxs = getfield(gb, 1), getfield(gb, 2)
     ngroups = length(labels)
 
+    bins = get(plotattributes, :bins, :auto)
+    normed = get(plotattributes, :normalize, false)
+    weights = get(plotattributes, :weights, nothing)
+
     # compute edges from ungrouped data
     h = Plots._make_hist((vec(v),), bins; normed = normed, weights = weights)
     nbins = length(h.weights)
+    edges = h.edges[1]
+    bar_width --> mean(map(i -> edges[i+1] - edges[i], 1:nbins))
+    x = map(i -> (edges[i] + edges[i+1])/2, 1:nbins)
 
     # compute weights (frequencies) by group using those edges
     y = fill(NaN, nbins, ngroups)
     for i in 1:ngroups
         groupinds = idxs[i]
-        v_g = v[groupinds]
-        w_g = weights == nothing ? nothing : weights[groupinds]
-        h_g = Plots._make_hist((v_g,), h.edges; normed = false, weights = w_g)
-        y[:,i] = normed ? h_g.weights / sum(h.weights) : h_g.weights
+        v_i = v[groupinds]
+        w_i = weights == nothing ? nothing : weights[groupinds]
+        h_i = Plots._make_hist((v_i,), h.edges; normed = false, weights = w_i)
+        y[:,i] = normed ? h_i.weights / sum(h.weights) : h_i.weights
     end
-    label --> labels
-
-    edges = h.edges[1]
-    bar_width --> mean(map(i -> edges[i+1] - edges[i], 1:nbins))
-    x = map(i -> (edges[i] + edges[i+1])/2, 1:nbins)
 
     GroupedBar((x, y))
 end
