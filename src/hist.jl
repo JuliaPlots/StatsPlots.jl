@@ -60,6 +60,44 @@ push!(Plots._histogram_like, :ea_histogram)
     ()
 end
 @shorthands testhist
+
+# ---------------------------------------------------------------------------
+# grouped histogram
+
+@userplot GroupedHist
+
+@recipe function f(p::GroupedHist)
+    @assert length(p.args) == 2
+    v = p.args[1]
+    gs = p.args[2]
+
+    bins = get(plotattributes, :bins, :auto)
+    normed = get(plotattributes, :normalize, false)
+    weights = get(plotattributes, :weights, nothing)
+
+    # compute edges from ungrouped data
+    h = Plots._make_hist((v,), bins; normed = normed, weights = weights)
+
+    # compute weights (frequencies) by group using those edges
+    nbins = length(h.weights)
+    groups = sort(unique(gs))
+    ngroups = length(groups)
+    y = fill(NaN, nbins, ngroups)
+    for (j,g) in enumerate(groups)
+        v_g = v[gs .== g]
+        w_g = weights == nothing ? nothing : weights[gs .== g]
+        h_g = Plots._make_hist((v_g,), h.edges; normed = false, weights = w_g)
+        y[:,j] = normed ? h_g.weights / sum(h.weights) : h_g.weights
+    end
+    label --> reshape(groups, 1, length(groups))
+
+    edges = h.edges[1]
+    bar_width --> mean(map(i -> edges[i+1] - edges[i], 1:nbins))
+    x = map(i -> (edges[i] + edges[i+1])/2, 1:nbins)
+
+    GroupedBar((x, y))
+end
+
 # ---------------------------------------------------------------------------
 # Compute binsizes using Wand (1997)'s criterion
 # Ported from R code located here https://github.com/cran/KernSmooth/tree/master/R
