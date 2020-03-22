@@ -66,17 +66,18 @@ end
 
 @userplot GroupedHist
 
-@recipe function f(p::GroupedHist)
-    @assert length(p.args) == 2
-    v = p.args[1]
-    gs = p.args[2]
+Plots.group_as_matrix(g::GroupedHist) = true
 
+@recipe function f(p::GroupedHist)
+    _, v = grouped_xy(p.args...)
+
+    gs = get(plotattributes, :group, nothing)
     bins = get(plotattributes, :bins, :auto)
     normed = get(plotattributes, :normalize, false)
     weights = get(plotattributes, :weights, nothing)
 
     # compute edges from ungrouped data
-    h = Plots._make_hist((v,), bins; normed = normed, weights = weights)
+    h = Plots._make_hist((vec(v),), bins; normed = normed, weights = weights)
 
     # compute weights (frequencies) by group using those edges
     nbins = length(h.weights)
