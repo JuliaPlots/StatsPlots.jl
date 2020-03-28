@@ -299,11 +299,11 @@ groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores",
 ## Dendrograms
 
 ```julia
-using Clustering
+using Clustering, StatsPlots
 D = rand(10, 10)
 D += D'
 hc = hclust(D, linkage=:single)
-plot(hc)
+plot(hc,xticks=false)  # temporary workaround on xticks, see #321
 ```
 
 ![dendrogram](https://user-images.githubusercontent.com/381464/43355211-855d5aa2-920d-11e8-82d7-2bf1a7aeccb5.png)
