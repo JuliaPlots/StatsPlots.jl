@@ -301,13 +301,13 @@ groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores",
 
 ```
 using RDatasets
-iris = dataset("datasets", "iris)
-@df iris groupedhist(:SepalLength, :Species; bar_position = :dodge)
+iris = dataset("datasets", "iris")
+@df iris groupedhist(:SepalLength, group = :Species, bar_position = :dodge)
 ```
 ![dodge](https://user-images.githubusercontent.com/6033297/77240750-a11d0c00-6ba6-11ea-9715-81a8a7e20cd6.png)
 
 ```
-@df iris groupedhist(:SepalLength, :Species; bar_position = :stack)
+@df iris groupedhist(:SepalLength, group = :Species, bar_position = :stack)
 ```
 ![stack](https://user-images.githubusercontent.com/6033297/77240749-9c585800-6ba6-11ea-85ea-e023341cb246.png)
 
