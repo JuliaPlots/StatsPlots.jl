@@ -39,13 +39,13 @@ function df_helper(d, x)
         plot_call = parse_table_call!(d, x, syms, vars)
         names = gensym()
         compute_vars = Expr(:(=), Expr(:tuple, Expr(:tuple, vars...), names),
-            Expr(:call, :(StatsPlots.extract_columns_and_names), d, syms...))
+            Expr(:call, :($(@__MODULE__).extract_columns_and_names), d, syms...))
         argnames = _argnames(names, x)
         if (length(plot_call.args) >= 2) && isa(plot_call.args[2], Expr) && (plot_call.args[2].head == :parameters)
-            label_plot_call = Expr(:call, :(StatsPlots.add_label), plot_call.args[2], argnames,
+            label_plot_call = Expr(:call, :($(@__MODULE__).add_label), plot_call.args[2], argnames,
                 plot_call.args[1], plot_call.args[3:end]...)
         else
-            label_plot_call = Expr(:call, :(StatsPlots.add_label), argnames, plot_call.args...)
+            label_plot_call = Expr(:call, :($(@__MODULE__).add_label), argnames, plot_call.args...)
         end
         return Expr(:block, compute_vars, label_plot_call)
 
@@ -71,7 +71,7 @@ function parse_table_call!(d, x::Expr, syms, vars)
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
             if length(x.args) == 1
-                push!(x.args, :(StatsPlots.column_names($d)))
+                push!(x.args, :($(@__MODULE__).column_names($d)))
                 return parse_table_call!(d, x, syms, vars)
             end
             range = x.args[2]
@@ -119,7 +119,7 @@ end
 _arg2string(names, x) = stringify(x)
 function _arg2string(names, x::Expr)
     if x.head == :call && x.args[1] == :cols
-        return :(StatsPlots.compute_name($names, $(x.args[2])))
+        return :($(@__MODULE__).compute_name($names, $(x.args[2])))
     elseif x.head == :call && x.args[1] == :hcat
         return hcat(stringify.(x.args[2:end])...)
     elseif x.head == :hcat
