@@ -86,7 +86,7 @@ Plots.group_as_matrix(g::GroupedHist) = true
     if isnothing(group)
         y = reshape(h.weights, nbins, 1)
     else
-        gb = Plots.extractGroupArgs(group)
+        gb = RecipesPipeline._extract_group_attributes(group)
         labels, idxs = getfield(gb, 1), getfield(gb, 2)
         ngroups = length(labels)
 

@@ -4,6 +4,7 @@ using Reexport
 import RecipesBase: recipetype
 import Tables
 import TableOperations
+using RecipesPipeline
 @reexport using Plots
 import Plots: _cycle
 using Plots.PlotMeasures
