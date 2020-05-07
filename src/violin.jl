@@ -174,7 +174,7 @@ recipetype(::Val{:groupedviolin}, args...) = GroupedViolin(args)
     # shift x values for each group
     group = get(plotattributes, :group, nothing)
     if group != nothing
-        gb = Plots.extractGroupArgs(group)
+        gb = RecipesPipeline._extract_group_attributes(group)
         labels, idxs = getfield(gb, 1), getfield(gb, 2)
         n = length(labels)
         bws = plotattributes[:bar_width] / n
