@@ -30,7 +30,7 @@ end
     xlims := (0.5, length(hc.order) + 0.5)
 
     linecolor --> :black
-    xticks --> (1:nnodes(hc), (1:nnodes(hc))[hc.order])
+    xticks --> (1:nnodes(hc), string.(1:nnodes(hc))[hc.order])
     ylims --> (0, Inf)
     yshowaxis --> useheight
 
