@@ -411,3 +411,13 @@ plot(M, group=iris.Species)
 
 PCA will be added once the API in MultivariateStats is changed.
 See https://github.com/JuliaStats/MultivariateStats.jl/issues/109 and https://github.com/JuliaStats/MultivariateStats.jl/issues/95.
+
+
+## Covariance ellipses
+
+A 2×2 covariance matrix `Σ` can be plotted as an ellipse, which is a contour line of a Gaussian density function with variance `Σ`.
+```
+covellipse([0,2], [2 1; 1 4], n_std=2, aspect_ratio=1, label="cov1")
+covellipse!([1,0], [1 -0.5; -0.5 3], showaxes=true, label="cov2")
+```
+![covariance ellipses](https://user-images.githubusercontent.com/4170948/84170978-f0c2f380-aa82-11ea-95de-ce2fe14e16ec.png)
