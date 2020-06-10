@@ -10,6 +10,7 @@ import Plots: _cycle
 using Plots.PlotMeasures
 using StatsBase
 using Distributions
+using LinearAlgebra: eigen, diagm
 import DataValues: DataValue
 using Widgets, Observables
 import Observables: AbstractObservable, @map, observe
@@ -43,5 +44,6 @@ include("bar.jl")
 include("dendrogram.jl")
 include("andrews.jl")
 include("ordinations.jl")
+include("covellipse.jl")
 
 end # module
