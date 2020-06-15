@@ -12,6 +12,7 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
 
     nr, nc = size(y)
     isstack = pop!(plotattributes, :bar_position, :dodge) == :stack
+    isylog = pop!(plotattributes, :yscale, :identity) == :log10
 
     # extract xnums and set default bar width.
     # might need to set xticks as well
@@ -48,7 +49,12 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
     # compute fillrange
     fillrange := if isstack
         y, fr = groupedbar_fillrange(y)
-        fr
+        if isylog
+            # to fill the blank of the bottom segment
+            replace!(fr, 0=>eps(Float64))
+        else
+            fr
+        end
     else
         get(plotattributes, :fillrange, nothing)
     end
@@ -71,11 +77,13 @@ function groupedbar_fillrange(y)
         for c = 1:nc
             el = y[r, c]
             if el >= 0
+                y[r, c] = y_pos
+                y_pos -= el
                 fr[r, c] = y_pos
-                y[r, c] = y_pos -= el
             else
                 fr[r, c] = y_neg
-                y[r, c] = y_neg += el
+                y_neg += el
+                y[r, c] = y_neg
             end
         end
     end
