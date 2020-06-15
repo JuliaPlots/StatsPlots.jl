@@ -77,11 +77,13 @@ function groupedbar_fillrange(y)
         for c = 1:nc
             el = y[r, c]
             if el >= 0
+                y[r, c] = y_pos
+                y_pos -= el
                 fr[r, c] = y_pos
-                y[r, c] = y_pos -= el
             else
                 fr[r, c] = y_neg
-                y[r, c] = y_neg += el
+                y_neg += el
+                y[r, c] = y_neg
             end
         end
     end
