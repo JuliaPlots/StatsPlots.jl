@@ -60,7 +60,7 @@
         left_margin --> 0mm
         bins := edges2
         y := y
-        xlims --> ylims
+        ylims --> ylims
     end
 end
 
