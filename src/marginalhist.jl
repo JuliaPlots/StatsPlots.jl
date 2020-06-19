@@ -31,8 +31,8 @@
 
     # these are common to both marginal histograms
     ticks := nothing
-    xlabel := ""
-    ylabel := ""
+    xguide := ""
+    yguide := ""
     foreground_color_border := nothing
     fillcolor --> Plots.fg_color(plotattributes)
     linecolor --> Plots.fg_color(plotattributes)
