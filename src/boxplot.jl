@@ -64,8 +64,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             # change q1 and q5 to show outliers
             # using maximum and minimum values inside the limits
             q1, q5 = Plots.ignorenan_extrema(inside)
-        end
-
+            q1, q5 = (min(q1, q2), max(q4, q5)) # whiskers cannot be inside the box
+        end        
         # Box
         if notch
             push!(xsegs, m, lw, rw, m, m)       # lower T
