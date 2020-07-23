@@ -33,6 +33,13 @@ end
     xticks --> (1:nnodes(hc), string.(1:nnodes(hc))[hc.order])
     ylims --> (0, Inf)
     yshowaxis --> useheight
+    
+    xs, ys = treepositions(hc, useheight)
 
-    treepositions(hc, useheight)
+    if useheight
+        y_tick_pos = sort!(unique(ys))
+        yticks --> (y_tick_pos[2:end], string.(hc.heights ./ 2))
+    end
+
+    xs, ys
 end
