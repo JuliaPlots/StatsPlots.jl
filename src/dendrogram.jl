@@ -31,6 +31,6 @@ end
     linecolor --> :black
     xticks --> (1:nnodes(hc), string.(1:nnodes(hc))[hc.order])
     yshowaxis --> useheight
-    
+
     treepositions(hc, useheight)
 end
