@@ -152,7 +152,7 @@ function add_label(argnames, f, args...; kwargs...)
         if (i === nothing)
             return f(args...; kwargs...)
         else
-            return f(label = argnames[i], args...; kwargs...)
+            return f(label = stringify(argnames[i]), args...; kwargs...)
         end
     catch e
         if e isa MethodError ||
