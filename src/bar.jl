@@ -12,8 +12,12 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
 
     nr, nc = size(y)
     isstack = pop!(plotattributes, :bar_position, :dodge) == :stack
+<<<<<<< HEAD
     isylog = pop!(plotattributes, :yscale, :identity) ∈ (:log10, :log)
     the_ylims = pop!(plotattributes, :ylims, (-Inf, Inf))
+=======
+    isylog = pop!(plotattributes, :yscale, :identity) == :log10
+>>>>>>> fe2b7da... fix groupbar fillrange in log scale
 
     # extract xnums and set default bar width.
     # might need to set xticks as well
@@ -48,6 +52,7 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
     end
 
     # compute fillrange
+<<<<<<< HEAD
     y, fr = groupedbar_fillrange(y)
     fillrange := if isylog
         if isstack
@@ -56,6 +61,15 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
             replace!(fr, 0 => fill_bottom)
         else
             max(minimum(y) / 100, the_ylims[1])
+=======
+    fillrange := if isstack
+        y, fr = groupedbar_fillrange(y)
+        if isylog
+            # to fill the blank of the bottom segment
+            replace!(fr, 0=>eps(Float64))
+        else
+            fr
+>>>>>>> fe2b7da... fix groupbar fillrange in log scale
         end
     else
         get(plotattributes, :fillrange, nothing)
