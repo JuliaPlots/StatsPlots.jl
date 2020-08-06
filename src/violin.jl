@@ -5,9 +5,6 @@
 const _violin_warned = [false]
 
 function violin_coords(y; wts = nothing, trim::Bool=false, bandwidth = KernelDensity.default_bandwidth(y))
-    if isnothing(bandwidth)
-        bandwidth = KernelDensity.default_bandwidth(y)
-    end
     kd = wts === nothing ?
         KernelDensity.kde(y, npoints = 200, bandwidth = bandwidth) :
         KernelDensity.kde(y, weights = weights(wts), npoints = 200, bandwidth = bandwidth)
