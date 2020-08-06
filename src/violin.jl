@@ -4,9 +4,13 @@
 
 const _violin_warned = [false]
 
-function violin_coords(y; wts = nothing, trim::Bool=false)
-
-    kd = wts === nothing ? KernelDensity.kde(y, npoints = 200) : KernelDensity.kde(y, weights = weights(wts), npoints = 200)
+function violin_coords(y; wts = nothing, trim::Bool=false, bandwidth = KernelDensity.default_bandwidth(y))
+    if isnothing(bandwidth)
+        bandwidth = KernelDensity.default_bandwidth(y)
+    end
+    kd = wts === nothing ?
+        KernelDensity.kde(y, npoints = 200, bandwidth = bandwidth) :
+        KernelDensity.kde(y, weights = weights(wts), npoints = 200, bandwidth = bandwidth)
     if trim
         xmin, xmax = Plots.ignorenan_extrema(y)
         inside = Bool[ xmin <= x <= xmax for x in kd.x]
@@ -20,7 +24,7 @@ get_quantiles(x::Real) = [x]
 get_quantiles(b::Bool) = b ? [0.5] : Float64[]
 get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
-@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both, show_mean = false, show_median = false, quantiles = Float64[])
+@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both, show_mean = false, show_median = false, quantiles = Float64[], bandwidth = KernelDensity.default_bandwidth(y))
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -38,7 +42,7 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
     msc = plotattributes[:markerstrokecolor]
     for (i,glabel) in enumerate(glabels)
         fy = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
-        widths, centers = violin_coords(fy, trim=trim, wts = plotattributes[:weights])
+        widths, centers = violin_coords(fy, trim=trim, wts = plotattributes[:weights], bandwidth = bandwidth)
         isempty(widths) && continue
 
         # normalize
