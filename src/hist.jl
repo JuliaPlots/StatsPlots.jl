@@ -70,20 +70,19 @@ Plots.group_as_matrix(g::GroupedHist) = true
 
 @recipe function f(p::GroupedHist)
     _, v = grouped_xy(p.args...)
-
     group = get(plotattributes, :group, nothing)
     bins = get(plotattributes, :bins, :auto)
     normed = get(plotattributes, :normalize, false)
     weights = get(plotattributes, :weights, nothing)
 
     # compute edges from ungrouped data
-    h = Plots._make_hist((vec(v),), bins; normed = normed, weights = weights)
+    h = Plots._make_hist((vec(copy(v)),), bins; normed = normed, weights = weights)
     nbins = length(h.weights)
     edges = h.edges[1]
     bar_width --> mean(map(i -> edges[i+1] - edges[i], 1:nbins))
     x = map(i -> (edges[i] + edges[i+1])/2, 1:nbins)
 
-    if isnothing(group)
+    if group === nothing
         y = reshape(h.weights, nbins, 1)
     else
         gb = RecipesPipeline._extract_group_attributes(group)
@@ -94,7 +93,7 @@ Plots.group_as_matrix(g::GroupedHist) = true
         y = fill(NaN, nbins, ngroups)
         for i in 1:ngroups
             groupinds = idxs[i]
-            v_i = v[groupinds]
+            v_i = filter(x->!isnan(x), v[:,i])
             w_i = weights == nothing ? nothing : weights[groupinds]
             h_i = Plots._make_hist((v_i,), h.edges; normed = false, weights = w_i)
             y[:,i] = normed ? h_i.weights / sum(h.weights) : h_i.weights
