@@ -82,7 +82,7 @@ Plots.group_as_matrix(g::GroupedHist) = true
     bar_width --> mean(map(i -> edges[i+1] - edges[i], 1:nbins))
     x = map(i -> (edges[i] + edges[i+1])/2, 1:nbins)
 
-    if isnothing(group)
+    if group === nothing
         y = reshape(h.weights, nbins, 1)
     else
         gb = RecipesPipeline._extract_group_attributes(group)
