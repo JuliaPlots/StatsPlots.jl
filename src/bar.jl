@@ -67,14 +67,14 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
     x, y
 end
 
-function groupedbar_fillrange(y; y_bottom = 0)
+function groupedbar_fillrange(y)
     nr, nc = size(y)
     # bar series fills from y[nr, nc] to fr[nr, nc], y .>= fr
     fr = zeros(nr, nc)
     y = copy(y)
     y[.!isfinite.(y)] .= 0
     for r = 1:nr
-        y_neg = y_bottom
+        y_neg = 0
         # upper & lower bounds for positive bar
         y_pos = sum([e for e in y[r, :] if e > 0])
         # division subtract towards 0
