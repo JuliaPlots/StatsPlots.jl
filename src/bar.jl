@@ -47,26 +47,34 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
         xmat
     end
 
-    # compute fillrange
-    # y, fr = groupedbar_fillrange(y)
-    fillrange := if isylog
-        fill_bottom = min(minimum(y) / 100, the_ylims[1])
+    fill_bottom = if isylog
+        if isfinite(the_ylims[1])
+            min(minimum(y) / 100, the_ylims[1])
+        else
+            minimum(y) / 100
+        end
     else
-        get(plotattributes, :fillrange, nothing)
+        0
     end
+    # compute fillrange
+    y, fr = isstack ? groupedbar_fillrange(y) : (y, get(plotattributes, :fillrange, [fill_bottom]))
+    if isylog
+        replace!( fr, 0 => fill_bottom )
+    end
+    fillrange := fr
 
     seriestype := :bar
     x, y
 end
 
-function groupedbar_fillrange(y)
+function groupedbar_fillrange(y; y_bottom = 0)
     nr, nc = size(y)
     # bar series fills from y[nr, nc] to fr[nr, nc], y .>= fr
     fr = zeros(nr, nc)
     y = copy(y)
     y[.!isfinite.(y)] .= 0
     for r = 1:nr
-        y_neg = 0
+        y_neg = y_bottom
         # upper & lower bounds for positive bar
         y_pos = sum([e for e in y[r, :] if e > 0])
         # division subtract towards 0
