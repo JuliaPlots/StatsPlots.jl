@@ -76,7 +76,9 @@ Plots.group_as_matrix(g::GroupedHist) = true
     weights = get(plotattributes, :weights, nothing)
 
     # compute edges from ungrouped data
+    @show v
     h = Plots._make_hist((vec(copy(v)),), bins; normed = normed, weights = weights)
+    @show h
     nbins = length(h.weights)
     edges = h.edges[1]
     bar_width --> mean(map(i -> edges[i+1] - edges[i], 1:nbins))

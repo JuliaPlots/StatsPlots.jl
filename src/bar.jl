@@ -48,15 +48,9 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
     end
 
     # compute fillrange
-    y, fr = isstack ? groupedbar_fillrange(y) : (y, get(plotattributes, :fillrange, nothing))
+    # y, fr = groupedbar_fillrange(y)
     fillrange := if isylog
         fill_bottom = min(minimum(y) / 100, the_ylims[1])
-        if isstack
-            # to fill the blank of the bottom segment depeding on if ylims
-            replace!(fr, 0 => fill_bottom)
-        else
-            fill_bottom
-        end
     else
         get(plotattributes, :fillrange, nothing)
     end

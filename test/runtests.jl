@@ -19,5 +19,9 @@ using NaNMath
     gpl1 = groupedhist(data[mask], group = mask[mask], color = 1)
     gpl2 = groupedhist(data[.!mask], group = mask[.!mask], color = 2)
     gpl12 = groupedhist(data, group = mask, nbins = 5, bar_position = :stack)
-    @test NaNMath.maximum(gpl12[1][2][:y]) == NaNMath.maximum(gpl1[1][1][:y]) 
+    @test NaNMath.maximum(gpl12[1][2][:y]) == NaNMath.maximum(gpl1[1][1][:y])
+    gplr = groupedbar(rand(rng, 4, 2))
+    for series in gplr.series_list
+        @test NaNMath.maximum(series[:y]) < 1
+    end
 end # testset
