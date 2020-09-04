@@ -126,6 +126,18 @@ iris = dataset("datasets","iris")
 
 ---
 
+## marginalscatter with DataFrames
+
+```julia
+using RDatasets
+iris = dataset("datasets","iris")
+@df iris marginalscatter(:PetalLength, :PetalWidth)
+```
+
+![marginalscatter](https://user-images.githubusercontent.com/6333339/29869938-fbe08d02-8d7c-11e7-9409-ca47ee3aaf35.png)
+
+---
+
 ## corrplot and cornerplot
 This plot type shows the correlation among input variables. The marker color in scatter plots reveal the degree of correlation. Pass the desired colorgradient to `markercolor`. With the default gradient positive correlations are blue, neutral are yellow and negative are red. In the 2d-histograms the color gradient show the frequency of points in that bin (as usual controlled by `seriescolor`).
 
