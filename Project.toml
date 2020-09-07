@@ -23,7 +23,7 @@ Widgets = "cc8bc4a8-27d6-5769-a93b-9d913e69aa62"
 
 [compat]
 Clustering = "0.13, 0.14"
-DataStructures = "0.17"
+DataStructures = "0.17, 0.18"
 DataValues = "0.4"
 Distributions = "0.21, 0.22, 0.23"
 Interpolations = "0.12"
