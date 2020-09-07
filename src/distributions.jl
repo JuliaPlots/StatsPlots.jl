@@ -22,7 +22,7 @@ function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
 end
 
 yz_args(dist) = default_range(dist)
-yz_args(dist::Distribution{N, T}) where N where T<:Discrete = (UnitRange(default_range(dist)...),)
+yz_args(dist::Distribution{N, T}) where N where T<:Discrete = (UnitRange(Int.(default_range(dist))...),)
 
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
 @recipe function f(dist::Distribution)
