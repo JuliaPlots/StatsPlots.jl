@@ -134,7 +134,7 @@ iris = dataset("datasets","iris")
 @df iris marginalscatter(:PetalLength, :PetalWidth)
 ```
 
-![marginalscatter](https://user-images.githubusercontent.com/6333339/29869938-fbe08d02-8d7c-11e7-9409-ca47ee3aaf35.png)
+![marginalscatter](https://user-images.githubusercontent.com/12200202/92408723-3aa78e00-f0f3-11ea-8ddc-9517f0f58207.png)
 
 ---
 
