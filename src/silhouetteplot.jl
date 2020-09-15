@@ -9,12 +9,12 @@ See also: [`Clustering.silhouettes`](@ref), [`Distances`](@ref).
 # Examples
 
 ```
-using Clustering, Distances, Plots
-# random dataset with 3-ish clusters in 5 dimensions
-X = hcat([rand(5,1) .+ 0.2*randn(5, 200) for _=1:3]...)
-D = pairwise(Euclidean(),X,dims=2)
-R = kmeans(D, 3; maxiter=200, display=:iter)
+using Clustering, LinearAlgebra, Random
+Random.seed!(123);
 
+X = reduce(hcat,[2*randn(5,1) .+ randn(5,100+100n) for n=1:3]);  # X is 5x900
+D = [ norm(x-y) for x in eachcol(X), y in eachcol(X) ];          # D is 900x900
+R = kmeans(D, 3; maxiter=200);
 silhouetteplot(R,X,D)
 ```
 """
