@@ -16,7 +16,6 @@ using Widgets, Observables
 import Observables: AbstractObservable, @map, observe
 import Widgets: @nodeps
 import DataStructures: OrderedDict
-using Distances: pairwise, Euclidean
 import Clustering: Hclust, nnodes
 using Clustering: ClusteringResult, silhouettes, assignments, counts
 using Interpolations
