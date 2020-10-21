@@ -129,10 +129,13 @@ iris = dataset("datasets","iris")
 ## marginalkde
 
 ```julia
-marginalkde(randn(1024), randn(1024))
+x = randn(1024)
+y = randn(1024)
+marginalkde(x, x+y)
 ```
 
-![marginalkde](https://user-images.githubusercontent.com/90048/96752480-8315c500-139c-11eb-9153-8cea95c33362.png)
+![correlated-marg](https://user-images.githubusercontent.com/90048/96789354-04804e00-13c3-11eb-82d3-6130e8c9d48a.png)
+
 
 * `levels=N` can be used to set the number of contour levels (default 10); levels are evenly-spaced in the cumulative probability mass.
 * `clip=((-xl, xh), (-yl, yh))` (default `((-3, 3), (-3, 3))`) can be used to adjust the bounds of the plot.  Clip values are expressed as multiples of the `[0.16-0.5]` and `[0.5,0.84]` percentiles of the underlying 1D distributions (these would be 1-sigma ranges for a Gaussian).
