@@ -394,8 +394,9 @@ plot(
 		xrotation=90,
 		colorbar=false
 	),
-	plot(hc_row,yticks=false,xrotation=90,orientation=:h)
+	plot(hc_row,yticks=false,xrotation=90,orientation=:horizontal)
 )
+
 ```
 
 ![heatmap with dendrograms on top and on the right](https://raw.githubusercontent.com/oheil/StatsPlots.jl/oh/screenshots/heatmapWithDendroOnRight.jpg)
