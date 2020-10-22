@@ -35,7 +35,7 @@ end
         yforeground_color_axis --> :white
         ygrid --> false
         ylims --> (0.5, length(hc.order) + 0.5)
-        yticks --> (1:nnodes(hc), (1:nnodes(hc))[hc.order])
+        yticks --> (1:nnodes(hc), string.(1:nnodes(hc))[hc.order])
         if useheight
             hs=sum(hc.heights)
             xlims --> (0, hs+hs*0.01)
@@ -47,7 +47,7 @@ end
         xforeground_color_axis --> :white
         xgrid --> false
         xlims --> (0.5, length(hc.order) + 0.5)
-        xticks --> (1:nnodes(hc), (1:nnodes(hc))[hc.order])
+        xticks --> (1:nnodes(hc), string.(1:nnodes(hc))[hc.order])
         ylims --> (0, Inf)
         yshowaxis --> useheight
     end
