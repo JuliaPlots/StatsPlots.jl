@@ -126,6 +126,18 @@ iris = dataset("datasets","iris")
 
 ---
 
+## marginalscatter with DataFrames
+
+```julia
+using RDatasets
+iris = dataset("datasets","iris")
+@df iris marginalscatter(:PetalLength, :PetalWidth)
+```
+
+![marginalscatter](https://user-images.githubusercontent.com/12200202/92408723-3aa78e00-f0f3-11ea-8ddc-9517f0f58207.png)
+
+---
+
 ## marginalkde
 
 ```julia
@@ -139,6 +151,7 @@ marginalkde(x, x+y)
 
 * `levels=N` can be used to set the number of contour levels (default 10); levels are evenly-spaced in the cumulative probability mass.
 * `clip=((-xl, xh), (-yl, yh))` (default `((-3, 3), (-3, 3))`) can be used to adjust the bounds of the plot.  Clip values are expressed as multiples of the `[0.16-0.5]` and `[0.5,0.84]` percentiles of the underlying 1D distributions (these would be 1-sigma ranges for a Gaussian).
+
 
 ## corrplot and cornerplot
 This plot type shows the correlation among input variables. The marker color in scatter plots reveal the degree of correlation. Pass the desired colorgradient to `markercolor`. With the default gradient positive correlations are blue, neutral are yellow and negative are red. In the 2d-histograms the color gradient show the frequency of points in that bin (as usual controlled by `seriescolor`).
