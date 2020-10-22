@@ -28,7 +28,7 @@ end
 @recipe function f(hc::Hclust; useheight=true, orientation=:vertical )
     typeof(useheight) <: Bool || error("'useheight' argument must be true or false")
 
-    legend := false
+    legend --> false
     linecolor --> :black
 
     if orientation == :horizontal
