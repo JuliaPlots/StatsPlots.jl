@@ -1,12 +1,10 @@
-@shorthands marginalhist
+@shorthands marginalscatter
 
-@recipe function f(::Type{Val{:marginalhist}}, plt::AbstractPlot; density = false)
+@recipe function f(::Type{Val{:marginalscatter}}, plt::AbstractPlot; density = false)
     x, y = plotattributes[:x], plotattributes[:y]
     i = isfinite.(x) .& isfinite.(y)
     x, y = x[i], y[i]
-    bns = get(plotattributes, :bins, :auto)
     scale = get(plotattributes, :scale, :identity)
-    edges1, edges2 = Plots._hist_edges((x,y), bns)
     xlims, ylims = Plots.widen(Plots.ignorenan_extrema(x)..., scale), Plots.widen(Plots.ignorenan_extrema(y)..., scale)
 
     # set up the subplots
@@ -14,26 +12,24 @@
     link := :both
     grid --> false
     layout --> @layout [
-        tophist           _
-        hist2d{0.9w,0.9h} righthist
+        topscatter           _
+        scatter2d{0.9w,0.9h} rightscatter
     ]
 
-    # main histogram2d
+    # main scatter2d
     @series begin
-        seriestype := :histogram2d
+        seriestype := :scatter
         right_margin --> 0mm
         top_margin --> 0mm
         subplot := 2
-        bins := (edges1, edges2)
         xlims --> xlims
         ylims --> ylims
     end
 
-    # these are common to both marginal histograms
+    # these are common to both marginal scatter
     ticks := nothing
     xguide := ""
     yguide := ""
-    foreground_color_border := nothing
     fillcolor --> Plots.fg_color(plotattributes)
     linecolor --> Plots.fg_color(plotattributes)
 
@@ -41,28 +37,31 @@
         trim := true
         seriestype := :density
     else
-        seriestype := :histogram
+        seriestype := :scatter
     end
 
-    # upper histogram
+    # upper scatter
     @series begin
         subplot := 1
         bottom_margin --> 0mm
-        bins := edges1
-        y := x
+        showaxis := :x
+        x := x
+        y := ones(y |> size)
         xlims --> xlims
+        ylims --> (0.95, 1.05)
     end
 
-    # right histogram
+    # right scatter
     @series begin
         orientation := :h
+        showaxis := :y
         subplot := 3
         left_margin --> 0mm
-        bins := edges2
+        # bins := edges2
         y := y
-        ylims --> ylims
+        x := ones(x |> size)
     end
 end
 
 # # now you can plot like:
-# marginalhist(rand(1000), rand(1000))
+# marginalscatter(rand(1000), rand(1000))

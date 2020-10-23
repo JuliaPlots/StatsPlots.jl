@@ -1,6 +1,7 @@
 # StatsPlots
 
 [![Build Status](https://travis-ci.org/JuliaPlots/StatsPlots.jl.svg?branch=master)](https://travis-ci.org/JuliaPlots/StatsPlots.jl)
+[![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://julialang.zulipchat.com/#narrow/stream/236493-plots)
 
 
 ### Original author: Thomas Breloff (@tbreloff), maintained by the JuliaPlots members
@@ -12,6 +13,7 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
     - Distributions
 - Recipes:
     - histogram/histogram2d
+    - groupedhist
     - boxplot
     - dotplot
     - violin
@@ -123,6 +125,33 @@ iris = dataset("datasets","iris")
 ![marginalhist](https://user-images.githubusercontent.com/6333339/29869938-fbe08d02-8d7c-11e7-9409-ca47ee3aaf35.png)
 
 ---
+
+## marginalscatter with DataFrames
+
+```julia
+using RDatasets
+iris = dataset("datasets","iris")
+@df iris marginalscatter(:PetalLength, :PetalWidth)
+```
+
+![marginalscatter](https://user-images.githubusercontent.com/12200202/92408723-3aa78e00-f0f3-11ea-8ddc-9517f0f58207.png)
+
+---
+
+## marginalkde
+
+```julia
+x = randn(1024)
+y = randn(1024)
+marginalkde(x, x+y)
+```
+
+![correlated-marg](https://user-images.githubusercontent.com/90048/96789354-04804e00-13c3-11eb-82d3-6130e8c9d48a.png)
+
+
+* `levels=N` can be used to set the number of contour levels (default 10); levels are evenly-spaced in the cumulative probability mass.
+* `clip=((-xl, xh), (-yl, yh))` (default `((-3, 3), (-3, 3))`) can be used to adjust the bounds of the plot.  Clip values are expressed as multiples of the `[0.16-0.5]` and `[0.5,0.84]` percentiles of the underlying 1D distributions (these would be 1-sigma ranges for a Gaussian).
+
 
 ## corrplot and cornerplot
 This plot type shows the correlation among input variables. The marker color in scatter plots reveal the degree of correlation. Pass the desired colorgradient to `markercolor`. With the default gradient positive correlations are blue, neutral are yellow and negative are red. In the 2d-histograms the color gradient show the frequency of points in that bin (as usual controlled by `seriescolor`).
@@ -296,6 +325,20 @@ groupedbar(nam, rand(5, 2), group = ctg, xlabel = "Groups", ylabel = "Scores",
 
 ![](https://user-images.githubusercontent.com/6645258/32116755-b7018f02-bb2a-11e7-82c7-ca471ecaeecf.png)
 
+## Grouped Histograms
+
+```
+using RDatasets
+iris = dataset("datasets", "iris")
+@df iris groupedhist(:SepalLength, group = :Species, bar_position = :dodge)
+```
+![dodge](https://user-images.githubusercontent.com/6033297/77240750-a11d0c00-6ba6-11ea-9715-81a8a7e20cd6.png)
+
+```
+@df iris groupedhist(:SepalLength, group = :Species, bar_position = :stack)
+```
+![stack](https://user-images.githubusercontent.com/6033297/77240749-9c585800-6ba6-11ea-85ea-e023341cb246.png)
+
 ## Dendrograms
 
 ```julia
@@ -440,3 +483,13 @@ plot(M, group=iris.Species)
 
 PCA will be added once the API in MultivariateStats is changed.
 See https://github.com/JuliaStats/MultivariateStats.jl/issues/109 and https://github.com/JuliaStats/MultivariateStats.jl/issues/95.
+
+
+## Covariance ellipses
+
+A 2×2 covariance matrix `Σ` can be plotted as an ellipse, which is a contour line of a Gaussian density function with variance `Σ`.
+```
+covellipse([0,2], [2 1; 1 4], n_std=2, aspect_ratio=1, label="cov1")
+covellipse!([1,0], [1 -0.5; -0.5 3], showaxes=true, label="cov2")
+```
+![covariance ellipses](https://user-images.githubusercontent.com/4170948/84170978-f0c2f380-aa82-11ea-95de-ce2fe14e16ec.png)

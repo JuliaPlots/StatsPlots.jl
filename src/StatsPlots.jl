@@ -2,12 +2,15 @@ module StatsPlots
 
 using Reexport
 import RecipesBase: recipetype
-import Tables: istable, columntable, select, schema, rows
+import Tables
+import TableOperations
+using RecipesPipeline
 @reexport using Plots
 import Plots: _cycle
 using Plots.PlotMeasures
 using StatsBase
 using Distributions
+using LinearAlgebra: eigen, diagm
 import DataValues: DataValue
 using Widgets, Observables
 import Observables: AbstractObservable, @map, observe
@@ -34,11 +37,15 @@ include("distributions.jl")
 include("boxplot.jl")
 include("dotplot.jl")
 include("violin.jl")
+include("ecdf.jl")
 include("hist.jl")
 include("marginalhist.jl")
+include("marginalscatter.jl")
+include("marginalkde.jl")
 include("bar.jl")
 include("dendrogram.jl")
 include("andrews.jl")
 include("ordinations.jl")
+include("covellipse.jl")
 
 end # module

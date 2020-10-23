@@ -39,13 +39,13 @@ function df_helper(d, x)
         plot_call = parse_table_call!(d, x, syms, vars)
         names = gensym()
         compute_vars = Expr(:(=), Expr(:tuple, Expr(:tuple, vars...), names),
-            Expr(:call, :(StatsPlots.extract_columns_and_names), d, syms...))
+            Expr(:call, :($(@__MODULE__).extract_columns_and_names), d, syms...))
         argnames = _argnames(names, x)
         if (length(plot_call.args) >= 2) && isa(plot_call.args[2], Expr) && (plot_call.args[2].head == :parameters)
-            label_plot_call = Expr(:call, :(StatsPlots.add_label), plot_call.args[2], argnames,
+            label_plot_call = Expr(:call, :($(@__MODULE__).add_label), plot_call.args[2], argnames,
                 plot_call.args[1], plot_call.args[3:end]...)
         else
-            label_plot_call = Expr(:call, :(StatsPlots.add_label), argnames, plot_call.args...)
+            label_plot_call = Expr(:call, :($(@__MODULE__).add_label), argnames, plot_call.args...)
         end
         return Expr(:block, compute_vars, label_plot_call)
 
@@ -71,7 +71,7 @@ function parse_table_call!(d, x::Expr, syms, vars)
         x.args[1] == :^ && length(x.args) == 2 && return x.args[2]
         if x.args[1] == :cols
             if length(x.args) == 1
-                push!(x.args, :(StatsPlots.column_names(StatsPlots.getiterator($d))))
+                push!(x.args, :($(@__MODULE__).column_names($d)))
                 return parse_table_call!(d, x, syms, vars)
             end
             range = x.args[2]
@@ -100,8 +100,8 @@ function parse_table_call!(d, x::Expr, syms, vars)
 end
 
 function column_names(t)
-    s = schema(t)
-    s === nothing ? propertynames(first(rows(t))) : s.names
+    s = Tables.schema(t)
+    s === nothing ? propertynames(first(Tables.rows(t))) : s.names
 end
 
 not_kw(x) = true
@@ -119,7 +119,7 @@ end
 _arg2string(names, x) = stringify(x)
 function _arg2string(names, x::Expr)
     if x.head == :call && x.args[1] == :cols
-        return :(StatsPlots.compute_name($names, $(x.args[2])))
+        return :($(@__MODULE__).compute_name($names, $(x.args[2])))
     elseif x.head == :call && x.args[1] == :hcat
         return hcat(stringify.(x.args[2:end])...)
     elseif x.head == :hcat
@@ -152,7 +152,7 @@ function add_label(argnames, f, args...; kwargs...)
         if (i === nothing)
             return f(args...; kwargs...)
         else
-            return f(label = argnames[i], args...; kwargs...)
+            return f(label = stringify.(argnames[i]), args...; kwargs...)
         end
     catch e
         if e isa MethodError ||
@@ -171,6 +171,18 @@ get_col(s::Int, col_nt, names) = col_nt[names[s]]
 get_col(s::Symbol, col_nt, names) = get(col_nt, s, s)
 get_col(syms, col_nt, names) = hcat((get_col(s, col_nt, names) for s in syms)...)
 
+# get the appropriate name when passed an Integer
+add_sym!(cols, i::Integer, names) = push!(cols, names[i])
+# check for errors in Symbols
+add_sym!(cols, s::Symbol, names) = s in names ? push!(cols, s) : cols
+# recursively extract column names
+function add_sym!(cols, s, names)
+    for si in s
+        add_sym!(cols, si, names)
+    end
+    cols
+end
+
 """
     extract_columns_and_names(df, syms...)
 
@@ -185,26 +197,12 @@ The structure goes as `((columndata...), names)`.  This is unpacked by the [`@df
     function you should overload!
 """
 function extract_columns_and_names(df, syms...)
-    istable(df) || error("Only tables are supported")
+    Tables.istable(df) || error("Only tables are supported")
     names = column_names(df)
 
-    selected_cols = Symbol[]
+    # extract selected column names
+    selected_cols = add_sym!(Symbol[], syms, names)
 
-    # get the appropriate name when passed an Integer
-    add_sym!(s::Integer) = push!(selected_cols, names[s])
-    # check for errors in Symbols
-    add_sym!(s::Symbol) = s in names && push!(selected_cols, s)
-    # recursively extract column names
-    add_sym!(s) = foreach(add_sym!, s)
-
-    foreach(add_sym!, syms)
-
-    cols = columntable(select(df, unique(selected_cols)...))
+    cols = Tables.columntable(TableOperations.select(df, unique(selected_cols)...))
     return Tuple(get_col(s, cols, names) for s in syms), names
 end
-
-convert_missing(el) = el
-convert_missing(el::DataValue{T}) where {T} = get(el, missing)
-convert_missing(el::DataValue{<:AbstractString}) = get(el, "")
-convert_missing(el::DataValue{Symbol}) = get(el, Symbol())
-convert_missing(el::DataValue{<:Real}) = get(convert(DataValue{Float64}, el), NaN)
