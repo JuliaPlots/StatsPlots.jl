@@ -201,23 +201,23 @@ cornerplot(M, compact=true)
 
 ```julia
 import RDatasets
-singers = RDatasets.dataset("lattice","singer")
-@df singers violin(:VoicePart,:Height,marker=(0.2,:blue,stroke(0)))
-@df singers boxplot!(:VoicePart,:Height,marker=(0.3,:orange,stroke(2)), alpha=0.75)
-@df singers dotplot!(:VoicePart,:Height,marker=(:black,stroke(0)))
+singers = dataset("lattice", "singer")
+@df singers violin(string.(:VoicePart), :Height, linewidth=0)
+@df singers boxplot!(string.(:VoicePart), :Height, fillalpha=0.75, linewidth=2)
+@df singers dotplot!(string.(:VoicePart), :Height, marker=(:black, stroke(0)))
 ```
 
-![violin](https://user-images.githubusercontent.com/1438610/58917297-13922d80-86f4-11e9-83c0-6133a51d1d4b.png)
+![violin](https://user-images.githubusercontent.com/16589944/98538614-506c3780-228b-11eb-881c-158c2f781798.png)
 
 Asymmetric violin or dot plots can be created using the `side` keyword (`:both` - default,`:right` or `:left`), e.g.:
 
 ```julia
 singers_moscow = deepcopy(singers)
 singers_moscow[:Height] = singers_moscow[:Height] .+ 5
-@df singers violin(:VoicePart,:Height, side=:right, marker=(0.2, :blue, stroke(0)), label="Scala")
-@df singers_moscow violin!(:VoicePart,:Height, side=:left, marker=(0.2, :red, stroke(0)), label="Moscow")
-@df singers dotplot!(:VoicePart,:Height, side=:right, marker=(:black,stroke(0)), label="Scala")
-@df singers_moscow dotplot!(:VoicePart,:Height, side=:left, marker=(:black,stroke(0)), label="Moscow")
+@df singers violin(string.(:VoicePart), :Height, side=:right, linewidth=0, label="Scala")
+@df singers_moscow violin!(string.(:VoicePart), :Height, side=:left, linewidth=0, label="Moscow")
+@df singers dotplot!(string.(:VoicePart), :Height, side=:right, marker=(:black,stroke(0)), label="")
+@df singers_moscow dotplot!(string.(:VoicePart), :Height, side=:left, marker=(:black,stroke(0)), label="")
 ```
 
 Dot plots can spread their dots over the full width of their column `mode = :uniform`, or restricted to the kernel density
@@ -225,7 +225,7 @@ Dot plots can spread their dots over the full width of their column `mode = :uni
 each time the plot is recreated. `mode = :none` keeps the dots along the center.
 
 
-![violin2](https://user-images.githubusercontent.com/1438610/58917360-3e7c8180-86f4-11e9-8150-2d5e07fc0d0e.png)
+![violin2](https://user-images.githubusercontent.com/16589944/98538618-52ce9180-228b-11eb-83d2-6d7b7c89fd52.png)
 
 ---
 
