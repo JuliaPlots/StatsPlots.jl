@@ -148,15 +148,22 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 
     end
 
-    # To prevent linecolor equal to fillcolor (It makes the median visible)
-    if plotattributes[:linecolor] == plotattributes[:fillcolor]
-        plotattributes[:linecolor] = plotattributes[:markerstrokecolor]
+    @series begin
+        # To prevent linecolor equal to fillcolor (It makes the median visible)
+        if plotattributes[:linecolor] == plotattributes[:fillcolor]
+            plotattributes[:linecolor] = plotattributes[:markerstrokecolor]
+        end
+        primary := true
+        seriestype := :shape
+        x := xsegs.pts
+        y := ysegs.pts
+        ()
     end
 
     # Outliers
     if outliers
-        primary := false
         @series begin
+            primary := false
             seriestype := :scatter
             if get!(plotattributes, :markershape, :circle) == :none
                 plotattributes[:markershape] = :circle
@@ -165,22 +172,15 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             fillrange := nothing
             x := outliers_x
             y := outliers_y
-            primary := true
             ()
         end
     end
 
     # Hover
-    @series begin
-        seriestype := :path
-        x := xsegs.pts
-        y := ysegs.pts
-        hover := texts
-        linewidth := 0
-    end
-
-
-    seriestype := :shape
+    primary := false
+    seriestype := :path
+    hover := texts
+    linewidth := 0
     x := xsegs.pts
     y := ysegs.pts
     ()
