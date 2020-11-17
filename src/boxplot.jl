@@ -10,9 +10,10 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     y,
     z;
     notch = false,
-    range = 1.5,
     outliers = true,
     whisker_width = :match,
+    quantile_range = false,
+    range = quantile_range ? 0.05 : 1.5
 )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
@@ -58,11 +59,11 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         L, R = center - 0.5 * hw, center + 0.5 * hw
 
         # outliers
-        if Float64(range) != 0.0  # if the range is 0.0, the whiskers will extend to the data
-            limit = range * (q4 - q2)
+        if Float64(range) != 0.0 || (quantile_range && range >= 1)  # if the range is 0.0, the whiskers will extend to the data
+            limits = quantile_range ? (quantile(values, range), quantile(values, 1-range)) : (q2 - range * (q4 - q2), q4 + range * (q4 - q2))
             inside = Float64[]
             for value in values
-                if (value < (q2 - limit)) || (value > (q4 + limit))
+                if !(limits[1] <= value <= limits[2])
                     if outliers
                         push!(outliers_y, value)
                         push!(outliers_x, center)
