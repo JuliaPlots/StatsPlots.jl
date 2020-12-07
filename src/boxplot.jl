@@ -161,7 +161,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     end
 
     # Outliers
-    if outliers
+    if outliers && !isempty(outliers)
         @series begin
             primary := false
             seriestype := :scatter
