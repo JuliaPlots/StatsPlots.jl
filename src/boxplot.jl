@@ -13,6 +13,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     range = 1.5,
     outliers = true,
     whisker_width = :match,
+    mode = :box
 )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
@@ -28,7 +29,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     warning = false
     outliers_x, outliers_y = zeros(0), zeros(0)
     bw = plotattributes[:bar_width]
-    bw == nothing && (bw = 0.8)
+    isnothing(bw) && (bw = 0.8)
     @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
     ww = whisker_width == :match ? bw : whisker_width
     for (i, glabel) in enumerate(glabels)
@@ -77,17 +78,28 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             q1, q5 = (min(q1, q2), max(q4, q5)) # whiskers cannot be inside the box
         end
         # Box
-        push!(xsegs, m, lw, rw, m, m)       # lower T
-        push!(ysegs, q1, q1, q1, q1, q2)             # lower T
-        push!(
-            texts,
-            "Lower fence: $q1",
-            "Lower fence: $q1",
-            "Lower fence: $q1",
-            "Lower fence: $q1",
-            "Q1: $q2",
-            "",
-        )
+        if mode == :lean
+            push!(xsegs, m, m)
+            push!(ysegs, q1, q2)
+            push!(
+                texts,
+                "Lower fence: $q1",
+                "Q1: $q2",
+                "",
+            )
+        else
+            push!(xsegs, m, lw, rw, m, m)       # lower T
+            push!(ysegs, q1, q1, q1, q1, q2)    # lower T
+            push!(
+                texts,
+                "Lower fence: $q1",
+                "Lower fence: $q1",
+                "Lower fence: $q1",
+                "Lower fence: $q1",
+                "Q1: $q2",
+                "",
+            )
+        end
         if notch
             push!(xsegs, l, l, L, m, R, r, r, l) # lower box
             push!(xsegs, l, l, L, R, r, r, l) # upper box
@@ -117,10 +129,29 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
                 "Q3: $q4",
                 "",
             )
+        elseif mode == :lean
+            push!(xsegs, m, L, R, m, m, l, r, m, m, L, R, m)         # median line and quartile whiskers
+            push!(ysegs, q2, q2, q2, q2, q3, q3, q3, q3, q4, q4, q4, q4)   # median line and quartile whiskers
+            push!(
+                texts,
+                "Q1: $q2",
+                "Q1: $q2",
+                "Q1: $q2",
+                "Q1: $q2",
+                "Median: $q3",
+                "Median: $q3",
+                "Median: $q3",
+                "Median: $q3",
+                "Q3: $q4",
+                "Q3: $q4",
+                "Q3: $q4",
+                "Q3: $q4",
+                "",
+            )
         else
             push!(xsegs, l, l, m, r, r, l)         # lower box
-            push!(xsegs, l, l, r, r, l)         # upper box
-            push!(ysegs, q2, q3, q3, q3, q2, q2)    # lower box
+            push!(xsegs, l, l, r, r, l)            # upper box
+            push!(ysegs, q2, q3, q3, q3, q2, q2)   # lower box
             push!(
                 texts,
                 "Q1: $q2",
@@ -134,17 +165,28 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             push!(ysegs, q4, q3, q3, q4, q4)    # upper box
             push!(texts, "Q3: $q4", "Median: $q3", "Median: $q3", "Q3: $q4", "Q3: $q4", "")
         end
-        push!(xsegs, m, lw, rw, m, m)             # upper T
-        push!(ysegs, q5, q5, q5, q5, q4)             # upper T
-        push!(
-            texts,
-            "Upper fence: $q5",
-            "Upper fence: $q5",
-            "Upper fence: $q5",
-            "Upper fence: $q5",
-            "Q3: $q4",
-            "",
-        )
+        if mode == :lean
+            push!(xsegs, m, m)
+            push!(ysegs, q5, q4)
+            push!(
+                texts,
+                "Upper fence: $q5",
+                "Q3: $q4",
+                "",
+            )
+        else
+            push!(xsegs, m, lw, rw, m, m)             # upper T
+            push!(ysegs, q5, q5, q5, q5, q4)          # upper T
+            push!(
+                texts,
+                "Upper fence: $q5",
+                "Upper fence: $q5",
+                "Upper fence: $q5",
+                "Upper fence: $q5",
+                "Q3: $q4",
+                "",
+            )
+        end
 
     end
 
