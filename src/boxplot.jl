@@ -12,7 +12,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     notch = false,
     range = 1.5,
     outliers = true,
-    whisker_width = :match,
+    whisker_width = :half,
     mode = :box
 )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
@@ -30,8 +30,10 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     outliers_x, outliers_y = zeros(0), zeros(0)
     bw = plotattributes[:bar_width]
     isnothing(bw) && (bw = 0.8)
-    @assert whisker_width == :match || whisker_width >= 0 "whisker_width must be :match or a positive number"
-    ww = whisker_width == :match ? bw : whisker_width
+    @assert whisker_width == :match || whisker_width == :half || whisker_width >= 0 "whisker_width must be :match, :half, or a positive number"
+    ww = whisker_width == :match ? bw : 
+         whisker_width == :half ? bw / 2 :
+         whisker_width
     for (i, glabel) in enumerate(glabels)
         # filter y
         values = y[filter(i -> _cycle(x, i) == glabel, 1:length(y))]
@@ -101,36 +103,38 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             )
         end
         if notch
-            push!(xsegs, l, l, L, m, R, r, r, l) # lower box
-            push!(xsegs, l, l, L, R, r, r, l) # upper box
+            push!(xsegs, r, r, R, L, l, l, r, r) # lower box
+            push!(xsegs, r, r, l, l, L, R, r, r) # upper box
 
-            push!(ysegs, q2, q3 - n, q3, q3, q3, q3 - n, q2, q2) # lower box
+            push!(ysegs, q2, q3 - n, q3, q3, q3 - n, q2, q2, q3 - n) # lower box
             push!(
                 texts,
                 "Q1: $q2",
                 "Median: $q3 ± $n",
-                "",
                 "Median: $q3 ± $n",
                 "Median: $q3 ± $n",
                 "Median: $q3 ± $n",
                 "Q1: $q2",
                 "Q1: $q2",
+                "Median: $q3 ± $n",
                 "",
             )
-            push!(ysegs, q4, q3 + n, q3, q3, q3 + n, q4, q4) # upper box
+
+            push!(ysegs, q3 + n, q4, q4, q3 + n, q3, q3, q3 + n, q4) # upper box
             push!(
                 texts,
+                "Median: $q3 ± $n",
+                "Q3: $q4",
                 "Q3: $q4",
                 "Median: $q3 ± $n",
                 "Median: $q3 ± $n",
-                "",
                 "Median: $q3 ± $n",
-                "Q3: $q4",
+                "Median: $q3 ± $n",
                 "Q3: $q4",
                 "",
             )
         elseif mode == :lean
-            push!(xsegs, m, L, R, m, m, l, r, m, m, L, R, m)         # median line and quartile whiskers
+            push!(xsegs, m, lw, rw, m, m, l, r, m, m, lw, rw, m)         # median line and quartile whiskers
             push!(ysegs, q2, q2, q2, q2, q3, q3, q3, q3, q4, q4, q4, q4)   # median line and quartile whiskers
             push!(
                 texts,
@@ -149,21 +153,21 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
                 "",
             )
         else
-            push!(xsegs, l, l, m, r, r, l)         # lower box
-            push!(xsegs, l, l, r, r, l)            # upper box
-            push!(ysegs, q2, q3, q3, q3, q2, q2)   # lower box
+            push!(xsegs, r, r, l, l, r, r)         # lower box
+            push!(xsegs, r, l, l, r, r, m)         # upper box
+            push!(ysegs, q2, q3, q3, q2, q2, q3)   # lower box
             push!(
                 texts,
                 "Q1: $q2",
                 "Median: $q3",
                 "Median: $q3",
+                "Q1: $q2",
+                "Q1: $q2",
                 "Median: $q3",
-                "Q1: $q2",
-                "Q1: $q2",
                 "",
             )
-            push!(ysegs, q4, q3, q3, q4, q4)    # upper box
-            push!(texts, "Q3: $q4", "Median: $q3", "Median: $q3", "Q3: $q4", "Q3: $q4", "")
+            push!(ysegs, q4, q4, q3, q3, q4, q4)   # upper box
+            push!(texts, "Q3: $q4", "Q3: $q4", "Median: $q3", "Median: $q3", "Q3: $q4", "Q3: $q4", "")
         end
         if mode == :lean
             push!(xsegs, m, m)
