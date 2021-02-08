@@ -2,8 +2,8 @@
 # ---------------------------------------------------------------------------
 # density
 
-@recipe function f(::Type{Val{:density}}, x, y, z; trim=false)
-    newx, newy = violin_coords(y, trim=trim, wts = plotattributes[:weights])
+@recipe function f(::Type{Val{:density}}, x, y, z; trim=false, bandwidth = KernelDensity.default_bandwidth(y))
+    newx, newy = violin_coords(y, trim=trim, wts = plotattributes[:weights], bandwidth = bandwidth)
     if Plots.isvertical(plotattributes)
         newx, newy = newy, newx
     end
@@ -19,8 +19,8 @@ Plots.@deps density path
 # cumulative density
 
 @recipe function f(::Type{Val{:cdensity}}, x, y, z; trim=false,
-                   npoints = 200)
-    newx, newy = violin_coords(y, trim=trim, wts = plotattributes[:weights])
+                   npoints = 200, bandwidth = KernelDensity.default_bandwidth(y))
+    newx, newy = violin_coords(y, trim=trim, wts = plotattributes[:weights], bandwidth = bandwidth)
 
     if Plots.isvertical(plotattributes)
         newx, newy = newy, newx
