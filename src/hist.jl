@@ -26,7 +26,8 @@ Plots.@deps density path
         newx, newy = newy, newx
     end
 
-    newy = [sum(newy[1:i]) for i = 1:length(newy)] / sum(newy)
+    newy = cumsum(float(yi) for yi in newy)
+    newy ./= newy[end]
 
     x := newx
     y := newy
