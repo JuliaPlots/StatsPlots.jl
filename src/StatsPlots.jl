@@ -17,6 +17,7 @@ import Observables: AbstractObservable, @map, observe
 import Widgets: @nodeps
 import DataStructures: OrderedDict
 import Clustering: Hclust, nnodes
+using Clustering: ClusteringResult, silhouettes, assignments, counts
 using Interpolations
 import MultivariateStats: MDS, eigvals, projection, principalvars,
                             principalratio, transform
@@ -47,5 +48,6 @@ include("dendrogram.jl")
 include("andrews.jl")
 include("ordinations.jl")
 include("covellipse.jl")
+include("silhouetteplot.jl")
 
 end # module
