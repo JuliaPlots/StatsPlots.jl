@@ -201,7 +201,7 @@ cornerplot(M, compact=true)
 
 ```julia
 import RDatasets
-singers = dataset("lattice", "singer")
+singers = RDatasets.dataset("lattice", "singer")
 @df singers violin(string.(:VoicePart), :Height, linewidth=0)
 @df singers boxplot!(string.(:VoicePart), :Height, fillalpha=0.75, linewidth=2)
 @df singers dotplot!(string.(:VoicePart), :Height, marker=(:black, stroke(0)))
