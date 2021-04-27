@@ -14,13 +14,14 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
 - Recipes:
     - histogram/histogram2d
     - groupedhist
-    - boxplot
-    - dotplot
-    - violin
+    - [boxplot](https://en.wikipedia.org/wiki/Box_plot)
+    - [dotplot](https://en.wikipedia.org/wiki/Dot_plot_(statistics))
+    - [violin](https://en.wikipedia.org/wiki/Violin_plot)
     - marginalhist
     - corrplot/cornerplot
-    - andrewsplot
+    - [andrewsplot](https://en.wikipedia.org/wiki/Andrews_plot)
     - MDS plot
+    - [qq-plot](https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot)
 
 It is thus slightly less lightweight, but has more functionality. Main documentation is found in the Plots.jl documentation (https://juliaplots.github.io).
 
