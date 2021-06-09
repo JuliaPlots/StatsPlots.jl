@@ -11,7 +11,7 @@ function treepositions(hc::Hclust, useheight::Bool, orientation=:vertical)
         x2, y2 = nodepos[hc.merges[i, 2]]
 
         xpos = (x1 + x2) / 2
-        ypos = useheight ?  (hc.heights[i] / 2) : (max(y1, y2) + 1)
+        ypos = useheight ?  hc.heights[i] : (max(y1, y2) + 1)
         
         nodepos[i] = (xpos, ypos)
         xs[:, i] .= [x1, x1, x2, x2]
