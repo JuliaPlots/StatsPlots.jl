@@ -22,7 +22,7 @@ function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
 end
 
 yz_args(dist) = default_range(dist)
-function yz_args(dist::Distribution{N, T}) where N where T<:Discrete
+function yz_args(dist::DiscreteUnivariateDistribution)
     minval, maxval = extrema(dist)
     if isfinite(minval) && isfinite(maxval)  # bounded
         sup = support(dist)
