@@ -22,7 +22,23 @@ function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
 end
 
 yz_args(dist) = default_range(dist)
-yz_args(dist::Distribution{N, T}) where N where T<:Discrete = (UnitRange(Int.(default_range(dist))...),)
+function yz_args(dist::Distribution{N, T}) where N where T<:Discrete
+    xmin, xmax = default_range(dist)
+    try
+        sup = support(dist)
+        imin = findfirst(≥(xmin), sup)
+        imax = findlast(≤(xmax), sup)
+        sup_subrange = sup[imin:imax]
+        if sup_subrange isa AbstractVector
+            return (sup_subrange,)
+        else # handle e.g. when support is a tuple
+            return ([sup_subrange...],)
+        end
+    catch
+        # fallback when calling `support` fails
+        return (xmin:xmax,)
+    end
+end
 
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
 @recipe function f(dist::Distribution)
