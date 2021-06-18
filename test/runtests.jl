@@ -76,6 +76,6 @@ end
             pnonint = plot(Bernoulli(0.75) - 1//2)
             @test pnonint[1][1][:x] == -1//2:1//2
             @test pnonint[1][1][:y] == [0.25, 0.75]
-        end        
+        end
     end
 end
