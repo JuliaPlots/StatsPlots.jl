@@ -80,6 +80,11 @@ end
             pmix = plot(MixtureModel([Bernoulli(0.75), Bernoulli(0.5)], [0.5, 0.5]); components=false)
             @test pmix[1][1][:x] == 0:1
             @test pmix[1][1][:y] == [0.375, 0.625]
+
+            zip = MixtureModel([Dirac(0), Poisson(1)], [0.1, 0.9])
+            pzip = plot(zip; components=false)
+            @test pzip[1][1][:x] isa AbstractVector
+            @test pzip[1][1][:y] == pdf.(zip, pzip[1][1][:x])
         end
     end
 end
