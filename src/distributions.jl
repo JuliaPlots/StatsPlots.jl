@@ -34,8 +34,8 @@ end
 
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
 @recipe function f(dist::Distribution)
-    if dist isa Distribution{Univariate,Discrete}
-        seriestype --> :sticks
+    if dist isa Distribution{Univariate,Discrete} && get(plotattributes, :seriestype, :none) === :none
+        seriestype := :sticks
         markershape --> :circle
     end
     (dist, yz_args(dist)...)
@@ -57,8 +57,8 @@ end
     for di in distvec
         @series begin
             seriesargs = isempty(yz) ? yz_args(di) : yz
-            if di isa Distribution{Univariate,Discrete}
-                seriestype --> :sticks
+            if di isa Distribution{Univariate,Discrete} && get(plotattributes, :seriestype, :none) === :none
+                seriestype := :sticks
                 markershape --> :circle
             end
             (di, seriesargs...)
