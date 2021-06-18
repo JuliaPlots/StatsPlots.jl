@@ -35,7 +35,8 @@ end
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
 @recipe function f(dist::Distribution)
     if dist isa Distribution{Univariate,Discrete}
-        seriestype --> :scatterpath
+        seriestype --> :sticks
+        markershape --> :circle
     end
     (dist, yz_args(dist)...)
 end
@@ -57,7 +58,8 @@ end
         @series begin
             seriesargs = isempty(yz) ? yz_args(di) : yz
             if di isa Distribution{Univariate,Discrete}
-                seriestype --> :scatterpath
+                seriestype --> :sticks
+                markershape --> :circle
             end
             (di, seriesargs...)
         end
