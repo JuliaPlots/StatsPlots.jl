@@ -7,7 +7,7 @@ function default_range(dist::Distribution, alpha = 0.0001)
 end
 
 function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
-    minval = maxval = 0.0
+    minval = maxval = 0
     for c in m.components
         thismin = isfinite(minimum(c)) ? minimum(c) : quantile(c, alpha)
         thismax = isfinite(maximum(c)) ? maximum(c) : quantile(c, 1-alpha)
