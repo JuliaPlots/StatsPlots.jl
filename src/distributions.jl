@@ -26,7 +26,7 @@ function yz_args(dist::DiscreteUnivariateDistribution)
     minval, maxval = extrema(dist)
     if isfinite(minval) && isfinite(maxval)  # bounded
         sup = support(dist)
-        return sup isa AbstractVector ? (sup,) : (reduce(vcat, sup),)
+        return sup isa AbstractVector ? (sup,) : ([sup...],)
     else  # unbounded
         return (UnitRange(default_range(dist)...),)
     end
