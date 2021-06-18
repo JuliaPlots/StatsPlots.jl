@@ -3,7 +3,7 @@
 function default_range(dist::Distribution, alpha = 0.0001)
     minval = isfinite(minimum(dist)) ? minimum(dist) : quantile(dist, alpha)
     maxval = isfinite(maximum(dist)) ? maximum(dist) : quantile(dist, 1-alpha)
-    minval, maxval
+    promote(minval, maxval)
 end
 
 function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
@@ -18,7 +18,7 @@ function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
             maxval = thismax
         end
     end
-    minval, maxval
+    promote(minval, maxval)
 end
 
 yz_args(dist) = default_range(dist)
