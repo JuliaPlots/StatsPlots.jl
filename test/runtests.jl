@@ -72,6 +72,7 @@ end
 
             ppois_unbounded = plot(Poisson(1))
             @test ppois_unbounded[1][1][:x] isa AbstractVector
+            @test ppois_unbounded[1][1][:y] == pdf.(Poisson(1), ppois_unbounded[1][1][:x])
 
             pnonint = plot(Bernoulli(0.75) - 1//2)
             @test pnonint[1][1][:x] == -1//2:1//2
