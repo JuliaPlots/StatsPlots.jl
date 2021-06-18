@@ -3,6 +3,7 @@ using Test
 using StableRNGs
 using NaNMath
 using Clustering
+using Distributions
 
 @testset "Grouped histogram" begin
     rng = StableRNG(1337)
@@ -56,4 +57,25 @@ end # testset
         17.0  23.0  28.0  43.0
          0.0  17.0   0.0  28.0
     ]
+end
+
+@testset "Distributions" begin
+    @testset "univariate" begin
+        @testset "discrete" begin
+            pbern = plot(Bernoulli(0.25))
+            @test pbern[1][1][:x] == 0:1
+            @test pbern[1][1][:y] == [0.75, 0.25]
+
+            pdirac = plot(Dirac(0.25))
+            @test pdirac[1][1][:x] == [0.25]
+            @test pdirac[1][1][:y] == [1]
+
+            ppois_unbounded = plot(Poisson(1))
+            @test ppois_unbounded[1][1][:x] isa AbstractVector
+
+            pnonint = plot(Bernoulli(0.75) - 1//2)
+            @test pnonint[1][1][:x] == -1//2:1//2
+            @test pnonint[1][1][:y] == [0.25, 0.75]
+        end        
+    end
 end
