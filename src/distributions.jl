@@ -42,6 +42,10 @@ end
 end
 
 @recipe function f(m::Distributions.MixtureModel; components = true)
+    if m isa Distribution{Univariate,Discrete} && get(plotattributes, :seriestype, :none) === :none
+        seriestype := :sticks
+        markershape --> :circle
+    end
     if components
         for c in m.components
             @series begin
