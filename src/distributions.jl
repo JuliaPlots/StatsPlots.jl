@@ -23,20 +23,12 @@ end
 
 yz_args(dist) = default_range(dist)
 function yz_args(dist::Distribution{N, T}) where N where T<:Discrete
-    xmin, xmax = default_range(dist)
-    try
+    minval, maxval = extrema(dist)
+    if isfinite(minval) && isfinite(maxval)  # bounded
         sup = support(dist)
-        imin = findfirst(≥(xmin), sup)
-        imax = findlast(≤(xmax), sup)
-        sup_subrange = sup[imin:imax]
-        if sup_subrange isa AbstractVector
-            return (sup_subrange,)
-        else # handle e.g. when support is a tuple
-            return ([sup_subrange...],)
-        end
-    catch
-        # fallback when calling `support` fails
-        return (xmin:xmax,)
+        return sup isa AbstractVector ? (sup,) : ([sup...],)
+    else  # unbounded
+        return (UnitRange(default_range(dist)...),)
     end
 end
 
