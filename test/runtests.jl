@@ -63,29 +63,38 @@ end
     @testset "univariate" begin
         @testset "discrete" begin
             pbern = plot(Bernoulli(0.25))
-            @test pbern[1][1][:x] == 0:1
-            @test pbern[1][1][:y] == [0.75, 0.25]
+            @test pbern[1][1][:x][1:2] == zeros(2)
+            @test pbern[1][1][:x][4:5] == ones(2)
+            @test pbern[1][1][:y][[1, 4]] == zeros(2)
+            @test pbern[1][1][:y][[2, 5]] == [0.75, 0.25]
 
             pdirac = plot(Dirac(0.25))
-            @test pdirac[1][1][:x] == [0.25]
-            @test pdirac[1][1][:y] == [1]
+            @test pdirac[1][1][:x][1:2] == [0.25, 0.25]
+            @test pdirac[1][1][:y][1:2] == [0, 1]
 
             ppois_unbounded = plot(Poisson(1))
             @test ppois_unbounded[1][1][:x] isa AbstractVector
-            @test ppois_unbounded[1][1][:y] == pdf.(Poisson(1), ppois_unbounded[1][1][:x])
+            @test ppois_unbounded[1][1][:x][1:2] == zeros(2)
+            @test ppois_unbounded[1][1][:x][4:5] == ones(2)
+            @test ppois_unbounded[1][1][:y][[1, 4]] == zeros(2)
+            @test ppois_unbounded[1][1][:y][[2, 5]] == pdf.(Poisson(1), ppois_unbounded[1][1][:x][[1, 4]])
 
             pnonint = plot(Bernoulli(0.75) - 1//2)
-            @test pnonint[1][1][:x] == -1//2:1//2
-            @test pnonint[1][1][:y] == [0.25, 0.75]
+            @test pnonint[1][1][:x][1:2] == [-1//2, -1//2]
+            @test pnonint[1][1][:x][4:5] == [1//2, 1//2]
+            @test pnonint[1][1][:y][[1, 4]] == zeros(2)
+            @test pnonint[1][1][:y][[2, 5]] == [0.25, 0.75]
 
             pmix = plot(MixtureModel([Bernoulli(0.75), Bernoulli(0.5)], [0.5, 0.5]); components=false)
-            @test pmix[1][1][:x] == 0:1
-            @test pmix[1][1][:y] == [0.375, 0.625]
+            @test pmix[1][1][:x][1:2] == zeros(2)
+            @test pmix[1][1][:x][4:5] == ones(2)
+            @test pmix[1][1][:y][[1, 4]] == zeros(2)
+            @test pmix[1][1][:y][[2, 5]] == [0.375, 0.625]
 
-            zip = MixtureModel([Dirac(0), Poisson(1)], [0.1, 0.9])
-            pzip = plot(zip; components=false)
+            dzip = MixtureModel([Dirac(0), Poisson(1)], [0.1, 0.9])
+            pzip = plot(dzip; components=false)
             @test pzip[1][1][:x] isa AbstractVector
-            @test pzip[1][1][:y] == pdf.(zip, pzip[1][1][:x])
+            @test pzip[1][1][:y][2:3:end] == pdf.(dzip, Int.(pzip[1][1][:x][1:3:end]))
         end
     end
 end

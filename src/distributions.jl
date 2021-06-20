@@ -25,17 +25,15 @@ end
 
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
 @recipe function f(dist::Distribution)
-    if dist isa DiscreteUnivariateDistribution && get(plotattributes, :seriestype, :none) === :none
-        seriestype := :sticks
-        markershape --> :circle
+    if dist isa DiscreteUnivariateDistribution
+        seriestype --> :sticks
     end
     (dist, yz_args(dist)...)
 end
 
 @recipe function f(m::Distributions.MixtureModel; components = true)
-    if m isa DiscreteUnivariateDistribution && get(plotattributes, :seriestype, :none) === :none
-        seriestype := :sticks
-        markershape --> :circle
+    if m isa DiscreteUnivariateDistribution
+        seriestype --> :sticks
     end
     if components
         for c in m.components
@@ -52,9 +50,8 @@ end
     for di in distvec
         @series begin
             seriesargs = isempty(yz) ? yz_args(di) : yz
-            if di isa DiscreteUnivariateDistribution && get(plotattributes, :seriestype, :none) === :none
-                seriestype := :sticks
-                markershape --> :circle
+            if di isa DiscreteUnivariateDistribution
+                seriestype --> :sticks
             end
             (di, seriesargs...)
         end
