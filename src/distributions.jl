@@ -7,19 +7,10 @@ function default_range(dist::Distribution, alpha = 0.0001)
 end
 
 function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
-    minval = maxval = 0
-    for c in m.components
-        thismin = isfinite(minimum(c)) ? minimum(c) : quantile(c, alpha)
-        thismax = isfinite(maximum(c)) ? maximum(c) : quantile(c, 1-alpha)
-        if thismin < minval
-            minval = thismin
-        end
-        if thismax > maxval
-            maxval = thismax
-        end
-    end
-    minval, maxval
+    mapreduce(c -> default_range(c, alpha), _minmax, m.components)
 end
+
+_minmax((xmin, xmax), (ymin, ymax)) = (min(xmin, ymin), max(xmax, ymax))
 
 yz_args(dist) = default_range(dist)
 function yz_args(dist::DiscreteUnivariateDistribution)
