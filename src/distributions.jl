@@ -7,32 +7,34 @@ function default_range(dist::Distribution, alpha = 0.0001)
 end
 
 function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
-    minval = maxval = 0.0
-    for c in m.components
-        thismin = isfinite(minimum(c)) ? minimum(c) : quantile(c, alpha)
-        thismax = isfinite(maximum(c)) ? maximum(c) : quantile(c, 1-alpha)
-        if thismin < minval
-            minval = thismin
-        end
-        if thismax > maxval
-            maxval = thismax
-        end
-    end
-    minval, maxval
+    mapreduce(c -> default_range(c, alpha), _minmax, m.components)
 end
 
+_minmax((xmin, xmax), (ymin, ymax)) = (min(xmin, ymin), max(xmax, ymax))
+
 yz_args(dist) = default_range(dist)
-yz_args(dist::Distribution{N, T}) where N where T<:Discrete = (UnitRange(Int.(default_range(dist))...),)
+function yz_args(dist::DiscreteUnivariateDistribution)
+    minval, maxval = extrema(dist)
+    if isfinite(minval) && isfinite(maxval)  # bounded
+        sup = support(dist)
+        return sup isa AbstractVector ? (sup,) : ([sup...],)
+    else  # unbounded
+        return (UnitRange(default_range(dist)...),)
+    end
+end
 
 # this "user recipe" adds a default x vector based on the distribution's μ and σ
 @recipe function f(dist::Distribution)
-    if dist isa Distribution{Univariate,Discrete}
-        seriestype --> :scatterpath
+    if dist isa DiscreteUnivariateDistribution
+        seriestype --> :sticks
     end
     (dist, yz_args(dist)...)
 end
 
 @recipe function f(m::Distributions.MixtureModel; components = true)
+    if m isa DiscreteUnivariateDistribution
+        seriestype --> :sticks
+    end
     if components
         for c in m.components
             @series begin
@@ -48,8 +50,8 @@ end
     for di in distvec
         @series begin
             seriesargs = isempty(yz) ? yz_args(di) : yz
-            if di isa Distribution{Univariate,Discrete}
-                seriestype --> :scatterpath
+            if di isa DiscreteUnivariateDistribution
+                seriestype --> :sticks
             end
             (di, seriesargs...)
         end
