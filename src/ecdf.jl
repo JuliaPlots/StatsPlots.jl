@@ -5,11 +5,10 @@
 @recipe function f(ecdf::StatsBase.ECDF; npoints=nothing)
     seriestype --> :steppost
     legend --> :topleft
-    xunique = unique(ecdf.sorted_values)
     if npoints !== nothing
         x = [-Inf; range(extrema(ecdf)...; length=npoints)]
     else
-        x = [-Inf; xunique]
+        x = [-Inf; unique(ecdf.sorted_values)]
     end
     y = ecdf(x)
     x, y
