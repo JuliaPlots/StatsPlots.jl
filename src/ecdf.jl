@@ -3,7 +3,7 @@
 # empirical CDF
 
 @recipe function f(ecdf::StatsBase.ECDF)
-    seriestype := :steppost
+    seriestype --> :steppost
     legend --> :topleft
     x = [ecdf.sorted_values[1]; ecdf.sorted_values]
     if :weights in propertynames(ecdf) && !isempty(ecdf.weights)
