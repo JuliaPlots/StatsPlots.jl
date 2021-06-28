@@ -6,9 +6,8 @@
     seriestype --> :steppost
     legend --> :topleft
     xunique = unique(ecdf.sorted_values)
-    x = [xunique[1]; xunique]
+    x = [-Inf; xunique]
     y = ecdf(x)
-    y[1] = 0
     x, y
 end
 
