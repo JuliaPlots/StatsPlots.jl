@@ -2,11 +2,15 @@
 # ---------------------------------------------------------------------------
 # empirical CDF
 
-@recipe function f(ecdf::StatsBase.ECDF)
+@recipe function f(ecdf::StatsBase.ECDF; npoints=nothing)
     seriestype --> :steppost
     legend --> :topleft
     xunique = unique(ecdf.sorted_values)
-    x = [-Inf; xunique]
+    if npoints !== nothing
+        x = [-Inf; range(extrema(ecdf)...; length=npoints)]
+    else
+        x = [-Inf; xunique]
+    end
     y = ecdf(x)
     x, y
 end
