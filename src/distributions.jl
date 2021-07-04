@@ -19,7 +19,7 @@ function yz_args(dist::DiscreteUnivariateDistribution)
         sup = support(dist)
         return sup isa AbstractVector ? (sup,) : ([sup...],)
     else  # unbounded
-        return (UnitRange(default_range(dist)...),)
+        return (UnitRange(promote(default_range(dist)...)...),)
     end
 end
 
