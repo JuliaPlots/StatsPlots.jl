@@ -6,8 +6,10 @@ function default_range(dist::Distribution, alpha = 0.0001)
     minval, maxval
 end
 
-function default_range(m::Distributions.MixtureModel, alpha = 0.0001)
-    mapreduce(c -> default_range(c, alpha), _minmax, m.components)
+function default_range(m::Distributions.UnivariateMixture, alpha = 0.0001)
+    mapreduce(_minmax, 1:Distributions.ncomponents(m)) do k
+        default_range(Distributions.component(m, k), alpha)
+    end
 end
 
 _minmax((xmin, xmax), (ymin, ymax)) = (min(xmin, ymin), max(xmax, ymax))
@@ -31,12 +33,13 @@ end
     (dist, yz_args(dist)...)
 end
 
-@recipe function f(m::Distributions.MixtureModel; components = true)
+@recipe function f(m::Distributions.UnivariateMixture; components = true)
     if m isa DiscreteUnivariateDistribution
         seriestype --> :sticks
     end
     if components
-        for c in m.components
+        for k in 1:Distributions.ncomponents(m)
+            c = Distributions.component(m, k)
             @series begin
                 (c, yz_args(c)...)
             end
