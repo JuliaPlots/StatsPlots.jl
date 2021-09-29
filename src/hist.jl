@@ -82,14 +82,15 @@ Plots.group_as_matrix(g::GroupedHist) = true
     edges = h.edges[1]
     bar_width --> mean(map(i -> edges[i+1] - edges[i], 1:nbins))
     x = map(i -> (edges[i] + edges[i+1])/2, 1:nbins)
-
+    
     if group === nothing
         y = reshape(h.weights, nbins, 1)
     else
         gb = RecipesPipeline._extract_group_attributes(group)
         labels, idxs = getfield(gb, 1), getfield(gb, 2)
         ngroups = length(labels)
-
+        ntot = count(x->!isnan(x), v) 
+        
         # compute weights (frequencies) by group using those edges
         y = fill(NaN, nbins, ngroups)
         for i in 1:ngroups
@@ -97,7 +98,11 @@ Plots.group_as_matrix(g::GroupedHist) = true
             v_i = filter(x->!isnan(x), v[:,i])
             w_i = weights == nothing ? nothing : weights[groupinds]
             h_i = Plots._make_hist((v_i,), h.edges; normed = false, weights = w_i)
-            y[:,i] = normed ? h_i.weights / sum(h.weights) : h_i.weights
+            if normed
+                y[:,i] .= h_i.weights .* (length(v_i) / ntot / sum(h_i.weights))
+            else
+                y[:,i] .= h_i.weights
+            end
         end
     end
 
