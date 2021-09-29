@@ -97,7 +97,7 @@ Plots.group_as_matrix(g::GroupedHist) = true
             v_i = filter(x->!isnan(x), v[:,i])
             w_i = weights == nothing ? nothing : weights[groupinds]
             h_i = Plots._make_hist((v_i,), h.edges; normed = false, weights = w_i)
-            y[:,i] = normed ? (h_i.weights / sum(h_i.weights)) .* (length(groupinds) ./ length(group)) : h_i.weights
+            y[:,i] = normed ? (h_i.weights / sum(h_i.weights)) .* (length(v_i) / ntot) : h_i.weights
         end
     end
 
