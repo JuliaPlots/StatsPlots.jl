@@ -82,6 +82,7 @@ Plots.group_as_matrix(g::GroupedHist) = true
     edges = h.edges[1]
     bar_width --> mean(map(i -> edges[i+1] - edges[i], 1:nbins))
     x = map(i -> (edges[i] + edges[i+1])/2, 1:nbins)
+    ntot = count(x->!isnan(x), v) 
 
     if group === nothing
         y = reshape(h.weights, nbins, 1)
