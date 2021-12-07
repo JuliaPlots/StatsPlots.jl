@@ -10,7 +10,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     y,
     z;
     notch = false,
-    range = 1.5,
+    whisker_range = 1.5,
     outliers = true,
     whisker_width = :half
 )
@@ -38,7 +38,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         values = y[filter(i -> _cycle(x, i) == glabel, 1:length(y))]
 
         # compute quantiles
-        q1, q2, q3, q4, q5 = quantile(values, Base.range(0, stop = 1, length = 5))
+        q1, q2, q3, q4, q5 = quantile(values, range(0, stop = 1, length = 5))
 
         # notch
         n = notch_width(q2, q4, length(values))
@@ -60,8 +60,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         L, R = center - 0.5 * hw, center + 0.5 * hw
 
         # outliers
-        if Float64(range) != 0.0  # if the range is 0.0, the whiskers will extend to the data
-            limit = range * (q4 - q2)
+        if Float64(whisker_range) != 0.0  # if the range is 0.0, the whiskers will extend to the data
+            limit = whisker_range * (q4 - q2)
             inside = Float64[]
             for value in values
                 if (value < (q2 - limit)) || (value > (q4 + limit))
