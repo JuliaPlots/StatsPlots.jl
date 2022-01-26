@@ -20,7 +20,7 @@ import Clustering: Hclust, nnodes
 using Interpolations
 import MultivariateStats: MDS, eigvals, projection, principalvars,
                             principalratio, transform
-
+import FFTW: fft, ifft
 import KernelDensity
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
 @recipe f(k::KernelDensity.BivariateKDE) = k.x, k.y, permutedims(k.density)
