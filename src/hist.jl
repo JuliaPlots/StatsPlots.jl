@@ -207,7 +207,7 @@ function bkfe(gcounts, drv, bandwidth, range_x)
     ## Obtain kernel weights
 
     tau = 4 + drv
-    L = min(floor(tau*h/delta), M)
+    L = min(floor(Int, tau*h/delta), M)
 
     lvec = 0:L
     arg = lvec .* delta/h
@@ -227,7 +227,7 @@ function bkfe(gcounts, drv, bandwidth, range_x)
 
     ## Now combine weights and counts to obtain estimate
     ## we need P >= 2L+1L, M: L <= M.
-    P = 2^(ceil(log(M+L+1)/log(2)))
+    P = 2^(ceil(Int, log(M+L+1)/log(2)))
     kappam = [kappam; zeros(P-2*L-1); reverse(kappam[2:end])]
     Gcounts = [gcounts; zeros(P-M)]
     kappam = fft(kappam)
