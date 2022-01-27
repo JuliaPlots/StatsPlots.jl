@@ -59,6 +59,11 @@ end # testset
     ]
 end
 
+@testset "Histogram" begin
+    data = randn(1000)
+    @test 0.3 < StatsPlots.wand_bins(data) < 0.4
+end
+
 @testset "Distributions" begin
     @testset "univariate" begin
         @testset "discrete" begin
