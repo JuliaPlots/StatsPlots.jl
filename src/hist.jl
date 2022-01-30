@@ -212,7 +212,7 @@ function bkfe(gcounts, drv, bandwidth, range_x)
     lvec = 0:L
     arg = lvec .* delta/h
 
-    kappam = pdf.(Normal(),arg)/(h^(drv+1))
+    kappam = pdf.(Normal(),arg) ./ h^(drv+1)
     hmold0, hmnew = ones(length(arg)), ones(length(arg))
     hmold1 = arg
 
