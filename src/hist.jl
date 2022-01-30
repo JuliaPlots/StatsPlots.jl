@@ -227,7 +227,7 @@ function bkfe(gcounts, drv, bandwidth, range_x)
 
     ## Now combine weights and counts to obtain estimate
     ## we need P >= 2L+1L, M: L <= M.
-    P = 2^(ceil(Int, log(M+L+1)/log(2)))
+    P = nextpow(2, M+L+1)
     kappam = [kappam; zeros(P-2*L-1); reverse(kappam[2:end])]
     Gcounts = [gcounts; zeros(P-M)]
     kappam = fft(kappam)
