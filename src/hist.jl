@@ -207,7 +207,7 @@ function bkfe(gcounts, drv, bandwidth, range_x)
     ## Obtain kernel weights
 
     tau = 4 + drv
-    L = min(floor(Int, tau*h/delta), M)
+    L = min(Int(fld(tau*h, delta)), M)
 
     lvec = 0:L
     arg = lvec .* delta/h
