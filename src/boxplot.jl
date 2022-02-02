@@ -12,7 +12,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     notch = false,
     whisker_range = 1.5,
     outliers = true,
-    whisker_width = :half
+    whisker_width = :half,
+    by = identity
 )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
@@ -33,7 +34,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     ww = whisker_width == :match ? bw :
          whisker_width == :half ? bw / 2 :
          whisker_width
-    for (i, glabel) in enumerate(glabels)
+    for (i, glabel) in enumerate(sort(glabels, by=by))
         # filter y
         values = y[filter(i -> _cycle(x, i) == glabel, 1:length(y))]
 
