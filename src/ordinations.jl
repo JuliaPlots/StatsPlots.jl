@@ -2,8 +2,6 @@
     length(mds_axes) in [2,3] || throw(ArgumentError("Can only accept 2 or 3 mds axes"))
     xax = mds_axes[1]
     yax = mds_axes[2]
-    ev = eigvals(mds)
-    var_explained = [v / sum(ev) for v in ev]
     tfm = collect(transform(mds)')
 
     xlabel --> "MDS$xax"
