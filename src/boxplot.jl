@@ -195,7 +195,9 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     primary := false
     seriestype := :path
     marker := false
-    hover := texts
+    if Plots.is_attr_supported(Plots.backend(), :hover)
+        hover := texts
+    end
     linewidth := 0
     x := xsegs.pts
     y := ysegs.pts
