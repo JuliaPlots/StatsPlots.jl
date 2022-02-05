@@ -4,6 +4,7 @@ using StableRNGs
 using NaNMath
 using Clustering
 using Distributions
+using MultivariateStats
 
 @testset "Grouped histogram" begin
     rng = StableRNG(1337)
@@ -101,5 +102,27 @@ end
             @test pzip[1][1][:x] isa AbstractVector
             @test pzip[1][1][:y][2:3:end] == pdf.(dzip, Int.(pzip[1][1][:x][1:3:end]))
         end
+    end
+end
+
+@testset "ordinations" begin
+    @testset "MDS" begin
+        X = randn(4, 100)
+        M = fit(MultivariateStats.MDS, X; maxoutdim=3, distances=false)
+        Y = MultivariateStats.predict(M)'
+
+        mds_plt = plot(M)
+        @test mds_plt[1][1][:x] == Y[:,1]
+        @test mds_plt[1][1][:y] == Y[:,2]
+        @test mds_plt[1][:xaxis][:guide] == "MDS1"
+        @test mds_plt[1][:yaxis][:guide] == "MDS2"
+
+        mds_plt2 = plot(M; mds_axes=(3,1,2))
+        @test mds_plt2[1][1][:x] == Y[:,3]
+        @test mds_plt2[1][1][:y] == Y[:,1]
+        @test mds_plt2[1][1][:z] == Y[:,2]
+        @test mds_plt2[1][:xaxis][:guide] == "MDS3"
+        @test mds_plt2[1][:yaxis][:guide] == "MDS1"
+        @test mds_plt2[1][:zaxis][:guide] == "MDS2"
     end
 end
