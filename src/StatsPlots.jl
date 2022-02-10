@@ -3,7 +3,6 @@ module StatsPlots
 using Reexport
 import RecipesBase: recipetype
 import Tables
-import TableOperations
 using RecipesPipeline
 @reexport using Plots
 import Plots: _cycle
@@ -26,9 +25,8 @@ import KernelDensity
 
 @shorthands cdensity
 
-export @df, dataviewer
+export dataviewer
 
-include("df.jl")
 include("interact.jl")
 include("corrplot.jl")
 include("cornerplot.jl")
