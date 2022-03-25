@@ -21,7 +21,15 @@ get_quantiles(x::Real) = [x]
 get_quantiles(b::Bool) = b ? [0.5] : Float64[]
 get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
-@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both, show_mean = false, show_median = false, quantiles = Float64[], bandwidth = KernelDensity.default_bandwidth(y))
+@recipe function f(::Type{Val{:violin}}, x, y, z; 
+                    trim=true, 
+                    side=:both, 
+                    show_mean = false, 
+                    show_median = false, 
+                    quantiles = Float64[], 
+                    bandwidth = KernelDensity.default_bandwidth(y),
+                    horizontal = false,
+                    )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -47,7 +55,8 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
         widths = hw * widths / Plots.ignorenan_maximum(widths)
 
         # make the violin
-        xcenter = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
+        _axis = horizontal ? :yaxis : :xaxis
+        xcenter = Plots.discrete_value!(plotattributes[:subplot][_axis], glabel)[1]
         xcoords = if (side==:right)
             vcat(widths, zeros(length(widths))) .+ xcenter
         elseif (side==:left)
@@ -115,8 +124,8 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
 
     @series begin
         seriestype := :shape
-        x := xsegs.pts
-        y := ysegs.pts
+        y := horizontal ? xsegs.pts : ysegs.pts
+        x := horizontal ? ysegs.pts : xsegs.pts
         ()
     end
 
@@ -125,8 +134,8 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
             primary := false
             seriestype := :shape
             linestyle := :dot
-            x := mxsegs.pts
-            y := mysegs.pts
+            y := horizontal ? mxsegs.pts : mysegs.pts
+            x := horizontal ? mysegs.pts : mxsegs.pts
             ()
         end
     end
@@ -135,8 +144,8 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
         @series begin
             primary := false
             seriestype := :shape
-            x := qxsegs.pts
-            y := qysegs.pts
+            y := horizontal ? qxsegs.pts : qysegs.pts
+            x := horizontal ? qysegs.pts : qxsegs.pts
             ()
         end
     end
