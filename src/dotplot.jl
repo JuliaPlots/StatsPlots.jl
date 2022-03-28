@@ -5,7 +5,6 @@
 @recipe function f(::Type{Val{:dotplot}}, x, y, z; 
                         mode = :density, 
                         side=:both,
-                        horizontal=false,
                         )
     # if only y is provided, then x will be UnitRange 1:size(y, 2)
     if typeof(x) <: AbstractRange
@@ -28,6 +27,11 @@
         zeros(length(y))
 
     points_x, points_y = zeros(0), zeros(0)
+
+    # Get if we have to plot horizontally from the 'orientation' attribute...
+    horizontal = !Plots.isvertical(plotattributes)
+    # and reset the orientation, so that the axes limits are set correctly.
+    orientation := default(:orientation)
 
     for (i,grouplabel) in enumerate(grouplabels)
         # filter y

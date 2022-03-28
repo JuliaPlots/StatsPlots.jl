@@ -28,7 +28,6 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
                     show_median = false, 
                     quantiles = Float64[], 
                     bandwidth = KernelDensity.default_bandwidth(y),
-                    horizontal = false,
                     )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
@@ -45,6 +44,12 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
     bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
     msc = plotattributes[:markerstrokecolor]
+    
+    # Get if we have to plot horizontally from the 'orientation' attribute...
+    horizontal = !Plots.isvertical(plotattributes)
+    # and reset the orientation, so that the axes limits are set correctly.
+    orientation := default(:orientation)
+
     for (i,glabel) in enumerate(glabels)
         fy = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
         widths, centers = violin_coords(fy, trim=trim, wts = plotattributes[:weights], bandwidth = bandwidth)
