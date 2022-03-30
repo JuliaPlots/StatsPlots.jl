@@ -2,10 +2,7 @@
 # ---------------------------------------------------------------------------
 # Dot Plot (strip plot, beeswarm)
 
-@recipe function f(::Type{Val{:dotplot}}, x, y, z; 
-                        mode = :density, 
-                        side=:both,
-                        )
+@recipe function f(::Type{Val{:dotplot}}, x, y, z; mode = :density, side=:both)
     # if only y is provided, then x will be UnitRange 1:size(y, 2)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -28,17 +25,11 @@
 
     points_x, points_y = zeros(0), zeros(0)
 
-    # Get if we have to plot horizontally from the 'orientation' attribute...
-    horizontal = !Plots.isvertical(plotattributes)
-    # and reset the orientation, so that the axes limits are set correctly.
-    orientation := default(:orientation)
-
     for (i,grouplabel) in enumerate(grouplabels)
         # filter y
         groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
 
-        _axis = horizontal ? :yaxis : :xaxis
-        center = Plots.discrete_value!(plotattributes[:subplot][_axis], grouplabel)[1]
+        center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
         halfwidth = 0.5_cycle(barwidth, i)
 
         offsets = getoffsets(halfwidth, groupy)
@@ -54,8 +45,8 @@
     end
 
     seriestype := :scatter
-    y := horizontal ? points_x : points_y
-    x := horizontal ? points_y : points_x
+    x := points_x
+    y := points_y
     ()
 end
 
