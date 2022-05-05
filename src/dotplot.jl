@@ -29,7 +29,7 @@
         # filter y
         groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
 
-        center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], grouplabel)[1]
+        center = Plots.discrete_value!(plotattributes, :x, grouplabel)[1]
         halfwidth = 0.5_cycle(barwidth, i)
 
         offsets = getoffsets(halfwidth, groupy)

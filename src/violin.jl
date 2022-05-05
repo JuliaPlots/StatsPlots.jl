@@ -47,7 +47,7 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
         widths = hw * widths / Plots.ignorenan_maximum(widths)
 
         # make the violin
-        xcenter = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
+        xcenter = Plots.discrete_value!(plotattributes, :x, glabel)[1]
         xcoords = if (side==:right)
             vcat(widths, zeros(length(widths))) .+ xcenter
         elseif (side==:left)

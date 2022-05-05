@@ -50,7 +50,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         end
 
         # make the shape
-        center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
+        center = Plots.discrete_value!(plotattributes, :x, glabel)[1]
         hw = 0.5_cycle(bw, i) # Box width
         HW = 0.5_cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
