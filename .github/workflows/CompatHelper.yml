@@ -1,12 +1,17 @@
 name: CompatHelper
+
 on:
   schedule:
-    - cron: 0 0 * * *
+    - cron: '00 00 * * *'
   workflow_dispatch:
+
 jobs:
   CompatHelper:
     runs-on: ubuntu-latest
     steps:
-      - uses: JuliaRegistries/compathelper-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pkg.add("CompatHelper")
+        run: julia -e 'using Pkg; Pkg.add("CompatHelper")'
+      - name: CompatHelper.main()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: julia -e 'using CompatHelper; CompatHelper.main()'
