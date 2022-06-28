@@ -168,6 +168,7 @@ end
                 [15.0, 11.0, 9.5, 8.0, 4.0, 2.5, 1.0],
                 ["x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"])
 
+        # test headers
         m2 = glm(@formula(y ~ 0 + x & c), data, Normal())
         cp4 = groupedcoefplot(m1, m2; intercept=true, headers=false)
         @test cp4[1][:yaxis][:ticks] == (
