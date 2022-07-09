@@ -25,7 +25,7 @@
     kx = KernelDensity.kde(x)
     ky = KernelDensity.kde(y)
 
-    ps = [pdf(k, xx, yy) for (xx, yy) in zip(x,y)]
+    ps = pdf.(Ref(k), x, y)
 
     ls = []
     for p in range(1.0/levels, stop=1-1.0/levels, length=levels-1)
