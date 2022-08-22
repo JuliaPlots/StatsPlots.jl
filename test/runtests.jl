@@ -126,3 +126,13 @@ end
         @test mds_plt2[1][:zaxis][:guide] == "MDS2"
     end
 end
+
+@testset "errorline" begin
+    x = 1:10
+    y = rand(10, 100) .* collect(1:2:20)
+    @test errorline(1:10, y)[1][1][:x] == x # x-input
+    @test all(round.(errorline(1:10, y)[1][1][:y], digits = 3) .==
+     round.(mean(y, dims=2), digits = 3)) # mean of y
+    @test all(round.(errorline(1:10, y)[1][1][:ribbon], digits = 3) .==
+     round.(std(y, dims=2), digits = 3)) # std of y
+end
