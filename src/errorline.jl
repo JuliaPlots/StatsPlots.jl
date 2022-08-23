@@ -27,7 +27,7 @@
         the default colorscheme. If one value is given then it will use that color for all groups. If multiple colors are
         given then it will use a different color for each group.
 
-    secondarycolor (Symbol, RGB, :matched - *:Gray60*) - When using stick mode this will allow for the setting of the stick color.
+    secondarycolor (`Symbol`, `RGB`, `:matched` - *:Gray60*) - When using stick mode this will allow for the setting of the stick color.
         If `:matched` is given then the color of the sticks with match that of the main line.
 
     secondarylinealpha (float *.1*) - alpha value of spaghetti lines.
