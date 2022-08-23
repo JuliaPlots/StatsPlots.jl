@@ -1,7 +1,7 @@
 @userplot ErrorLine
-""" 
-# StatsPlots.errorline(x, y, arg): 
-    Function for parsing inputs to easily make a ribbons (https://ggplot2.tidyverse.org/reference/geom_ribbon.html) 
+"""
+# StatsPlots.errorline(x, y, arg):
+    Function for parsing inputs to easily make a ribbons (https://ggplot2.tidyverse.org/reference/geom_ribbon.html)
     or errorbar (https://www.mathworks.com/help/matlab/ref/errorbar.html) plot while allowing for easily controlling error
     type and NaN handling.
 
@@ -10,7 +10,7 @@
     x (vector, unit range) - the values along the x-axis for each y-point
 
     y (matrix [x, repeat, group]) - values along y-axis wrt x. The first dimension must be of equal length to that of x.
-        The second dimension is treated as the repeated observations and error is computed along this dimension. If the 
+        The second dimension is treated as the repeated observations and error is computed along this dimension. If the
         matrix has a 3rd dimension this is treated as a new group.
 
     error_style (symbol - *:ribbon* or :stick) - determines whether to use a ribbon style or stick style error representation.
@@ -22,7 +22,7 @@
     percentiles (Vector{Int64} *[25, 75]*) - if using errortype == :percentile then which percentiles to use as bounds.
 
     groupcolor (Symbol, RGB, Vector of Symbol or RGB) - Declares the color for each group. If no value is passed then will use
-        the default colorscheme. If one value is given then it will use that color for all groups. If multiple colors are 
+        the default colorscheme. If one value is given then it will use that color for all groups. If multiple colors are
         given then it will use a different color for each group.
 
     secondarycolor (Symbol, RGB, :matched - *:Gray60*) - When using stick mode this will allow for the setting of the stick color.
@@ -47,8 +47,8 @@ errorline
 function compute_error(y::AbstractMatrix, centertype::Symbol, errortype::Symbol, percentiles::AbstractVector)
     y_central = fill(NaN, size(y,1))
     # NaNMath doesn't accept Ints so convert to AbstractFloat if necessary
-    if y isa Matrix{Int}
-        y = convert(Matrix{AbstractFloat}, y)
+    if eltype(y) isa Integer
+        y = float(y)
     end
     # First compute the center
     if centertype == :mean
@@ -105,14 +105,14 @@ end
             error("Size of x and y do not match")
         elseif ndims(y) == 2 && size(y,1) != length(x) && size(y,2) == length(x) # Check if y needs to be transposed or transmuted
             y = transpose(y)
-        elseif ndims(y) == 3 && size(y,1) != length(x) 
+        elseif ndims(y) == 3 && size(y,1) != length(x)
             error("When passing a 3 dimensional matrix as y, the axes must be [x, repeat, group]")
         end
     end
 
     # Parse different color type
     if groupcolor isa Symbol || groupcolor isa RGB{Float64} || groupcolor isa RGBA{Float64}
-        groupcolor = [groupcolor] 
+        groupcolor = [groupcolor]
     end
     # Check groupcolor format
     if (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) == 1
@@ -182,7 +182,7 @@ end
                 end
                 ()
             end
-        
+
         elseif errorstyle == :raw
             num_obs = size(y,2)
             if num_obs > numrawlines
