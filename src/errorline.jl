@@ -42,7 +42,7 @@
 """
 errorline
 
-function compute_error(y::AbstractMatrix, CenterType::Symbol, ErrorType::Symbol, Percentiles::Vector{Int64})
+function compute_error(y::AbstractMatrix, CenterType::Symbol, ErrorType::Symbol, Percentiles::Vector{Int})
     y_central = fill(NaN, size(y,1))
     # First compute the center
     if CenterType == :Mean
