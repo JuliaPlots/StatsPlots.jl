@@ -280,7 +280,7 @@ errorline!(1:10, y[:,:,2], errorstyle=:stick, label="Stick", secondarycolor=:mat
 errorline!(1:10, y[:,:,3], errorstyle=:spaghetti, label="Spaghetti")
 ```
 
-<img width="575" alt="iris_andrews_curve" src="https://user-images.githubusercontent.com/24966610/186193984-8601301e-8e03-48e3-98c3-159cf40c9e13.svg">
+<img width="575" alt="ErrorLine Styles" src="https://user-images.githubusercontent.com/24966610/186193984-8601301e-8e03-48e3-98c3-159cf40c9e13.svg">
 
 ---
 
