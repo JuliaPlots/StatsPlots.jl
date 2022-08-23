@@ -127,7 +127,7 @@ end
     elseif (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) < size(y,3)
         error("$(length(groupcolor)) colors given for a matrix with $(size(y,3)) groups")
     end
-
+    # Determine if a color palette is being used so it can be passed to secondary lines
     if :color_palette ∉ keys(plotattributes)
         color_palette = :default
     else
