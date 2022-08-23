@@ -14,7 +14,7 @@
         The second dimension is treated as the repeated observations and error is computed along this dimension. If the
         matrix has a 3rd dimension this is treated as a new group.
 
-    error_style (symbol - *:ribbon*, :stick, :spaghetti) - determines whether to use a ribbon style or stick style error
+    error_style (`Symbol` - *:ribbon*, :stick, :spaghetti) - determines whether to use a ribbon style or stick style error
      representation.
 
     centertype (symbol - *:mean* or :median) - which approach to use to represent the central value of y at each x-value.
