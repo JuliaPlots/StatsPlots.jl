@@ -37,16 +37,16 @@
     stickwidth (Float64 *.01*) - How much of the x-axis the horizontal aspect of the error stick should take up.
 
 # Example
-    ```julia
-    x = 1:10
-    y = fill(NaN, 10, 100, 3)
-    for i = axes(y,3)
-        y[:,:,i] = collect(1:2:20) .+ rand(10,100).*5 .* collect(1:2:20) .+ rand()*100
-    end
+```julia
+x = 1:10
+y = fill(NaN, 10, 100, 3)
+for i = axes(y,3)
+    y[:,:,i] = collect(1:2:20) .+ rand(10,100).*5 .* collect(1:2:20) .+ rand()*100
+end
 
-    y = reshape(1:100, 10, 10);
-    errorline(1:10, y)
-    ```
+y = reshape(1:100, 10, 10);
+errorline(1:10, y)
+```
 """
 errorline
 
@@ -57,10 +57,13 @@ function compute_error(y::AbstractMatrix, centertype::Symbol, errortype::Symbol,
         y = float(y)
     end
     # First compute the center
+    y_central =
     if centertype == :mean
-        y_central =  mapslices(NaNMath.mean, y, dims=2)
+        mapslices(NaNMath.mean, y, dims=2)
     elseif centertype == :median
-        y_central =  mapslices(NaNMath.median, y, dims=2)
+        mapslices(NaNMath.median, y, dims=2)
+    else
+        error("Invalid center type. Valid symbols include :mean or :median")
     end
 
     # Takes 2d matrix [x,y] and computes the desired error type for each row (value of x)
@@ -125,6 +128,12 @@ end
         error("$(length(groupcolor)) colors given for a matrix with $(size(y,3)) groups")
     end
 
+    if :color_palette ∉ keys(plotattributes)
+        color_palette = :default
+    else
+        color_palette = plotattributes[:color_palette]
+    end
+
     if errorstyle == :spaghetti && numsecondarylines > size(y,2) # Override numsecondarylines
         numsecondarylines = size(y,2)
     end
@@ -166,7 +175,7 @@ end
                         if groupcolor !== nothing
                             linecolor := groupcolor[g]
                         else
-                            linecolor := palette(:default)[g]
+                            linecolor := palette(color_palette)[plotattributes[:plot_object][1][end][:series_index]+1]
                         end
                     else
                         linecolor := secondarycolor
@@ -205,7 +214,7 @@ end
                     # Set the stick color
                     if (secondarycolor === nothing && groupcolor === nothing) ||
                        (secondarycolor == :matched && groupcolor === nothing)
-                        linecolor := palette(:default)[g]
+                        linecolor := palette(color_palette)[plotattributes[:plot_object][1][end][:series_index]+1]
                     elseif secondarycolor == :matched && groupcolor !== nothing
                         linecolor := groupcolor[g]
                     else
