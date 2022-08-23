@@ -88,7 +88,7 @@ end
 
 @recipe function f(e::ErrorLine; errorstyle=:ribbon, centertype=:mean, errortype=:std,
      percentiles = [25, 75], groupcolor = nothing, secondarycolor = nothing, stickwidth=.01,
-     rawalpha = .075, numrawlines = 100)
+     rawalpha = .1, numrawlines = 100)
     if length(e.args) == 1  # If only one input is given assume it is y-values in the form [x,obs]
         y = e.args[1]
         x = 1:size(y,1)
