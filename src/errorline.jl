@@ -13,22 +13,22 @@
         The second dimension is treated as the repeated observations and error is computed along this dimension. If the 
         matrix has a 3rd dimension this is treated as a new group.
 
-    error_style (symbol - *:ribbon* or :classic) - determines whether to use a ribbon style or stick style error representation.
+    error_style (symbol - *:ribbon* or :stick) - determines whether to use a ribbon style or stick style error representation.
 
-    CenterType (symbol - *:Mean* or :Median) - which approach to use to represent the central value of y at each x-value.
+    centertype (symbol - *:mean* or :median) - which approach to use to represent the central value of y at each x-value.
 
-    ErrorType (symbol - *:STD*, :SEM, :Percentile) - which error metric to use to show the distribution of y at each x-value.
+    errortype (symbol - *:std*, :sem, :percentile) - which error metric to use to show the distribution of y at each x-value.
 
-    Percentiles (Vector{Int64} *[25, 75]*) - if using ErrorType == :Percentile then which percentiles to use as bounds.
+    percentiles (Vector{Int64} *[25, 75]*) - if using errortype == :percentile then which percentiles to use as bounds.
 
-    GroupColor (Symbol, RGB, Vector of Symbol or RGB) - Declares the color for each group. If no value is passed then will use
+    groupcolor (Symbol, RGB, Vector of Symbol or RGB) - Declares the color for each group. If no value is passed then will use
         the default colorscheme. If one value is given then it will use that color for all groups. If multiple colors are 
         given then it will use a different color for each group.
 
-    StickColor (Symbol, RGB, :Matched - *:Gray60*) - When using classic mode this will allow for the setting of the stick color.
-        If ":Matched" is given then the color of the sticks with match that of the main line.
+    secondarycolor (Symbol, RGB, :matched - *:Gray60*) - When using stick mode this will allow for the setting of the stick color.
+        If ":matched" is given then the color of the sticks with match that of the main line.
 
-    StickWidthMultiplier (Float64 *.01*) - How much of the x-axis the horizontal aspect of the error stick should take up.
+    stickwidth (Float64 *.01*) - How much of the x-axis the horizontal aspect of the error stick should take up.
 
 # Example
     ```julia
@@ -37,51 +37,58 @@
     for i = axes(y,3)
         y[:,:,i] = collect(1:2:20) .+ rand(10,100).*5 .* collect(1:2:20) .+ rand()*100
     end
+
+    y = reshape(1:100, 10, 10);
     errorline(1:10, y)
     ```
 """
 errorline
 
-function compute_error(y::AbstractMatrix, CenterType::Symbol, ErrorType::Symbol, Percentiles::Vector{Int})
+function compute_error(y::AbstractMatrix, centertype::Symbol, errortype::Symbol, percentiles::AbstractVector)
     y_central = fill(NaN, size(y,1))
+    # NaNMath doesn't accept Ints so convert to AbstractFloat if necessary
+    if y isa Matrix{Int}
+        y = convert(Matrix{AbstractFloat}, y)
+    end
     # First compute the center
-    if CenterType == :Mean
+    if centertype == :mean
         y_central =  mapslices(NaNMath.mean, y, dims=2)
-    elseif CenterType == :Median
+    elseif centertype == :median
         y_central =  mapslices(NaNMath.median, y, dims=2)
     end
 
     # Takes 2d matrix [x,y] and computes the desired error type for each row (value of x)
-    if ErrorType == :STD || ErrorType == :SEM
+    if errortype == :std || errortype == :sem
         y_error = mapslices(NaNMath.std, y, dims=2)
-        if ErrorType == :SEM
+        if errortype == :sem
             y_error = y_error ./ sqrt(size(y,2))
         end
 
-    elseif ErrorType == :Percentile
+    elseif errortype == :percentile
         y_lower = fill(NaN, size(y,1))
         y_upper = fill(NaN, size(y,1))
         if any(isnan.(y)) # NaNMath does not have a percentile function so have to go via StatsBase
             for i = axes(y,1)
                 yi = y[i, .!isnan.(y[i,:])]
-                y_lower[i] = percentile(yi, Percentiles[1])
-                y_upper[i] = percentile(yi, Percentiles[2])
+                y_lower[i] = percentile(yi, percentiles[1])
+                y_upper[i] = percentile(yi, percentiles[2])
             end
         else
-            y_lower = mapslices(Y -> percentile(Y, Percentiles[1]), y, dims=2)
-            y_upper = mapslices(Y -> percentile(Y, Percentiles[2]), y, dims=2)
+            y_lower = mapslices(Y -> percentile(Y, percentiles[1]), y, dims=2)
+            y_upper = mapslices(Y -> percentile(Y, percentiles[2]), y, dims=2)
         end
 
         y_error = (y_central .- y_lower, y_upper .- y_central) # Difference from center value
     else
-        error("Invalid error type. Valid symbols include :STD, :SEM, :Percentile")
+        error("Invalid error type. Valid symbols include :std, :sem, :percentile")
     end
 
     return y_central, y_error
 end
 
-@recipe function f(e::ErrorLine; ErrorStyle=:Ribbon, CenterType=:Mean, ErrorType=:STD,
-     Percentiles = [25, 75], GroupColor = nothing, StickColor = nothing, StickWidthMultiplier=.01)
+@recipe function f(e::ErrorLine; errorstyle=:ribbon, centertype=:mean, errortype=:std,
+     percentiles = [25, 75], groupcolor = nothing, secondarycolor = nothing, stickwidth=.01,
+     rawalpha = .075, numrawlines = 100)
     if length(e.args) == 1  # If only one input is given assume it is y-values in the form [x,obs]
         y = e.args[1]
         x = 1:size(y,1)
@@ -104,58 +111,61 @@ end
     end
 
     # Parse different color type
-    if GroupColor isa Symbol || GroupColor isa RGB{Float64}
-        GroupColor = [GroupColor] 
+    if groupcolor isa Symbol || groupcolor isa RGB{Float64} || groupcolor isa RGBA{Float64}
+        groupcolor = [groupcolor] 
     end
-    # Check GroupColor format
-    if (GroupColor !== nothing && ndims(y) > 2) && length(GroupColor) == 1
-        GroupColor = repeat(GroupColor, size(y,3))
-    elseif (GroupColor !== nothing && ndims(y) > 2) && length(GroupColor) < size(y,3)
-        error("$(length(GroupColor)) colors given for a matrix with $(size(y,3)) groups")
+    # Check groupcolor format
+    if (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) == 1
+        groupcolor = repeat(groupcolor, size(y,3)) # Use the same color for all groups
+    elseif (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) < size(y,3)
+        error("$(length(groupcolor)) colors given for a matrix with $(size(y,3)) groups")
+    end
+
+    if errorstyle == :raw && numrawlines > size(y,2) # Override numrawlines
+        numrawlines = size(y,2)
     end
 
     for g = axes(y,3) # Iterate through 3rd dimension
         # Compute center and distribution for each value of x
-        y_central, y_error = compute_error(y[:,:,g], CenterType, ErrorType, Percentiles)
-
-        if ErrorStyle == :Ribbon
+        y_central, y_error = compute_error(y[:,:,g], centertype, errortype, percentiles)
+        if errorstyle == :ribbon
             seriestype := :path
             @series begin
                 x := x
                 y := y_central
                 ribbon := y_error
                 fillalpha --> .1
-                if GroupColor !== nothing
-                    linecolor := GroupColor[g]
-                    fillcolor := GroupColor[g]
+                if groupcolor !== nothing
+                    linecolor := groupcolor[g]
+                    fillcolor := groupcolor[g]
                 end
                 () # Supress implicit return
             end
 
-        elseif ErrorStyle == :Classic
-            x_offset = (extrema(x)[2] - extrema(x)[1]) * StickWidthMultiplier
+        elseif errorstyle == :stick
+            x_offset = (extrema(x)[2] - extrema(x)[1]) * stickwidth
             seriestype := :path
             for (i, xi) in enumerate(x)
                 # Error sticks
                 @series begin
                     primary := false
                     x := [xi-x_offset, xi+x_offset, xi, xi, xi+x_offset, xi-x_offset]
-                    if ErrorType == :Percentile
+                    if errortype == :percentile
                         y := [repeat([y_central[i] - y_error[1][i]],3); repeat([y_central[i] + y_error[2][i]],3)]
                     else
                         y := [repeat([y_central[i] - y_error[i]],3); repeat([y_central[i] + y_error[i]],3)]
                     end
                     # Set the stick color
-                    if StickColor === nothing
+                    if secondarycolor === nothing
                         linecolor := :gray60
-                    elseif StickColor == :Matched
-                        if GroupColor !== nothing
-                            linecolor := GroupColor[g]
+                    elseif secondarycolor == :matched
+                        if groupcolor !== nothing
+                            linecolor := groupcolor[g]
                         else
                             linecolor := palette(:default)[g]
                         end
                     else
-                        linecolor := StickColor
+                        linecolor := secondarycolor
                     end
                     () # Supress implicit return
                 end
@@ -167,13 +177,54 @@ end
                 primary := true
                 x := x
                 y := y_central
-                if GroupColor !== nothing
-                    linecolor := GroupColor[g]
+                if groupcolor !== nothing
+                    linecolor := groupcolor[g]
+                end
+                ()
+            end
+        
+        elseif errorstyle == :raw
+            num_obs = size(y,2)
+            if num_obs > numrawlines
+                sub_sample_idx = sample(1:num_obs, numrawlines, replace=false)
+                y_sub_sample = y[:,sub_sample_idx,g]
+            else
+                y_sub_sample = y[:,:,g]
+            end
+            seriestype := :path
+            for i = 1:numrawlines
+                # Background paths
+                @series begin
+                    primary := false
+                    x := x
+                    y := y_sub_sample[:,i]
+                    # Set the stick color
+                    if (secondarycolor === nothing && groupcolor === nothing) ||
+                       (secondarycolor == :matched && groupcolor === nothing)
+                        linecolor := palette(:default)[g]
+                    elseif secondarycolor == :matched && groupcolor !== nothing
+                        linecolor := groupcolor[g]
+                    else
+                        linecolor := secondarycolor
+                    end
+                    linealpha := rawalpha
+                    () # Supress implicit return
+                end
+            end
+
+            # Base line
+            seriestype := :line
+            @series begin
+                primary := true
+                x := x
+                y := y_central
+                if groupcolor !== nothing
+                    linecolor := groupcolor[g]
                 end
                 ()
             end
         else
-            error("Invalid error style. Valid symbols include :Ribbon or :Classic")
+            error("Invalid error style. Valid symbols include :ribbon or :stick")
         end
     end
 end
