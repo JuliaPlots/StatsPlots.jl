@@ -20,6 +20,7 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
     - marginalhist
     - corrplot/cornerplot
     - [andrewsplot](https://en.wikipedia.org/wiki/Andrews_plot)
+    - [errorline] ([ribbon](https://ggplot2.tidyverse.org/reference/geom_ribbon.html), [stick](https://www.mathworks.com/help/matlab/ref/errorbar.html), [spaghetti](https://stackoverflow.com/questions/65510619/how-to-prepare-my-data-for-spaghetti-plots))
     - MDS plot
     - [qq-plot](https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot)
 

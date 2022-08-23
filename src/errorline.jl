@@ -1,9 +1,10 @@
 @userplot ErrorLine
 """
 # StatsPlots.errorline(x, y, arg):
-    Function for parsing inputs to easily make a ribbons (https://ggplot2.tidyverse.org/reference/geom_ribbon.html)
-    or errorbar (https://www.mathworks.com/help/matlab/ref/errorbar.html) plot while allowing for easily controlling error
-    type and NaN handling.
+    Function for parsing inputs to easily make a [`ribbons`] (https://ggplot2.tidyverse.org/reference/geom_ribbon.html),
+    stick errorbar (https://www.mathworks.com/help/matlab/ref/errorbar.html), or spaghetti
+    (https://stackoverflow.com/questions/65510619/how-to-prepare-my-data-for-spaghetti-plots) plot while allowing 
+    for easily controlling error type and NaN handling.
 
 # Inputs: default values are indicated with *s
 
@@ -13,7 +14,8 @@
         The second dimension is treated as the repeated observations and error is computed along this dimension. If the
         matrix has a 3rd dimension this is treated as a new group.
 
-    error_style (symbol - *:ribbon* or :stick) - determines whether to use a ribbon style or stick style error representation.
+    error_style (symbol - *:ribbon*, :stick, :spaghetti) - determines whether to use a ribbon style or stick style error
+     representation.
 
     centertype (symbol - *:mean* or :median) - which approach to use to represent the central value of y at each x-value.
 
@@ -27,6 +29,10 @@
 
     secondarycolor (Symbol, RGB, :matched - *:Gray60*) - When using stick mode this will allow for the setting of the stick color.
         If ":matched" is given then the color of the sticks with match that of the main line.
+
+    secondarylinealpha (float *.1*) - alpha value of spaghetti lines.
+
+    numsecondarylines (int *100*) - number of spaghetti lines to plot behind central line.
 
     stickwidth (Float64 *.01*) - How much of the x-axis the horizontal aspect of the error stick should take up.
 
@@ -88,7 +94,7 @@ end
 
 @recipe function f(e::ErrorLine; errorstyle=:ribbon, centertype=:mean, errortype=:std,
      percentiles = [25, 75], groupcolor = nothing, secondarycolor = nothing, stickwidth=.01,
-     rawalpha = .1, numrawlines = 100)
+     secondarylinealpha = .1, numsecondarylines = 100)
     if length(e.args) == 1  # If only one input is given assume it is y-values in the form [x,obs]
         y = e.args[1]
         x = 1:size(y,1)
@@ -121,8 +127,8 @@ end
         error("$(length(groupcolor)) colors given for a matrix with $(size(y,3)) groups")
     end
 
-    if errorstyle == :raw && numrawlines > size(y,2) # Override numrawlines
-        numrawlines = size(y,2)
+    if errorstyle == :spaghetti && numsecondarylines > size(y,2) # Override numsecondarylines
+        numsecondarylines = size(y,2)
     end
 
     for g = axes(y,3) # Iterate through 3rd dimension
@@ -183,16 +189,16 @@ end
                 ()
             end
 
-        elseif errorstyle == :raw
+        elseif errorstyle == :spaghetti
             num_obs = size(y,2)
-            if num_obs > numrawlines
-                sub_sample_idx = sample(1:num_obs, numrawlines, replace=false)
+            if num_obs > numsecondarylines
+                sub_sample_idx = sample(1:num_obs, numsecondarylines, replace=false)
                 y_sub_sample = y[:,sub_sample_idx,g]
             else
                 y_sub_sample = y[:,:,g]
             end
             seriestype := :path
-            for i = 1:numrawlines
+            for i = 1:numsecondarylines
                 # Background paths
                 @series begin
                     primary := false
@@ -207,7 +213,7 @@ end
                     else
                         linecolor := secondarycolor
                     end
-                    linealpha := rawalpha
+                    linealpha := secondarylinealpha
                     () # Supress implicit return
                 end
             end
@@ -224,7 +230,7 @@ end
                 ()
             end
         else
-            error("Invalid error style. Valid symbols include :ribbon or :stick")
+            error("Invalid error style. Valid symbols include :ribbon, :stick, or :spaghetti.")
         end
     end
 end
