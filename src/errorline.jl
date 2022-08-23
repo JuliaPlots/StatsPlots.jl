@@ -103,9 +103,7 @@ end
         y = e.args[2]
 
         # Check y orientation
-        if ndims(y) > 3
-            error("ndims(y) > 3")
-        end
+        ndims(y) > 3 && error("ndims(y) > 3")
 
         if !any(size(y) .== length(x))
             error("Size of x and y do not match")
