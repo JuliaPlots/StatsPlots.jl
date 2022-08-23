@@ -147,7 +147,7 @@ end
             end
 
         elseif errorstyle == :stick
-            x_offset = (extrema(x)[2] - extrema(x)[1]) * stickwidth
+            x_offset = diff(extrema(x) |> collect) * stickwidth
             seriestype := :path
             for (i, xi) in enumerate(x)
                 # Error sticks
