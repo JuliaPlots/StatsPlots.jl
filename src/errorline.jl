@@ -104,7 +104,7 @@ end
     end
 
     # Parse different color type
-    if typeof(GroupColor) == Symbol || typeof(GroupColor) == RGB{Float64}
+    if GroupColor isa Symbol || GroupColor isa RGB{Float64}
         GroupColor = [GroupColor] 
     end
     # Check GroupColor format
