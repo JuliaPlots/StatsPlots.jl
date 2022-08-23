@@ -47,7 +47,7 @@ errorline
 function compute_error(y::AbstractMatrix, centertype::Symbol, errortype::Symbol, percentiles::AbstractVector)
     y_central = fill(NaN, size(y,1))
     # NaNMath doesn't accept Ints so convert to AbstractFloat if necessary
-    if eltype(y) isa Integer
+    if eltype(y) <: Integer
         y = float(y)
     end
     # First compute the center
