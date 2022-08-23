@@ -104,7 +104,7 @@ end
         if !any(size(y) .== length(x))
             error("Size of x and y do not match")
         elseif ndims(y) == 2 && size(y,1) != length(x) && size(y,2) == length(x) # Check if y needs to be transposed or transmuted
-            y = y'
+            y = transpose(y)
         elseif ndims(y) == 3 && size(y,1) != length(x) 
             error("When passing a 3 dimensional matrix as y, the axes must be [x, repeat, group]")
         end
