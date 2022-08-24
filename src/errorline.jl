@@ -156,7 +156,7 @@ end
             end
 
         elseif errorstyle == :stick
-            x_offset = diff(extrema(x) |> collect) * stickwidth
+            x_offset = diff(extrema(x) |> collect)[1] * stickwidth
             seriestype := :path
             for (i, xi) in enumerate(x)
                 # Error sticks
@@ -213,10 +213,9 @@ end
                     x := x
                     y := y_sub_sample[:,i]
                     # Set the stick color
-                    if (secondarycolor === nothing && groupcolor === nothing) ||
-                       (secondarycolor == :matched && groupcolor === nothing)
+                    if groupcolor === nothing && (secondarycolor === nothing || secondarycolor == :matched)
                         linecolor := palette(color_palette)[plotattributes[:plot_object][1][end][:series_index]+1]
-                    elseif secondarycolor == :matched && groupcolor !== nothing
+                    elseif groupcolor !== nothing && (secondarycolor == :matched ||  secondarycolor === nothing)
                         linecolor := groupcolor[g]
                     else
                         linecolor := secondarycolor
@@ -236,6 +235,7 @@ end
                 if groupcolor !== nothing
                     linecolor := groupcolor[g]
                 end
+                linewidth --> 3 # Make it stand out against the spaghetti better
                 ()
             end
         else
