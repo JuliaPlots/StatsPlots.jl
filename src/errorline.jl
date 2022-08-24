@@ -95,9 +95,9 @@ function compute_error(y::AbstractMatrix, centertype::Symbol, errortype::Symbol,
     return y_central, y_error
 end
 
-@recipe function f(e::ErrorLine; errorstyle=:ribbon, centertype=:mean, errortype=:std,
-     percentiles = [25, 75], groupcolor = nothing, secondarycolor = nothing, stickwidth=.01,
-     secondarylinealpha = .1, numsecondarylines = 100)
+@recipe function f(e::ErrorLine; errorstyle = :ribbon, centertype = :mean, errortype = :std,
+     percentiles = [25, 75], groupcolor = nothing, secondarycolor = nothing, stickwidth = .01,
+     secondarylinealpha = .1, numsecondarylines = 100, secondarylinewidth = 1)
     if length(e.args) == 1  # If only one input is given assume it is y-values in the form [x,obs]
         y = e.args[1]
         x = 1:size(y,1)
@@ -180,6 +180,7 @@ end
                     else
                         linecolor := secondarycolor
                     end
+                    linewidth := secondarylinewidth
                     () # Supress implicit return
                 end
             end
@@ -221,6 +222,7 @@ end
                         linecolor := secondarycolor
                     end
                     linealpha := secondarylinealpha
+                    linewidth := secondarylinewidth
                     () # Supress implicit return
                 end
             end
