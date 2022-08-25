@@ -20,7 +20,7 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
     - marginalhist
     - corrplot/cornerplot
     - [andrewsplot](https://en.wikipedia.org/wiki/Andrews_plot)
-    - errorline ([ribbon](https://ggplot2.tidyverse.org/reference/geom_ribbon.html), [stick](https://www.mathworks.com/help/matlab/ref/errorbar.html), [spaghetti](https://stackoverflow.com/questions/65510619/how-to-prepare-my-data-for-spaghetti-plots))
+    - errorline ([ribbon](https://ggplot2.tidyverse.org/reference/geom_ribbon.html), [stick](https://www.mathworks.com/help/matlab/ref/errorbar.html), [plume](https://www.e-education.psu.edu/files/meteo410/file/Plume.pdf))
     - MDS plot
     - [qq-plot](https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot)
 
@@ -280,7 +280,7 @@ errorline!(1:10, y[:,:,2], errorstyle=:stick, label="Stick", secondarycolor=:mat
 errorline!(1:10, y[:,:,3], errorstyle=:spaghetti, label="Spaghetti")
 ```
 
-<img width="575" alt="ErrorLine Styles" src="https://user-images.githubusercontent.com/24966610/186193984-8601301e-8e03-48e3-98c3-159cf40c9e13.svg">
+<img width="575" alt="ErrorLine Styles" src="https://user-images.githubusercontent.com/24966610/186654791-e8e2bab8-b31c-4ee5-ae80-3c0ba7cf8c62.svg">
 
 ---
 

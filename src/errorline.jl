@@ -2,8 +2,8 @@
 """
 # StatsPlots.errorline(x, y, arg):
     Function for parsing inputs to easily make a [`ribbons`] (https://ggplot2.tidyverse.org/reference/geom_ribbon.html),
-    stick errorbar (https://www.mathworks.com/help/matlab/ref/errorbar.html), or spaghetti
-    (https://stackoverflow.com/questions/65510619/how-to-prepare-my-data-for-spaghetti-plots) plot while allowing 
+    stick errorbar (https://www.mathworks.com/help/matlab/ref/errorbar.html), or plume
+    (https://stackoverflow.com/questions/65510619/how-to-prepare-my-data-for-plume-plots) plot while allowing 
     for easily controlling error type and NaN handling.
 
 # Inputs: default values are indicated with *s
@@ -14,7 +14,7 @@
         The second dimension is treated as the repeated observations and error is computed along this dimension. If the
         matrix has a 3rd dimension this is treated as a new group.
 
-    error_style (`Symbol` - *:ribbon*, :stick, :spaghetti) - determines whether to use a ribbon style or stick style error
+    error_style (`Symbol` - *:ribbon*, :stick, :plume) - determines whether to use a ribbon style or stick style error
      representation.
 
     centertype (symbol - *:mean* or :median) - which approach to use to represent the central value of y at each x-value.
@@ -30,9 +30,9 @@
     secondarycolor (`Symbol`, `RGB`, `:matched` - *:Gray60*) - When using stick mode this will allow for the setting of the stick color.
         If `:matched` is given then the color of the sticks with match that of the main line.
 
-    secondarylinealpha (float *.1*) - alpha value of spaghetti lines.
+    secondarylinealpha (float *.1*) - alpha value of plume lines.
 
-    numsecondarylines (int *100*) - number of spaghetti lines to plot behind central line.
+    numsecondarylines (int *100*) - number of plume lines to plot behind central line.
 
     stickwidth (Float64 *.01*) - How much of the x-axis the horizontal aspect of the error stick should take up.
 
@@ -134,7 +134,7 @@ end
         color_palette = plotattributes[:color_palette]
     end
 
-    if errorstyle == :spaghetti && numsecondarylines > size(y,2) # Override numsecondarylines
+    if errorstyle == :plume && numsecondarylines > size(y,2) # Override numsecondarylines
         numsecondarylines = size(y,2)
     end
 
@@ -197,7 +197,7 @@ end
                 ()
             end
 
-        elseif errorstyle == :spaghetti
+        elseif errorstyle == :plume
             num_obs = size(y,2)
             if num_obs > numsecondarylines
                 sub_sample_idx = sample(1:num_obs, numsecondarylines, replace=false)
@@ -235,11 +235,11 @@ end
                 if groupcolor !== nothing
                     linecolor := groupcolor[g]
                 end
-                linewidth --> 3 # Make it stand out against the spaghetti better
+                linewidth --> 3 # Make it stand out against the plume better
                 ()
             end
         else
-            error("Invalid error style. Valid symbols include :ribbon, :stick, or :spaghetti.")
+            error("Invalid error style. Valid symbols include :ribbon, :stick, or :plume.")
         end
     end
 end
