@@ -280,7 +280,7 @@ errorline!(1:10, y[:,:,2], errorstyle=:stick, label="Stick", secondarycolor=:mat
 errorline!(1:10, y[:,:,3], errorstyle=:spaghetti, label="Spaghetti")
 ```
 
-<img width="575" alt="ErrorLine Styles" src="https://user-images.githubusercontent.com/24966610/186654791-e8e2bab8-b31c-4ee5-ae80-3c0ba7cf8c62.svg">
+<img width="575" alt="ErrorLine Styles" src="https://user-images.githubusercontent.com/24966610/186655231-2b7b9e37-0beb-4796-ad08-cbb84020ffd8.svg">
 
 ---
 
