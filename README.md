@@ -20,6 +20,7 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
     - marginalhist
     - corrplot/cornerplot
     - [andrewsplot](https://en.wikipedia.org/wiki/Andrews_plot)
+    - errorline ([ribbon](https://ggplot2.tidyverse.org/reference/geom_ribbon.html), [stick](https://www.mathworks.com/help/matlab/ref/errorbar.html), [plume](https://www.e-education.psu.edu/files/meteo410/file/Plume.pdf))
     - MDS plot
     - [qq-plot](https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot)
 
@@ -261,6 +262,25 @@ iris = dataset("datasets", "iris")
 ```
 
 <img width="575" alt="iris_andrews_curve" src="https://user-images.githubusercontent.com/1159782/46241166-c392e800-c368-11e8-93de-125c6eb38b52.png">
+
+---
+
+## ErrorLine
+The ErrorLine function shows error distributions for lines plots in a variety of styles.
+
+```julia
+x = 1:10
+y = fill(NaN, 10, 100, 3)
+for i = axes(y,3)
+    y[:,:,i] = collect(1:2:20) .+ rand(10,100).*5 .* collect(1:2:20) .+ rand()*100
+end
+
+errorline(1:10, y[:,:,1], errorstyle=:ribbon, label="Ribbon")
+errorline!(1:10, y[:,:,2], errorstyle=:stick, label="Stick", secondarycolor=:matched)
+errorline!(1:10, y[:,:,3], errorstyle=:spaghetti, label="Spaghetti")
+```
+
+<img width="575" alt="ErrorLine Styles" src="https://user-images.githubusercontent.com/24966610/186655231-2b7b9e37-0beb-4796-ad08-cbb84020ffd8.svg">
 
 ---
 
