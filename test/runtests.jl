@@ -8,6 +8,7 @@ using MultivariateStats
 using DataFrames
 using CategoricalArrays
 using GLM
+using StatsModels: DummyCoding
 
 @testset "Grouped histogram" begin
     rng = StableRNG(1337)
@@ -188,5 +189,21 @@ end
         @test cp7[1][:yaxis][:ticks] == (
                 [10.5, 9.5, 8.5, 8.0, 7.5, 6.5, 6.0, 5.5, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5],
                 ["(Intercept)", "x", "c: 1", "2", "3", "d: 1", "2", "3", "c & d: 1 & 1", "2 & 1", "3 & 1", "1 & 2", "2 & 2", "3 & 2", "1 & 3", "2 & 3", "3 & 3"])
+        m5 = lm(@formula(y ~ x * c + d), data)
+        cp8 = groupedcoefplot(m3, m5; intercept=true, headers=true)
+        @test cp8[1][:yaxis][:ticks] == (
+                [12.5, 11.5, 10.5, 10.0, 9.5, 8.5, 8.0, 7.5, 6.5, 6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["(Intercept)", "x", "c: 1", "2", "3", "d: 1", "2", "3", "c & d: 1 & 1", "2 & 1", "3 & 1", "1 & 2", "2 & 2", "3 & 2", "1 & 3", "2 & 3", "3 & 3", "x & c: x & 1", "x & 2", "x & 3"])
+
+        # Test strict_names_order
+        m6 = lm(@formula(y ~ x * c + d), data, contrasts = Dict(:d => DummyCoding(base=3)))
+        cp9 = groupedcoefplot(m5, m6; intercept=false, headers=true, strict_names_order=false)
+        @test cp9[1][:yaxis][:ticks] == (
+                [6.5, 5.5, 5.0, 4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["x", "c: 1", "2", "3", "d: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"])
+        cp10 = groupedcoefplot(m5, m6; intercept=false, headers=true, strict_names_order=true)
+        @test cp10[1][:yaxis][:ticks] == (
+                [8.5, 7.5, 7.0, 6.5, 5.5, 5.0, 4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["x", "c: 1", "2", "3", "d: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3", "d: 3", "1", "2"])
     end
 end

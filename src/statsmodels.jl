@@ -11,7 +11,6 @@ using StatsModels:
     stderror,
     confint
 
-
 ### Util functions for StatsModels/StatsAPI types
 
 # Type-piracy, call it responsename__ instead of StatsAPI.responsename
@@ -448,6 +447,7 @@ function get_plotting_values(
     term_width::Real = 1.0,
     incategory_width::Real = 0.5,
     offset::Real = term_width / 2,
+    add_category_first::Bool = true,
 )
     title = responsename__(m)
     terms = create_forest_terms(m; intercept, headers, useconfint, level, add_category_first=true)
@@ -933,6 +933,15 @@ recipetype(::Val{:groupedcoefplot}, args...) = GroupedCoefPlot(args)
             group_offset,
             strict_names_order,
         )
+
+    # Process yticks names
+    for t in allgroups
+        if length(t.names) > 1
+            # if category term, add the category name before the first element
+            t.names[1] = "$(t.term): $(t.names[1])"
+        end
+    end
+    allnames = vcat(getproperty.(allgroups, :names)...)
 
     horient = (orientation == :v)
 
