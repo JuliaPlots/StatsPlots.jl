@@ -514,3 +514,23 @@ covellipse([0,2], [2 1; 1 4], n_std=2, aspect_ratio=1, label="cov1")
 covellipse!([1,0], [1 -0.5; -0.5 3], showaxes=true, label="cov2")
 ```
 ![covariance ellipses](https://user-images.githubusercontent.com/4170948/84170978-f0c2f380-aa82-11ea-95de-ce2fe14e16ec.png)
+
+## Coefficient plot
+
+Coefficients of a RegressionModel can be plotted with their standard deviation to easily visualize effect size.
+A collection of models can be plotted together if the response variable is identical.
+
+```julia
+using GLM, RobustModels, RDatasets, StatsPlots
+
+iris = dataset("datasets", "iris")
+m = lm(@formula(PetalLength ~ SepalLength * Species), iris)
+coefplot(m; intercept=true, orientation=:h)
+coefplot(m; headers=true)
+
+m2 = quantreg(@formula(PetalLength ~ SepalLength * Species), iris)
+groupedcoefplot(m, m2; intercept=true, orientation=:h, label=["lm" "qr"])
+groupedcoefplot(m, m2; headers=true, label=["lm" "qr"])
+```
+
+![coef plot]()

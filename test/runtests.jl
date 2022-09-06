@@ -5,6 +5,9 @@ using NaNMath
 using Clustering
 using Distributions
 using MultivariateStats
+using DataFrames
+using CategoricalArrays
+using GLM
 
 @testset "Grouped histogram" begin
     rng = StableRNG(1337)
@@ -141,4 +144,37 @@ end
     @test all(errorline(1:10, y)[1][1][:y] .== mean(y,dims=2))
     @test all(round.(errorline(1:10, y)[1][1][:ribbon], digits = 3) .==
      round.(std(y, dims=2), digits = 3))
+end
+
+@testset "coefplot" begin
+    @testset "GLM" begin
+        N = 20
+        data = DataFrame(x=randn(N), y=randn(N), c=categorical(rand(1:3, N)))
+        m = lm(@formula(y ~ x * c), data)
+
+        @test_throws ArgumentError coefplot(data.x)
+
+        cp1 = coefplot(m; intercept=true)
+        @test cp1[1][:yaxis][:ticks] == (
+                [5.5, 4.5, 3.5, 2.5, 1.5, 0.5],
+                ["(Intercept)", "x", "c: 2", "c: 3", "x & c: 2", "x & c: 3"])
+        cp2 = coefplot(m; headers=true)
+        @test cp2[1][:yaxis][:ticks] == (
+                [4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"])
+        cp3 = coefplot(m; headers=true, term_width=4, incategory_width=1.5, offset=1)
+        @test cp3[1][:yaxis][:ticks] == (
+                [15.0, 11.0, 9.5, 8.0, 4.0, 2.5, 1.0],
+                ["x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"])
+
+        m2 = glm(@formula(y ~ 0 + x & c), data, Normal())
+        cp4 = groupedcoefplot(m, m2; intercept=true, headers=false)
+        @test cp4[1][:yaxis][:ticks] == (
+                [6.5, 5.5, 4.5, 3.5, 2.5, 1.5, 0.5],
+                ["(Intercept)", "x", "c: 2", "c: 3", "x & c: 2", "x & c: 3", "x & c: 1"])
+        cp5 = groupedcoefplot(m, m2; intercept=true, headers=true)
+        @test cp5[1][:yaxis][:ticks] == (
+                [5.5, 4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["(Intercept)", "x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"])
+    end
 end
