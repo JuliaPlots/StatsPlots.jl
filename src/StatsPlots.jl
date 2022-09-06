@@ -20,6 +20,7 @@ import Clustering: Hclust, nnodes
 using Interpolations
 using MultivariateStats: MultivariateStats
 using AbstractFFTs: fft, ifft
+using StatsAPI
 using StatsModels
 using StatsModels: hasintercept, TableRegressionModel, kron_insideout, vectorize
 import KernelDensity

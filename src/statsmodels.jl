@@ -443,11 +443,12 @@ function get_plotting_values(
     intercept::Bool = false,
     headers::Bool = false,
     useconfint::Bool = true,
-    level::Real = 0.95,
+    level::Union{Real, AbstractVector{<:Real}},
     term_width::Real = 1.0,
     incategory_width::Real = 0.5,
     offset::Real = term_width / 2,
-    add_category_first::Bool = true,
+    group_offset::Real = incategory_width / length(ms),
+    strict_names_order::Bool = false,
 )
     title = responsename__(m)
     terms = create_forest_terms(m; intercept, headers, useconfint, level, add_category_first=true)

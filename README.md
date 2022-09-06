@@ -517,7 +517,7 @@ covellipse!([1,0], [1 -0.5; -0.5 3], showaxes=true, label="cov2")
 
 ## Coefficient plot
 
-Coefficients of a RegressionModel can be plotted with their standard deviation to easily visualize effect size.
+Coefficients of a `StatsAPI.RegressionModel` can be plotted with their standard deviation to easily visualize effect size.
 A collection of models can be plotted together if the response variable is identical.
 
 ```julia
