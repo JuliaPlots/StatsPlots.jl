@@ -147,9 +147,6 @@ end
         # Compute center and distribution for each value of x
         y_central, y_error = compute_error(y[:,:,g], centertype, errortype, percentiles)
 
-        # Check secondarycolor validity
-        temp = 0;
-
         if errorstyle == :ribbon
             seriestype := :path
             @series begin
