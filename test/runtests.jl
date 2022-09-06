@@ -149,32 +149,44 @@ end
 @testset "coefplot" begin
     @testset "GLM" begin
         N = 20
-        data = DataFrame(x=randn(N), y=randn(N), c=categorical(rand(1:3, N)))
-        m = lm(@formula(y ~ x * c), data)
+        data = DataFrame(x=randn(N), y=randn(N), c=categorical(rand(1:3, N)), d=categorical(rand(1:3, N)))
+        m1 = lm(@formula(y ~ x * c), data)
 
         @test_throws ArgumentError coefplot(data.x)
 
-        cp1 = coefplot(m; intercept=true)
+        cp1 = coefplot(m1; intercept=true)
         @test cp1[1][:yaxis][:ticks] == (
                 [5.5, 4.5, 3.5, 2.5, 1.5, 0.5],
                 ["(Intercept)", "x", "c: 2", "c: 3", "x & c: 2", "x & c: 3"])
-        cp2 = coefplot(m; headers=true)
+        cp2 = coefplot(m1; headers=true)
         @test cp2[1][:yaxis][:ticks] == (
                 [4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
                 ["x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"])
-        cp3 = coefplot(m; headers=true, term_width=4, incategory_width=1.5, offset=1)
+        cp3 = coefplot(m1; headers=true, term_width=4, incategory_width=1.5, offset=1)
         @test cp3[1][:yaxis][:ticks] == (
                 [15.0, 11.0, 9.5, 8.0, 4.0, 2.5, 1.0],
                 ["x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"])
 
         m2 = glm(@formula(y ~ 0 + x & c), data, Normal())
-        cp4 = groupedcoefplot(m, m2; intercept=true, headers=false)
+        cp4 = groupedcoefplot(m1, m2; intercept=true, headers=false)
         @test cp4[1][:yaxis][:ticks] == (
                 [6.5, 5.5, 4.5, 3.5, 2.5, 1.5, 0.5],
                 ["(Intercept)", "x", "c: 2", "c: 3", "x & c: 2", "x & c: 3", "x & c: 1"])
-        cp5 = groupedcoefplot(m, m2; intercept=true, headers=true)
+        cp5 = groupedcoefplot(m1, m2; intercept=true, headers=true)
         @test cp5[1][:yaxis][:ticks] == (
                 [5.5, 4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
                 ["(Intercept)", "x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"])
+
+        # test same subcategory ("2" and "3" for terms "c" and "d")
+        m3 = lm(@formula(y ~ x + c * d), data)
+        cp6 = coefplot(m3; intercept=true, headers=true)
+        @test cp6[1][:yaxis][:ticks] == (
+                [10.5, 9.5, 8.5, 8.0, 7.5, 6.5, 6.0, 5.5, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5],
+                ["(Intercept)", "x", "c: 1", "2", "3", "d: 1", "2", "3", "c & d: 1 & 1", "2 & 1", "3 & 1", "1 & 2", "2 & 2", "3 & 2", "1 & 3", "2 & 3", "3 & 3"])
+        m4 = lm(@formula(y ~ -1 + c + d), data)
+        cp7 = groupedcoefplot(m3, m4; intercept=true, headers=true)
+        @test cp7[1][:yaxis][:ticks] == (
+                [10.5, 9.5, 8.5, 8.0, 7.5, 6.5, 6.0, 5.5, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5],
+                ["(Intercept)", "x", "c: 1", "2", "3", "d: 1", "2", "3", "c & d: 1 & 1", "2 & 1", "3 & 1", "1 & 2", "2 & 2", "3 & 2", "1 & 3", "2 & 3", "3 & 3"])
     end
 end

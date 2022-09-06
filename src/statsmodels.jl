@@ -49,7 +49,6 @@ check_type(m) =
     (isa(m, StatisticalModel) && all(hasmethod(f, (typeof(m),)) for f in defined_methods))
 check_type_confint(m) = hasmethod(confint, (typeof(m),))
 
-
 ### Util functions for grouping the terms
 
 struct ForestTerm{T<:AbstractFloat}
