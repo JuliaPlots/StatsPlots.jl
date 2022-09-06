@@ -117,21 +117,26 @@ end
         end
     end
 
-    # Parse different color type
-    if groupcolor isa Symbol || groupcolor isa RGB{Float64} || groupcolor isa RGBA{Float64}
-        groupcolor = [groupcolor]
-    end
-    # Check groupcolor format
-    if (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) == 1
-        groupcolor = repeat(groupcolor, size(y,3)) # Use the same color for all groups
-    elseif (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) < size(y,3)
-        error("$(length(groupcolor)) colors given for a matrix with $(size(y,3)) groups")
-    end
     # Determine if a color palette is being used so it can be passed to secondary lines
     if :color_palette ∉ keys(plotattributes)
         color_palette = :default
     else
         color_palette = plotattributes[:color_palette]
+    end
+
+    # Parse different color type
+    if groupcolor isa Symbol || groupcolor isa RGB{Float64} || groupcolor isa RGBA{Float64}
+        groupcolor = [groupcolor]
+    end
+
+    # Check groupcolor format
+    if (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) == 1
+        groupcolor = repeat(groupcolor, size(y,3)) # Use the same color for all groups
+    elseif (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) < size(y,3)
+        error("$(length(groupcolor)) colors given for a matrix with $(size(y,3)) groups")
+    elseif groupcolor === nothing
+        group_series_index = length(plotattributes[:plot_object]) + 1
+        groupcolor = palette(color_palette)[group_series_index:group_series_index+size(y,3)]
     end
 
     if errorstyle == :plume && numsecondarylines > size(y,2) # Override numsecondarylines
@@ -141,6 +146,10 @@ end
     for g = axes(y,3) # Iterate through 3rd dimension
         # Compute center and distribution for each value of x
         y_central, y_error = compute_error(y[:,:,g], centertype, errortype, percentiles)
+
+        # Check secondarycolor validity
+        temp = 0;
+
         if errorstyle == :ribbon
             seriestype := :path
             @series begin
@@ -148,10 +157,8 @@ end
                 y := y_central
                 ribbon := y_error
                 fillalpha --> .1
-                if groupcolor !== nothing
-                    linecolor := groupcolor[g]
-                    fillcolor := groupcolor[g]
-                end
+                linecolor := groupcolor[g]
+                fillcolor := groupcolor[g]
                 () # Supress implicit return
             end
 
@@ -172,11 +179,7 @@ end
                     if secondarycolor === nothing
                         linecolor := :gray60
                     elseif secondarycolor == :matched
-                        if groupcolor !== nothing
-                            linecolor := groupcolor[g]
-                        else
-                            linecolor := palette(color_palette)[plotattributes[:plot_object][1][end][:series_index]+1]
-                        end
+                        linecolor := groupcolor[g]
                     else
                         linecolor := secondarycolor
                     end
@@ -191,9 +194,7 @@ end
                 primary := true
                 x := x
                 y := y_central
-                if groupcolor !== nothing
-                    linecolor := groupcolor[g]
-                end
+                linecolor := groupcolor[g]
                 ()
             end
 
@@ -213,9 +214,7 @@ end
                     x := x
                     y := y_sub_sample[:,i]
                     # Set the stick color
-                    if groupcolor === nothing && (secondarycolor === nothing || secondarycolor == :matched)
-                        linecolor := palette(color_palette)[plotattributes[:plot_object][1][end][:series_index]+1]
-                    elseif groupcolor !== nothing && (secondarycolor == :matched ||  secondarycolor === nothing)
+                    if secondarycolor === nothing || secondarycolor == :matched
                         linecolor := groupcolor[g]
                     else
                         linecolor := secondarycolor
@@ -227,14 +226,12 @@ end
             end
 
             # Base line
-            seriestype := :line
+            seriestype := :path
             @series begin
                 primary := true
                 x := x
                 y := y_central
-                if groupcolor !== nothing
-                    linecolor := groupcolor[g]
-                end
+                linecolor := groupcolor[g]
                 linewidth --> 3 # Make it stand out against the plume better
                 ()
             end
