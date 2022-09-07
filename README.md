@@ -277,7 +277,7 @@ end
 
 errorline(1:10, y[:,:,1], errorstyle=:ribbon, label="Ribbon")
 errorline!(1:10, y[:,:,2], errorstyle=:stick, label="Stick", secondarycolor=:matched)
-errorline!(1:10, y[:,:,3], errorstyle=:spaghetti, label="Spaghetti")
+errorline!(1:10, y[:,:,3], errorstyle=:plume, label="Plume")
 ```
 
 <img width="575" alt="ErrorLine Styles" src="https://user-images.githubusercontent.com/24966610/186655231-2b7b9e37-0beb-4796-ad08-cbb84020ffd8.svg">
