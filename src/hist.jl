@@ -140,11 +140,11 @@ function wand_bins(x, scalest = :minim, gridsize = 401, range_x = extrema(x), tr
     gpoints = range(minx, stop = maxx, length = gridsize)
     gcounts = linbin(x, gpoints, trun = trun)
 
-    scalest = if scalest == :stdev
+    scalest = if scalest === :stdev
         sqrt(var(x))
-    elseif scalest == :iqr
+    elseif scalest === :iqr
         (quantile(x, 3 // 4) - quantile(x, 1 // 4)) / 1.349
-    elseif scalest == :minim
+    elseif scalest === :minim
         min((quantile(x, 3 // 4) - quantile(x, 1 // 4)) / 1.349, sqrt(var(x)))
     else
         error("scalest must be one of :stdev, :iqr or :minim (default)")
