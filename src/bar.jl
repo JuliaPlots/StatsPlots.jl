@@ -5,7 +5,7 @@ recipetype(::Val{:groupedbar}, args...) = GroupedBar(args)
 Plots.group_as_matrix(g::GroupedBar) = true
 
 grouped_xy(x::AbstractVector, y::AbstractArray) = x, y
-grouped_xy(y::AbstractArray) = 1:size(y,1), y
+grouped_xy(y::AbstractArray) = 1:size(y, 1), y
 
 @recipe function f(g::GroupedBar; spacing = 0)
     x, y = grouped_xy(g.args...)
@@ -36,12 +36,12 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
     else
         bws = plotattributes[:bar_width] / nc
         bar_width := bws * clamp(1 - spacing, 0, 1)
-        xmat = zeros(nr,nc)
-        for r=1:nr
+        xmat = zeros(nr, nc)
+        for r = 1:nr
             bw = _cycle(bws, r)
             farleft = xnums[r] - 0.5 * (bw * nc)
-            for c=1:nc
-                xmat[r,c] = farleft + 0.5bw + (c-1)*bw
+            for c = 1:nc
+                xmat[r, c] = farleft + 0.5bw + (c - 1) * bw
             end
         end
         xmat
@@ -57,9 +57,11 @@ grouped_xy(y::AbstractArray) = 1:size(y,1), y
         0
     end
     # compute fillrange
-    y, fr = isstack ? groupedbar_fillrange(y) : (y, get(plotattributes, :fillrange, [fill_bottom]))
+    y, fr =
+        isstack ? groupedbar_fillrange(y) :
+        (y, get(plotattributes, :fillrange, [fill_bottom]))
     if isylog
-        replace!( fr, 0 => fill_bottom )
+        replace!(fr, 0 => fill_bottom)
     end
     fillrange := fr
 

@@ -2,7 +2,7 @@
 # pick a nice default x range given a distribution
 function default_range(dist::Distribution, alpha = 0.0001)
     minval = isfinite(minimum(dist)) ? minimum(dist) : quantile(dist, alpha)
-    maxval = isfinite(maximum(dist)) ? maximum(dist) : quantile(dist, 1-alpha)
+    maxval = isfinite(maximum(dist)) ? maximum(dist) : quantile(dist, 1 - alpha)
     minval, maxval
 end
 
@@ -38,7 +38,7 @@ end
         seriestype --> :sticks
     end
     if components
-        for k in 1:Distributions.ncomponents(m)
+        for k = 1:Distributions.ncomponents(m)
             c = Distributions.component(m, k)
             @series begin
                 (c, yz_args(c)...)
@@ -62,9 +62,7 @@ end
 end
 
 # this "type recipe" replaces any instance of a distribution with a function mapping xi to yi
-@recipe function f(::Type{T}, dist::T; func = pdf) where T<:Distribution
-    xi -> func(dist, xi)
-end
+@recipe f(::Type{T}, dist::T; func = pdf) where {T<:Distribution} = xi -> func(dist, xi)
 
 #-----------------------------------------------------------------------------
 # qqplots
@@ -95,7 +93,7 @@ end
     h.qx, h.qy
 end
 
-loc(D::Type{T}, x) where T<:Distribution = fit(D, x), x
+loc(D::Type{T}, x) where {T<:Distribution} = fit(D, x), x
 loc(D, x) = D, x
 
 @userplot QQPlot

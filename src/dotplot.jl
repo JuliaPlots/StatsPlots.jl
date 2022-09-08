@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 # Dot Plot (strip plot, beeswarm)
 
-@recipe function f(::Type{Val{:dotplot}}, x, y, z; mode = :density, side=:both)
+@recipe function f(::Type{Val{:dotplot}}, x, y, z; mode = :density, side = :both)
     # if only y is provided, then x will be UnitRange 1:size(y, 2)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -17,17 +17,14 @@
     barwidth == nothing && (barwidth = 0.8)
 
     getoffsets(halfwidth, y) =
-        mode == :uniform ?
-            (rand(length(y)) .* 2 .- 1) .* halfwidth :
-        mode == :density ?
-            violinoffsets(halfwidth, y) :
-        zeros(length(y))
+        mode == :uniform ? (rand(length(y)) .* 2 .- 1) .* halfwidth :
+        mode == :density ? violinoffsets(halfwidth, y) : zeros(length(y))
 
     points_x, points_y = zeros(0), zeros(0)
 
-    for (i,grouplabel) in enumerate(grouplabels)
+    for (i, grouplabel) in enumerate(grouplabels)
         # filter y
-        groupy = y[filter(i -> _cycle(x,i) == grouplabel, 1:length(y))]
+        groupy = y[filter(i -> _cycle(x, i) == grouplabel, 1:length(y))]
 
         center = Plots.discrete_value!(plotattributes, :x, grouplabel)[1]
         halfwidth = 0.5_cycle(barwidth, i)
@@ -57,7 +54,8 @@ function violinoffsets(maxwidth, y)
     normalizewidths(maxwidth, widths) = maxwidth * widths / Plots.ignorenan_maximum(widths)
 
     function getlocalwidths(widths, centers, y)
-        upperbounds = [violincenters[violincenters .> yval] for yval ∈ y] .|> findmin .|> first
+        upperbounds =
+            [violincenters[violincenters .> yval] for yval ∈ y] .|> findmin .|> first
         lowercenters = findmax.([violincenters[violincenters .≤ yval] for yval ∈ y])
         lowerbounds, lowerindexes = first.(lowercenters), last.(lowercenters)
         δs = (y .- lowerbounds) ./ (upperbounds .- lowerbounds)
@@ -71,7 +69,6 @@ function violinoffsets(maxwidth, y)
     localwidths = getlocalwidths(violinwidths, violincenters, y)
     offsets = (rand(length(y)) .* 2 .- 1) .* localwidths
 end
-
 
 # ------------------------------------------------------------------------------
 # Grouped dotplot
@@ -104,7 +101,7 @@ recipetype(::Val{:groupeddotplot}, args...) = GroupedDotplot(args)
         n = length(labels)
         bws = plotattributes[:bar_width] / n
         bar_width := bws * clamp(1 - spacing, 0, 1)
-        for i in 1:n
+        for i = 1:n
             groupinds = idxs[i]
             Δx = _cycle(bws, i) * (i - (n + 1) / 2)
             x[groupinds] .+= Δx
