@@ -1,5 +1,5 @@
-@recipe function f(mds::MultivariateStats.MDS{<:Real}; mds_axes=(1,2))
-    length(mds_axes) in [2,3] || throw(ArgumentError("Can only accept 2 or 3 mds axes"))
+@recipe function f(mds::MultivariateStats.MDS{<:Real}; mds_axes = (1, 2))
+    length(mds_axes) in [2, 3] || throw(ArgumentError("Can only accept 2 or 3 mds axes"))
     xax = mds_axes[1]
     yax = mds_axes[2]
     tfm = collect(MultivariateStats.predict(mds)')
@@ -12,9 +12,9 @@
     if length(mds_axes) == 3
         zax = mds_axes[3]
         zlabel --> "MDS$zax"
-        tfm[:,xax], tfm[:,yax], tfm[:,zax]
+        tfm[:, xax], tfm[:, yax], tfm[:, zax]
     else
-        tfm[:,xax], tfm[:,yax]
+        tfm[:, xax], tfm[:, yax]
     end
 end
 
