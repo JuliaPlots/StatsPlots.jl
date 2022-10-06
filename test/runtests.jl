@@ -141,9 +141,10 @@ end
 end
 
 @testset "errorline" begin
+    rng = StableRNG(1337)
     x = 1:10
     # Test for floats
-    y = rand(10, 100) .* collect(1:2:20)
+    y = rand(rng, 10, 100) .* collect(1:2:20)
     @test errorline(1:10, y)[1][1][:x] == x # x-input
     @test all(
         round.(errorline(1:10, y)[1][1][:y], digits = 3) .==
@@ -160,4 +161,16 @@ end
         round.(errorline(1:10, y)[1][1][:ribbon], digits = 3) .==
         round.(std(y, dims = 2), digits = 3),
     )
+end
+
+@testset "marginalhist" begin
+    rng = StableRNG(1337)
+    pl = marginalhist(rand(rng, 100), rand(rng, 100))
+    @test show(devnull, pl) isa Nothing
+end
+
+@testset "marginalscatter" begin
+    rng = StableRNG(1337)
+    pl = marginalscatter(rand(rng, 100), rand(rng, 100))
+    @test show(devnull, pl) isa Nothing
 end
