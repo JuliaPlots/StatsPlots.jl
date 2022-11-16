@@ -6,15 +6,22 @@
     x, y = x[i], y[i]
     bns = get(plotattributes, :bins, :auto)
     scale = get(plotattributes, :scale, :identity)
-    edges1, edges2 = Plots._hist_edges((x,y), bns)
-    xlims, ylims = Plots.widen(Plots.ignorenan_extrema(x)..., scale), Plots.widen(Plots.ignorenan_extrema(y)..., scale)
+    edges1, edges2 = Plots._hist_edges((x, y), bns)
+    xlims, ylims = map(
+        x -> Plots.scale_lims(
+            Plots.ignorenan_extrema(x)...,
+            Plots.default_widen_factor,
+            scale,
+        ),
+        (x, y),
+    )
 
     # set up the subplots
     legend --> false
     link := :both
     grid --> false
     layout --> @layout [
-        tophist           _
+        tophist _
         hist2d{0.9w,0.9h} righthist
     ]
 

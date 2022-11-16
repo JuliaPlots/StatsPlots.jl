@@ -5,14 +5,21 @@
     i = isfinite.(x) .& isfinite.(y)
     x, y = x[i], y[i]
     scale = get(plotattributes, :scale, :identity)
-    xlims, ylims = Plots.widen(Plots.ignorenan_extrema(x)..., scale), Plots.widen(Plots.ignorenan_extrema(y)..., scale)
+    xlims, ylims = map(
+        x -> Plots.scale_lims(
+            Plots.ignorenan_extrema(x)...,
+            Plots.default_widen_factor,
+            scale,
+        ),
+        (x, y),
+    )
 
     # set up the subplots
     legend --> false
     link := :both
     grid --> false
     layout --> @layout [
-        topscatter           _
+        topscatter _
         scatter2d{0.9w,0.9h} rightscatter
     ]
 

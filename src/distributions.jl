@@ -2,7 +2,7 @@
 # pick a nice default x range given a distribution
 function default_range(dist::Distribution, alpha = 0.0001)
     minval = isfinite(minimum(dist)) ? minimum(dist) : quantile(dist, alpha)
-    maxval = isfinite(maximum(dist)) ? maximum(dist) : quantile(dist, 1-alpha)
+    maxval = isfinite(maximum(dist)) ? maximum(dist) : quantile(dist, 1 - alpha)
     minval, maxval
 end
 
@@ -38,7 +38,7 @@ end
         seriestype --> :sticks
     end
     if components
-        for k in 1:Distributions.ncomponents(m)
+        for k = 1:Distributions.ncomponents(m)
             c = Distributions.component(m, k)
             @series begin
                 (c, yz_args(c)...)
@@ -62,9 +62,7 @@ end
 end
 
 # this "type recipe" replaces any instance of a distribution with a function mapping xi to yi
-@recipe function f(::Type{T}, dist::T; func = pdf) where T<:Distribution
-    xi -> func(dist, xi)
-end
+@recipe f(::Type{T}, dist::T; func = pdf) where {T<:Distribution} = xi -> func(dist, xi)
 
 #-----------------------------------------------------------------------------
 # qqplots
@@ -72,12 +70,12 @@ end
 @recipe function f(h::QQPair; qqline = :identity)
     if qqline in (:fit, :quantile, :identity, :R)
         xs = [extrema(h.qx)...]
-        if qqline == :identity
+        if qqline === :identity
             ys = xs
-        elseif qqline == :fit
+        elseif qqline === :fit
             itc, slp = hcat(fill!(similar(h.qx), 1), h.qx) \ h.qy
             ys = slp .* xs .+ itc
-        else # if qqline == :quantile || qqline == :R
+        else # if qqline === :quantile || qqline == :R
             quantx, quanty = quantile(h.qx, [0.25, 0.75]), quantile(h.qy, [0.25, 0.75])
             slp = diff(quanty) ./ diff(quantx)
             ys = quanty .+ slp .* (xs .- quantx)
@@ -95,7 +93,7 @@ end
     h.qx, h.qy
 end
 
-loc(D::Type{T}, x) where T<:Distribution = fit(D, x), x
+loc(D::Type{T}, x) where {T<:Distribution} = fit(D, x), x
 loc(D, x) = D, x
 
 @userplot QQPlot

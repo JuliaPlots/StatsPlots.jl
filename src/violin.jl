@@ -4,14 +4,19 @@
 
 const _violin_warned = [false]
 
-function violin_coords(y; wts = nothing, trim::Bool=false, bandwidth = KernelDensity.default_bandwidth(y))
-    kd = wts === nothing ?
-        KernelDensity.kde(y, npoints = 200, bandwidth = bandwidth) :
+function violin_coords(
+    y;
+    wts = nothing,
+    trim::Bool = false,
+    bandwidth = KernelDensity.default_bandwidth(y),
+)
+    kd =
+        wts === nothing ? KernelDensity.kde(y, npoints = 200, bandwidth = bandwidth) :
         KernelDensity.kde(y, weights = weights(wts), npoints = 200, bandwidth = bandwidth)
     if trim
         xmin, xmax = Plots.ignorenan_extrema(y)
-        inside = Bool[ xmin <= x <= xmax for x in kd.x]
-        return(kd.density[inside], kd.x[inside])
+        inside = Bool[xmin <= x <= xmax for x in kd.x]
+        return (kd.density[inside], kd.x[inside])
     end
     kd.density, kd.x
 end
@@ -19,9 +24,20 @@ end
 get_quantiles(quantiles::AbstractVector) = quantiles
 get_quantiles(x::Real) = [x]
 get_quantiles(b::Bool) = b ? [0.5] : Float64[]
-get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
+get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:(end - 1)]
 
-@recipe function f(::Type{Val{:violin}}, x, y, z; trim=true, side=:both, show_mean = false, show_median = false, quantiles = Float64[], bandwidth = KernelDensity.default_bandwidth(y))
+@recipe function f(
+    ::Type{Val{:violin}},
+    x,
+    y,
+    z;
+    trim = true,
+    side = :both,
+    show_mean = false,
+    show_median = false,
+    quantiles = Float64[],
+    bandwidth = KernelDensity.default_bandwidth(y),
+)
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
         if step(x) == first(x) == 1
@@ -37,9 +53,14 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
     bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
     msc = plotattributes[:markerstrokecolor]
-    for (i,glabel) in enumerate(glabels)
-        fy = y[filter(i -> _cycle(x,i) == glabel, 1:length(y))]
-        widths, centers = violin_coords(fy, trim=trim, wts = plotattributes[:weights], bandwidth = bandwidth)
+    for (i, glabel) in enumerate(glabels)
+        fy = y[filter(i -> _cycle(x, i) == glabel, 1:length(y))]
+        widths, centers = violin_coords(
+            fy,
+            trim = trim,
+            wts = plotattributes[:weights],
+            bandwidth = bandwidth,
+        )
         isempty(widths) && continue
 
         # normalize
@@ -47,10 +68,10 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
         widths = hw * widths / Plots.ignorenan_maximum(widths)
 
         # make the violin
-        xcenter = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
-        xcoords = if (side==:right)
+        xcenter = Plots.discrete_value!(plotattributes, :x, glabel)[1]
+        xcoords = if (side === :right)
             vcat(widths, zeros(length(widths))) .+ xcenter
-        elseif (side==:left)
+        elseif (side === :left)
             vcat(zeros(length(widths)), -reverse(widths)) .+ xcenter
         else
             vcat(widths, -reverse(widths)) .+ xcenter
@@ -65,9 +86,9 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
             mw = maximum(widths)
             mx = xcenter .+ [-mw, mw] * 0.75
             my = [mea, mea]
-            if side == :right
+            if side === :right
                 mx[1] = xcenter
-            elseif side == :left
+            elseif side === :left
                 mx[2] = xcenter
             end
 
@@ -80,9 +101,9 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
             mw = maximum(widths)
             mx = xcenter .+ [-mw, mw] / 2
             my = [med, med]
-            if side == :right
+            if side === :right
                 mx[1] = xcenter
-            elseif side == :left
+            elseif side === :left
                 mx[2] = xcenter
             end
 
@@ -98,9 +119,9 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:end-1]
             for i in eachindex(qy)
                 qxi = xcenter .+ [-maxw, maxw] * (0.5 - abs(0.5 - quantiles[i]))
                 qyi = [qy[i], qy[i]]
-                if side == :right
+                if side === :right
                     qxi[1] = xcenter
-                elseif side == :left
+                elseif side === :left
                     qxi[2] = xcenter
                 end
 
@@ -180,7 +201,7 @@ recipetype(::Val{:groupedviolin}, args...) = GroupedViolin(args)
         n = length(labels)
         bws = plotattributes[:bar_width] / n
         bar_width := bws * clamp(1 - spacing, 0, 1)
-        for i in 1:n
+        for i = 1:n
             groupinds = idxs[i]
             Δx = _cycle(bws, i) * (i - (n + 1) / 2)
             x[groupinds] .+= Δx

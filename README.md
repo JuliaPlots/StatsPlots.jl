@@ -1,6 +1,7 @@
 # StatsPlots
 
 [![Build Status](https://travis-ci.org/JuliaPlots/StatsPlots.jl.svg?branch=master)](https://travis-ci.org/JuliaPlots/StatsPlots.jl)
+[![Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://docs.juliaplots.org/latest/generated/statsplots/)
 [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://julialang.zulipchat.com/#narrow/stream/236493-plots)
 
 
@@ -20,10 +21,11 @@ This package is a drop-in replacement for Plots.jl that contains many statistica
     - marginalhist
     - corrplot/cornerplot
     - [andrewsplot](https://en.wikipedia.org/wiki/Andrews_plot)
+    - errorline ([ribbon](https://ggplot2.tidyverse.org/reference/geom_ribbon.html), [stick](https://www.mathworks.com/help/matlab/ref/errorbar.html), [plume](https://www.e-education.psu.edu/files/meteo410/file/Plume.pdf))
     - MDS plot
     - [qq-plot](https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot)
 
-It is thus slightly less lightweight, but has more functionality. Main documentation is found in the Plots.jl documentation (https://juliaplots.github.io).
+It is thus slightly less lightweight, but has more functionality.
 
 
 Initialize:
@@ -243,8 +245,7 @@ a = [randn(100); randn(100) .+ 3; randn(100) ./ 2 .+ 3]
 ea_histogram(a, bins = :scott, fillalpha = 0.4)
 ```
 
-<img width="487" alt="equal area histogram"
-src ="https://user-images.githubusercontent.com/8429802/29754490-8d1b01f6-8b86-11e7-9f86-e1063a88dfd8.png">
+![equal area histogram](https://user-images.githubusercontent.com/8429802/29754490-8d1b01f6-8b86-11e7-9f86-e1063a88dfd8.png)
 
 ---
 
@@ -260,7 +261,26 @@ iris = dataset("datasets", "iris")
 @df iris andrewsplot(:Species, cols(1:4), legend = :topleft)
 ```
 
-<img width="575" alt="iris_andrews_curve" src="https://user-images.githubusercontent.com/1159782/46241166-c392e800-c368-11e8-93de-125c6eb38b52.png">
+![iris_andrews_curve](https://user-images.githubusercontent.com/1159782/46241166-c392e800-c368-11e8-93de-125c6eb38b52.png)
+
+---
+
+## ErrorLine
+The ErrorLine function shows error distributions for lines plots in a variety of styles.
+
+```julia
+x = 1:10
+y = fill(NaN, 10, 100, 3)
+for i = axes(y,3)
+    y[:,:,i] = collect(1:2:20) .+ rand(10,100).*5 .* collect(1:2:20) .+ rand()*100
+end
+
+errorline(1:10, y[:,:,1], errorstyle=:ribbon, label="Ribbon")
+errorline!(1:10, y[:,:,2], errorstyle=:stick, label="Stick", secondarycolor=:matched)
+errorline!(1:10, y[:,:,3], errorstyle=:plume, label="Plume")
+```
+
+![ErrorLine Styles](https://user-images.githubusercontent.com/24966610/186655231-2b7b9e37-0beb-4796-ad08-cbb84020ffd8.svg)
 
 ---
 
@@ -295,7 +315,7 @@ plot(
  qqnorm(x, qqline = :R)       # the :R default line passes through the 1st and 3rd quartiles of the distribution
 )
 ```
-<img width="1185" alt="skaermbillede 2017-09-28 kl 22 46 28" src="https://user-images.githubusercontent.com/8429802/30989741-0c4f9dac-a49f-11e7-98ff-028192a8d5b1.png">
+![skaermbillede 2017-09-28 kl 22 46 28](https://user-images.githubusercontent.com/8429802/30989741-0c4f9dac-a49f-11e7-98ff-028192a8d5b1.png)
 
 ## Grouped Bar plots
 

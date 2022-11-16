@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 # Box Plot
 
-notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
+notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
 
 @recipe function f(
     ::Type{Val{:boxplot}},
@@ -30,10 +30,8 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     outliers_x, outliers_y = zeros(0), zeros(0)
     bw = plotattributes[:bar_width]
     isnothing(bw) && (bw = 0.8)
-    @assert whisker_width == :match || whisker_width == :half || whisker_width >= 0 "whisker_width must be :match, :half, or a positive number"
-    ww = whisker_width == :match ? bw :
-         whisker_width == :half ? bw / 2 :
-         whisker_width
+    @assert whisker_width === :match || whisker_width == :half || whisker_width >= 0 "whisker_width must be :match, :half, or a positive number"
+    ww = whisker_width === :match ? bw : whisker_width == :half ? bw / 2 : whisker_width
     for (i, glabel) in enumerate(sort(glabels, by=sort_labels_by))
         # filter y
         values = y[filter(i -> _cycle(x, i) == glabel, 1:length(y))]
@@ -51,7 +49,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         end
 
         # make the shape
-        center = Plots.discrete_value!(plotattributes[:subplot][:xaxis], glabel)[1]
+        center = Plots.discrete_value!(plotattributes, :x, glabel)[1]
         hw = 0.5_cycle(bw, i) # Box width
         HW = 0.5_cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
@@ -138,7 +136,16 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
                 "",
             )
             push!(ysegs, q4, q4, q3, q3, q4, q4)   # upper box
-            push!(texts, "Q3: $q4", "Q3: $q4", "Median: $q3", "Median: $q3", "Q3: $q4", "Q3: $q4", "")
+            push!(
+                texts,
+                "Q3: $q4",
+                "Q3: $q4",
+                "Median: $q3",
+                "Median: $q3",
+                "Q3: $q4",
+                "Q3: $q4",
+                "",
+            )
         end
 
         push!(xsegs, m, lw, rw, m, m)             # upper T
@@ -152,7 +159,6 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
             "Q3: $q4",
             "",
         )
-
     end
 
     if !Plots.isvertical(plotattributes)
@@ -181,7 +187,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
         @series begin
             primary := false
             seriestype := :scatter
-            if get!(plotattributes, :markershape, :circle) == :none
+            if get!(plotattributes, :markershape, :circle) === :none
                 plotattributes[:markershape] = :circle
             end
 
@@ -196,7 +202,9 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     primary := false
     seriestype := :path
     marker := false
-    hover := texts
+    if Plots.is_attr_supported(Plots.backend(), :hover)
+        hover := texts
+    end
     linewidth := 0
     x := xsegs.pts
     y := ysegs.pts
@@ -204,7 +212,6 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
 end
 
 Plots.@deps boxplot shape scatter
-
 
 # ------------------------------------------------------------------------------
 # Grouped Boxplot
@@ -237,7 +244,7 @@ recipetype(::Val{:groupedboxplot}, args...) = GroupedBoxplot(args)
         n = length(labels)
         bws = plotattributes[:bar_width] / n
         bar_width := bws * clamp(1 - spacing, 0, 1)
-        for i in 1:n
+        for i = 1:n
             groupinds = idxs[i]
             Δx = _cycle(bws, i) * (i - (n + 1) / 2)
             x[groupinds] .+= Δx

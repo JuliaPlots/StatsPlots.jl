@@ -18,10 +18,10 @@ import Widgets: @nodeps
 import DataStructures: OrderedDict
 import Clustering: Hclust, nnodes
 using Interpolations
-import MultivariateStats: MDS, eigvals, projection, principalvars,
-                            principalratio, transform
+using MultivariateStats: MultivariateStats
 using AbstractFFTs: fft, ifft
 import KernelDensity
+using NaNMath
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
 @recipe f(k::KernelDensity.BivariateKDE) = k.x, k.y, permutedims(k.density)
 
@@ -47,5 +47,6 @@ include("dendrogram.jl")
 include("andrews.jl")
 include("ordinations.jl")
 include("covellipse.jl")
+include("errorline.jl")
 
 end # module
