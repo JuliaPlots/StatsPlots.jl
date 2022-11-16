@@ -13,7 +13,7 @@ notch_width(q2, q4, N) = 1.58 * (q4-q2)/sqrt(N)
     whisker_range = 1.5,
     outliers = true,
     whisker_width = :half,
-    order_labels_by = identity
+    sort_labels_by = identity
 )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
