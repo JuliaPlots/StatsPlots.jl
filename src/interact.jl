@@ -8,11 +8,11 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
 
     coltable = map(Tables.columntable, t)
 
-    @show names = map(collect∘keys, coltable)
+    @show names = map(collect ∘ keys, coltable)
 
-    dict = @map Dict((key, val) for (key, val)  in pairs(&coltable))
-    x =  Widgets.dropdown(names, placeholder = "First axis", multiple = true)
-    y =  Widgets.dropdown(names, placeholder = "Second axis", multiple = true)
+    dict = @map Dict((key, val) for (key, val) in pairs(&coltable))
+    x = Widgets.dropdown(names, placeholder = "First axis", multiple = true)
+    y = Widgets.dropdown(names, placeholder = "Second axis", multiple = true)
     y_toggle = Widgets.togglecontent(y, value = false, label = "Second axis")
     plot_type = Widgets.dropdown(
         OrderedDict(
@@ -28,15 +28,26 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
             "marginalhist" => StatsPlots.marginalhist,
             "violin"       => (StatsPlots.violin, StatsPlots.groupedviolin),
         ),
-        placeholder = "Plot type")
+        placeholder = "Plot type",
+    )
 
     # Add bins if the plot allows it
-    display_nbins = @map (&plot_type) in [corrplot, cornerplot, histogram, marginalhist] ? "block" : "none"
-    nbins =  (Widgets.slider(nbins_range, extra_obs = ["display" => display_nbins], value = nbins, label = "number of bins"))
-    nbins.scope.dom = Widgets.div(nbins.scope.dom, attributes = Dict("data-bind" => "style: {display: display}"))
+    display_nbins =
+        @map (&plot_type) in [corrplot, cornerplot, histogram, marginalhist] ? "block" :
+             "none"
+    nbins = (Widgets.slider(
+        nbins_range,
+        extra_obs = ["display" => display_nbins],
+        value = nbins,
+        label = "number of bins",
+    ))
+    nbins.scope.dom = Widgets.div(
+        nbins.scope.dom,
+        attributes = Dict("data-bind" => "style: {display: display}"),
+    )
     nbins_throttle = Observables.throttle(throttle, nbins)
 
-    by = Widgets.dropdown(names, multiple = true, placeholder="Group by")
+    by = Widgets.dropdown(names, multiple = true, placeholder = "Group by")
     by_toggle = Widgets.togglecontent(by, value = false, label = "Split data")
     plt = Widgets.button("plot")
     output = @map begin
@@ -77,21 +88,23 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
             plot_func(args...; nbins = &nbins_throttle, kwargs...)
         end
     end
-    wdg = Widget{:dataviewer}(["x" => x, "y" => y, "y_toggle" => y_toggle, "by" => by, "by_toggle" => by_toggle,
-        "plot_type" => plot_type, "plot_button" => plt, "nbins" => nbins], output = output)
+    wdg = Widget{:dataviewer}(
+        [
+            "x" => x,
+            "y" => y,
+            "y_toggle" => y_toggle,
+            "by" => by,
+            "by_toggle" => by_toggle,
+            "plot_type" => plot_type,
+            "plot_button" => plt,
+            "nbins" => nbins,
+        ],
+        output = output,
+    )
     @layout! wdg Widgets.div(
-        Widgets.div(
-            :x,
-            :y_toggle,
-            :plot_type,
-            :by_toggle,
-            :plot_button
-        ),
+        Widgets.div(:x, :y_toggle, :plot_type, :by_toggle, :plot_button),
         Widgets.div(style = Dict("width" => "3em")),
-        Widgets.div(
-            Widgets.observe(_),
-            :nbins
-        ),
-        style = Dict("display" => "flex", "direction" => "row")
+        Widgets.div(Widgets.observe(_), :nbins),
+        style = Dict("display" => "flex", "direction" => "row"),
     )
 end

@@ -19,7 +19,7 @@ andrewsplot
         x, y = h.args
     else
         y = h.args[1]
-        x = ones(size(y,1))
+        x = ones(size(y, 1))
     end
 
     seriestype := :andrews
@@ -28,7 +28,7 @@ andrewsplot
     for g in unique(x)
         @series begin
             label := "$g"
-            range(-π, stop = π, length = 200), Surface(y[g .== x,:]) #surface needed, or the array will be split into columns
+            range(-π, stop = π, length = 200), Surface(y[g .== x, :]) #surface needed, or the array will be split into columns
         end
     end
     nothing
@@ -37,17 +37,18 @@ end
 # the series recipe
 @recipe function f(::Type{Val{:andrews}}, x, y, z)
     y = y.surf
-    rows,cols = size(y)
+    rows, cols = size(y)
     seriestype := :path
 
     # these series are the lines, will keep the same colors
-    for j in 1:rows
+    for j = 1:rows
         @series begin
             primary := false
-            ys     = zeros(length(x))
-            terms = [isodd(i) ? cos((i÷2).*ti) : sin((i÷2).*ti) for i = 2:cols, ti=x]
-            for ti = eachindex(x)
-                ys[ti] = y[j,1]/sqrt(2) + sum(y[j,i].*terms[i-1,ti] for i = 2:cols)
+            ys = zeros(length(x))
+            terms =
+                [isodd(i) ? cos((i ÷ 2) .* ti) : sin((i ÷ 2) .* ti) for i = 2:cols, ti in x]
+            for ti in eachindex(x)
+                ys[ti] = y[j, 1] / sqrt(2) + sum(y[j, i] .* terms[i - 1, ti] for i = 2:cols)
             end
 
             x := x

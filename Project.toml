@@ -1,6 +1,6 @@
 name = "StatsPlots"
 uuid = "f3b207a7-027a-5e70-b257-86293d7955fd"
-version = "0.15.2"
+version = "0.15.4"
 
 [deps]
 AbstractFFTs = "621f4979-c628-5d54-868e-fcf4e3e8185c"
