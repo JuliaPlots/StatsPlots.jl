@@ -21,7 +21,7 @@
 
     errortype (symbol - *:std*, :sem, :percentile) - which error metric to use to show the distribution of y at each x-value.
 
-    percentiles (Vector{Int64} *[25, 75]*) - if using errortype === :percentile then which percentiles to use as bounds.
+    percentiles (Vector{Int64} *[25, 75]*) - if using errortype == :percentile then which percentiles to use as bounds.
 
     groupcolor (Symbol, RGB, Vector of Symbol or RGB) - Declares the color for each group. If no value is passed then will use
         the default colorscheme. If one value is given then it will use that color for all groups. If multiple colors are
@@ -50,45 +50,41 @@ errorline(1:10, y)
 """
 errorline
 
-function compute_error(
-    y::AbstractMatrix,
-    centertype::Symbol,
-    errortype::Symbol,
-    percentiles::AbstractVector,
-)
-    y_central = fill(NaN, size(y, 1))
+function compute_error(y::AbstractMatrix, centertype::Symbol, errortype::Symbol, percentiles::AbstractVector)
+    y_central = fill(NaN, size(y,1))
     # NaNMath doesn't accept Ints so convert to AbstractFloat if necessary
     if eltype(y) <: Integer
         y = float(y)
     end
     # First compute the center
-    y_central = if centertype === :mean
-        mapslices(NaNMath.mean, y, dims = 2)
-    elseif centertype === :median
-        mapslices(NaNMath.median, y, dims = 2)
+    y_central =
+    if centertype == :mean
+        mapslices(NaNMath.mean, y, dims=2)
+    elseif centertype == :median
+        mapslices(NaNMath.median, y, dims=2)
     else
         error("Invalid center type. Valid symbols include :mean or :median")
     end
 
     # Takes 2d matrix [x,y] and computes the desired error type for each row (value of x)
-    if errortype === :std || errortype == :sem
-        y_error = mapslices(NaNMath.std, y, dims = 2)
-        if errortype === :sem
-            y_error = y_error ./ sqrt(size(y, 2))
+    if errortype === :std || errortype === :sem
+        y_error = mapslices(NaNMath.std, y, dims=2)
+        if errortype == :sem
+            y_error = y_error ./ sqrt(size(y,2))
         end
 
-    elseif errortype === :percentile
-        y_lower = fill(NaN, size(y, 1))
-        y_upper = fill(NaN, size(y, 1))
+    elseif errortype == :percentile
+        y_lower = fill(NaN, size(y,1))
+        y_upper = fill(NaN, size(y,1))
         if any(isnan.(y)) # NaNMath does not have a percentile function so have to go via StatsBase
-            for i in axes(y, 1)
-                yi = y[i, .!isnan.(y[i, :])]
+            for i = axes(y,1)
+                yi = y[i, .!isnan.(y[i,:])]
                 y_lower[i] = percentile(yi, percentiles[1])
                 y_upper[i] = percentile(yi, percentiles[2])
             end
         else
-            y_lower = mapslices(Y -> percentile(Y, percentiles[1]), y, dims = 2)
-            y_upper = mapslices(Y -> percentile(Y, percentiles[2]), y, dims = 2)
+            y_lower = mapslices(Y -> percentile(Y, percentiles[1]), y, dims=2)
+            y_upper = mapslices(Y -> percentile(Y, percentiles[2]), y, dims=2)
         end
 
         y_error = (y_central .- y_lower, y_upper .- y_central) # Difference from center value
@@ -99,22 +95,12 @@ function compute_error(
     return y_central, y_error
 end
 
-@recipe function f(
-    e::ErrorLine;
-    errorstyle = :ribbon,
-    centertype = :mean,
-    errortype = :std,
-    percentiles = [25, 75],
-    groupcolor = nothing,
-    secondarycolor = nothing,
-    stickwidth = 0.01,
-    secondarylinealpha = 0.1,
-    numsecondarylines = 100,
-    secondarylinewidth = 1,
-)
+@recipe function f(e::ErrorLine; errorstyle = :ribbon, centertype = :mean, errortype = :std,
+     percentiles = [25, 75], groupcolor = nothing, secondarycolor = nothing, stickwidth = .01,
+     secondarylinealpha = .1, numsecondarylines = 100, secondarylinewidth = 1)
     if length(e.args) == 1  # If only one input is given assume it is y-values in the form [x,obs]
         y = e.args[1]
-        x = 1:size(y, 1)
+        x = 1:size(y,1)
     else # Otherwise assume that the first two inputs are x and y
         x = e.args[1]
         y = e.args[2]
@@ -124,12 +110,10 @@ end
 
         if !any(size(y) .== length(x))
             error("Size of x and y do not match")
-        elseif ndims(y) == 2 && size(y, 1) != length(x) && size(y, 2) == length(x) # Check if y needs to be transposed or transmuted
+        elseif ndims(y) == 2 && size(y,1) != length(x) && size(y,2) == length(x) # Check if y needs to be transposed or transmuted
             y = transpose(y)
-        elseif ndims(y) == 3 && size(y, 1) != length(x)
-            error(
-                "When passing a 3 dimensional matrix as y, the axes must be [x, repeat, group]",
-            )
+        elseif ndims(y) == 3 && size(y,1) != length(x)
+            error("When passing a 3 dimensional matrix as y, the axes must be [x, repeat, group]")
         end
     end
 
@@ -147,59 +131,60 @@ end
 
     # Check groupcolor format
     if (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) == 1
-        groupcolor = repeat(groupcolor, size(y, 3)) # Use the same color for all groups
-    elseif (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) < size(y, 3)
+        groupcolor = repeat(groupcolor, size(y,3)) # Use the same color for all groups
+    elseif (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) < size(y,3)
         error("$(length(groupcolor)) colors given for a matrix with $(size(y,3)) groups")
     elseif groupcolor === nothing
-        group_series_index = length(plotattributes[:plot_object]) + 1
-        groupcolor =
-            palette(color_palette)[group_series_index:(group_series_index + size(y, 3))]
+        gsi_counter = 0
+        for i = 1:length(plotattributes[:plot_object].series_list)
+            if plotattributes[:plot_object].series_list[i].plotattributes[:primary]
+                gsi_counter += 1
+            end
+        end
+        # Allow wrapping of indices
+        group_series_index = gsi_counter + 1
+        idx = (group_series_index:group_series_index+size(y,3)) .% length(palette(color_palette))
+        idx[findall(x->x == 0, idx)] .= length(palette(color_palette))
+        groupcolor = palette(color_palette)[idx]
     end
 
-    if errorstyle === :plume && numsecondarylines > size(y, 2) # Override numsecondarylines
-        numsecondarylines = size(y, 2)
+    if errorstyle == :plume && numsecondarylines > size(y,2) # Override numsecondarylines
+        numsecondarylines = size(y,2)
     end
 
-    for g in axes(y, 3) # Iterate through 3rd dimension
+    for g = axes(y,3) # Iterate through 3rd dimension
         # Compute center and distribution for each value of x
-        y_central, y_error = compute_error(y[:, :, g], centertype, errortype, percentiles)
+        y_central, y_error = compute_error(y[:,:,g], centertype, errortype, percentiles)
 
-        if errorstyle === :ribbon
+        if errorstyle == :ribbon
             seriestype := :path
             @series begin
                 x := x
                 y := y_central
                 ribbon := y_error
-                fillalpha --> 0.1
+                fillalpha --> .1
                 linecolor := groupcolor[g]
                 fillcolor := groupcolor[g]
                 () # Supress implicit return
             end
 
-        elseif errorstyle === :stick
+        elseif errorstyle == :stick
             x_offset = diff(extrema(x) |> collect)[1] * stickwidth
             seriestype := :path
             for (i, xi) in enumerate(x)
                 # Error sticks
                 @series begin
                     primary := false
-                    x :=
-                        [xi - x_offset, xi + x_offset, xi, xi, xi + x_offset, xi - x_offset]
-                    if errortype === :percentile
-                        y := [
-                            repeat([y_central[i] - y_error[1][i]], 3)
-                            repeat([y_central[i] + y_error[2][i]], 3)
-                        ]
+                    x := [xi-x_offset, xi+x_offset, xi, xi, xi+x_offset, xi-x_offset]
+                    if errortype == :percentile
+                        y := [repeat([y_central[i] - y_error[1][i]],3); repeat([y_central[i] + y_error[2][i]],3)]
                     else
-                        y := [
-                            repeat([y_central[i] - y_error[i]], 3)
-                            repeat([y_central[i] + y_error[i]], 3)
-                        ]
+                        y := [repeat([y_central[i] - y_error[i]],3); repeat([y_central[i] + y_error[i]],3)]
                     end
                     # Set the stick color
                     if secondarycolor === nothing
                         linecolor := :gray60
-                    elseif secondarycolor === :matched
+                    elseif secondarycolor == :matched
                         linecolor := groupcolor[g]
                     else
                         linecolor := secondarycolor
@@ -219,13 +204,13 @@ end
                 ()
             end
 
-        elseif errorstyle === :plume
-            num_obs = size(y, 2)
+        elseif errorstyle == :plume
+            num_obs = size(y,2)
             if num_obs > numsecondarylines
-                sub_sample_idx = sample(1:num_obs, numsecondarylines, replace = false)
-                y_sub_sample = y[:, sub_sample_idx, g]
+                sub_sample_idx = sample(1:num_obs, numsecondarylines, replace=false)
+                y_sub_sample = y[:,sub_sample_idx,g]
             else
-                y_sub_sample = y[:, :, g]
+                y_sub_sample = y[:,:,g]
             end
             seriestype := :path
             for i = 1:numsecondarylines
@@ -233,9 +218,9 @@ end
                 @series begin
                     primary := false
                     x := x
-                    y := y_sub_sample[:, i]
+                    y := y_sub_sample[:,i]
                     # Set the stick color
-                    if secondarycolor === nothing || secondarycolor === :matched
+                    if secondarycolor === nothing || secondarycolor == :matched
                         linecolor := groupcolor[g]
                     else
                         linecolor := secondarycolor
@@ -247,7 +232,7 @@ end
             end
 
             # Base line
-            seriestype := :path
+            seriestype := :line
             @series begin
                 primary := true
                 x := x
