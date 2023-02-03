@@ -50,8 +50,12 @@ errorline(1:10, y)
 """
 errorline
 
-function compute_error(y::AbstractMatrix, centertype::Symbol, errortype::Symbol, percentiles::AbstractVector)
+function compute_error(y::AbstractMatrix,
+    centertype::Symbol,
+    errortype::Symbol,
+    percentiles::AbstractVector)
     y_central = fill(NaN, size(y,1))
+
     # NaNMath doesn't accept Ints so convert to AbstractFloat if necessary
     if eltype(y) <: Integer
         y = float(y)
@@ -95,9 +99,16 @@ function compute_error(y::AbstractMatrix, centertype::Symbol, errortype::Symbol,
     return y_central, y_error
 end
 
-@recipe function f(e::ErrorLine; errorstyle = :ribbon, centertype = :mean, errortype = :std,
-     percentiles = [25, 75], groupcolor = nothing, secondarycolor = nothing, stickwidth = .01,
-     secondarylinealpha = .1, numsecondarylines = 100, secondarylinewidth = 1)
+@recipe function f(e::ErrorLine; errorstyle = :ribbon, centertype = :mean,
+    errortype = :std,
+    percentiles = [25, 75],
+    groupcolor = nothing,
+    secondarycolor = nothing,
+    stickwidth = .01,
+    secondarylinealpha = .1,
+    numsecondarylines = 100,
+    secondarylinewidth = 1)
+    
     if length(e.args) == 1  # If only one input is given assume it is y-values in the form [x,obs]
         y = e.args[1]
         x = 1:size(y,1)
