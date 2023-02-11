@@ -173,7 +173,7 @@ end
                 fillalpha --> 0.1
                 linecolor := groupcolor[g]
                 fillcolor := groupcolor[g]
-                () # Supress implicit return
+                () # Suppress implicit return
             end
 
         elseif errorstyle === :stick
@@ -205,7 +205,7 @@ end
                         linecolor := secondarycolor
                     end
                     linewidth := secondarylinewidth
-                    () # Supress implicit return
+                    () # Suppress implicit return
                 end
             end
 
@@ -242,7 +242,7 @@ end
                     end
                     linealpha := secondarylinealpha
                     linewidth := secondarylinewidth
-                    () # Supress implicit return
+                    () # Suppress implicit return
                 end
             end
 
