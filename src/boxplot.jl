@@ -13,6 +13,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
     whisker_range = 1.5,
     outliers = true,
     whisker_width = :half,
+    xshift = 0.0,
 )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
@@ -48,7 +49,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
         end
 
         # make the shape
-        center = Plots.discrete_value!(plotattributes, :x, glabel)[1]
+        center = Plots.discrete_value!(plotattributes, :x, glabel)[1] + xshift
         hw = 0.5_cycle(bw, i) # Box width
         HW = 0.5_cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
