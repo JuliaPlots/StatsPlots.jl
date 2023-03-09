@@ -458,12 +458,12 @@ plot(
 		xrotation=90,
 		colorbar=false
 	),
-	plot(hc_row,yticks=false,xrotation=90,orientation=:horizontal)
+	plot(hc_row,yticks=false,xrotation=90,orientation=:horizontal,xlim=(0,1))
 )
 
 ```
 
-![heatmap with dendrograms on top and on the right](https://raw.githubusercontent.com/oheil/StatsPlots.jl/oh/screenshots/heatmapWithDendroOnRight.jpg)
+![heatmap with dendrograms on top and on the right](https://user-images.githubusercontent.com/13688320/224165246-bb3aba7d-5df2-47b5-9678-3384d13610fd.png)
 
 
 ## GroupedErrors.jl for population analysis
