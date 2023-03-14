@@ -152,9 +152,9 @@ end
                 gsi_counter += 1
             end
         end
-        # Allow wrapping of indices
-        group_series_index = gsi_counter + 1
-        idx = (group_series_index:group_series_index+size(y,3)) .% length(palette(color_palette))
+        # Start at next index and allow wrapping of indices
+        gsi_counter += 1
+        idx = (gsi_counter:gsi_counter+size(y,3)) .% length(palette(color_palette))
         idx[findall(x->x == 0, idx)] .= length(palette(color_palette))
         groupcolor = palette(color_palette)[idx]
     end

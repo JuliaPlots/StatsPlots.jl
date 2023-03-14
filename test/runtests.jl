@@ -161,6 +161,15 @@ end
         round.(errorline(1:10, y)[1][1][:ribbon], digits = 3) .==
         round.(std(y, dims = 2), digits = 3),
     )
+    # Test colors
+    y = rand(rng,10,100,3) .* collect(1:2:20)
+    c = palette(:tab10)
+    e = errorline(1:10,y)
+    @test all(
+        colordiff(c[1], e[1][1][:linecolor]) == 0.0
+        colordiff(c[2], e[1][2][:linecolor]) == 0.0
+        colordiff(c[3], e[1][3][:linecolor]) == 0.0
+    )
 end
 
 @testset "marginalhist" begin
