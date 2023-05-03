@@ -24,7 +24,7 @@ Widgets = "cc8bc4a8-27d6-5769-a93b-9d913e69aa62"
 
 [compat]
 AbstractFFTs = "1.1"
-Clustering = "0.13 - 0.14"
+Clustering = "0.13 - 0.14, 0.15"
 DataStructures = "0.17 - 0.18"
 Distributions = "0.21 - 0.25"
 Interpolations = "0.12 - 0.14"
