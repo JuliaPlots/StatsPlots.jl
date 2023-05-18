@@ -11,7 +11,6 @@ using Plots.PlotMeasures
 using StatsBase
 using Distributions
 using LinearAlgebra: eigen, diagm
-import DataValues: DataValue
 using Widgets, Observables
 import Observables: AbstractObservable, @map, observe
 import Widgets: @nodeps

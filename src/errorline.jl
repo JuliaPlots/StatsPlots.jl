@@ -57,6 +57,7 @@ function compute_error(
     percentiles::AbstractVector,
 )
     y_central = fill(NaN, size(y, 1))
+
     # NaNMath doesn't accept Ints so convert to AbstractFloat if necessary
     if eltype(y) <: Integer
         y = float(y)
@@ -71,9 +72,9 @@ function compute_error(
     end
 
     # Takes 2d matrix [x,y] and computes the desired error type for each row (value of x)
-    if errortype === :std || errortype == :sem
+    if errortype === :std || errortype === :sem
         y_error = mapslices(NaNMath.std, y, dims = 2)
-        if errortype === :sem
+        if errortype == :sem
             y_error = y_error ./ sqrt(size(y, 2))
         end
 
@@ -151,9 +152,17 @@ end
     elseif (groupcolor !== nothing && ndims(y) > 2) && length(groupcolor) < size(y, 3)
         error("$(length(groupcolor)) colors given for a matrix with $(size(y,3)) groups")
     elseif groupcolor === nothing
-        group_series_index = length(plotattributes[:plot_object]) + 1
-        groupcolor =
-            palette(color_palette)[group_series_index:(group_series_index + size(y, 3))]
+        gsi_counter = 0
+        for i = 1:length(plotattributes[:plot_object].series_list)
+            if plotattributes[:plot_object].series_list[i].plotattributes[:primary]
+                gsi_counter += 1
+            end
+        end
+        # Start at next index and allow wrapping of indices
+        gsi_counter += 1
+        idx = (gsi_counter:(gsi_counter + size(y, 3))) .% length(palette(color_palette))
+        idx[findall(x -> x == 0, idx)] .= length(palette(color_palette))
+        groupcolor = palette(color_palette)[idx]
     end
 
     if errorstyle === :plume && numsecondarylines > size(y, 2) # Override numsecondarylines
@@ -173,7 +182,7 @@ end
                 fillalpha --> 0.1
                 linecolor := groupcolor[g]
                 fillcolor := groupcolor[g]
-                () # Supress implicit return
+                () # Suppress implicit return
             end
 
         elseif errorstyle === :stick
@@ -205,7 +214,7 @@ end
                         linecolor := secondarycolor
                     end
                     linewidth := secondarylinewidth
-                    () # Supress implicit return
+                    () # Suppress implicit return
                 end
             end
 
@@ -242,12 +251,12 @@ end
                     end
                     linealpha := secondarylinealpha
                     linewidth := secondarylinewidth
-                    () # Supress implicit return
+                    () # Suppress implicit return
                 end
             end
 
             # Base line
-            seriestype := :path
+            seriestype := :line
             @series begin
                 primary := true
                 x := x
