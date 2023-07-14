@@ -32,7 +32,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
     isnothing(bw) && (bw = 0.8)
     @assert whisker_width === :match || whisker_width == :half || whisker_width >= 0 "whisker_width must be :match, :half, or a positive number"
     ww = whisker_width === :match ? bw : whisker_width == :half ? bw / 2 : whisker_width
-    for (i, glabel) in enumerate(sort(glabels, by = sort_labels_by))
+    for (i, glabel) in enumerate(sort(glabels; by = sort_labels_by))
         # filter y
         values = y[filter(i -> _cycle(x, i) == glabel, 1:length(y))]
 
