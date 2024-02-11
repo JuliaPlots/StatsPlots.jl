@@ -5,6 +5,10 @@ using NaNMath
 using Clustering
 using Distributions
 using MultivariateStats
+using DataFrames
+using CategoricalArrays
+using GLM
+using StatsModels: DummyCoding
 
 @testset "Grouped histogram" begin
     rng = StableRNG(1337)
@@ -180,4 +184,92 @@ end
     rng = StableRNG(1337)
     pl = marginalscatter(rand(rng, 100), rand(rng, 100))
     @test show(devnull, pl) isa Nothing
+end
+
+@testset "coefplot" begin
+    @testset "GLM" begin
+        N = 20
+        data = DataFrame(x=randn(N), y=randn(N), c=categorical(rand(1:3, N)), d=categorical(rand(1:3, N)))
+        m1 = lm(@formula(y ~ x * c), data)
+
+        @test_throws ArgumentError coefplot(data.x)
+
+        cp1 = coefplot(m1; intercept=true)
+        @test cp1[1][:yaxis][:ticks] == (
+                [5.5, 4.5, 3.5, 2.5, 1.5, 0.5],
+                ["(Intercept)", "x", "c: 2", "c: 3", "x & c: 2", "x & c: 3"],
+        )
+        cp2 = coefplot(m1; headers=true)
+        @test cp2[1][:yaxis][:ticks] == (
+                [4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"],
+        )
+        cp3 = coefplot(m1; headers=true, term_width=4, incategory_width=1.5, offset=1)
+        @test cp3[1][:yaxis][:ticks] == (
+                [15.0, 11.0, 9.5, 8.0, 4.0, 2.5, 1.0],
+                ["x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"],
+        )
+
+        # test headers
+        m2 = glm(@formula(y ~ 0 + x & c), data, Normal())
+        cp4 = groupedcoefplot(m1, m2; intercept=true, headers=false)
+        @test cp4[1][:yaxis][:ticks] == (
+                [6.5, 5.5, 4.5, 3.5, 2.5, 1.5, 0.5],
+                ["(Intercept)", "x", "c: 2", "c: 3", "x & c: 2", "x & c: 3", "x & c: 1"],
+        )
+        cp5 = groupedcoefplot(m1, m2; intercept=true, headers=true)
+        @test cp5[1][:yaxis][:ticks] == (
+                [5.5, 4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["(Intercept)", "x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"],
+        )
+
+        # test same subcategory ("2" and "3" for terms "c" and "d")
+        m3 = lm(@formula(y ~ x + c * d), data)
+        cp6 = coefplot(m3; intercept=true, headers=true)
+        @test cp6[1][:yaxis][:ticks] == (
+                [10.5, 9.5, 8.5, 8.0, 7.5, 6.5, 6.0, 5.5, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5],
+                ["(Intercept)", "x", "c: 1", "2", "3", "d: 1", "2", "3", "c & d: 1 & 1", "2 & 1", "3 & 1", "1 & 2", "2 & 2", "3 & 2", "1 & 3", "2 & 3", "3 & 3"],
+        )
+        m4 = lm(@formula(y ~ -1 + c + d), data)
+        cp7 = groupedcoefplot(m3, m4; intercept=true, headers=true)
+        @test cp7[1][:yaxis][:ticks] == (
+                [10.5, 9.5, 8.5, 8.0, 7.5, 6.5, 6.0, 5.5, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5],
+                ["(Intercept)", "x", "c: 1", "2", "3", "d: 1", "2", "3", "c & d: 1 & 1", "2 & 1", "3 & 1", "1 & 2", "2 & 2", "3 & 2", "1 & 3", "2 & 3", "3 & 3"],
+        )
+        m5 = lm(@formula(y ~ x * c + d), data)
+        cp8 = groupedcoefplot(m3, m5; intercept=true, headers=true)
+        @test cp8[1][:yaxis][:ticks] == (
+                [12.5, 11.5, 10.5, 10.0, 9.5, 8.5, 8.0, 7.5, 6.5, 6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["(Intercept)", "x", "c: 1", "2", "3", "d: 1", "2", "3", "c & d: 1 & 1", "2 & 1", "3 & 1", "1 & 2", "2 & 2", "3 & 2", "1 & 3", "2 & 3", "3 & 3", "x & c: x & 1", "x & 2", "x & 3"],
+        )
+
+        # Test strict_names_order
+        m6 = lm(@formula(y ~ x * c + d), data, contrasts = Dict(:d => DummyCoding(base=3)))
+        cp9 = groupedcoefplot(m5, m6; intercept=false, headers=true, strict_names_order=false)
+        @test cp9[1][:yaxis][:ticks] == (
+                [6.5, 5.5, 5.0, 4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["x", "c: 1", "2", "3", "d: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"],
+        )
+        cp10 = groupedcoefplot(m5, m6; intercept=false, headers=true, strict_names_order=true)
+        @test cp10[1][:yaxis][:ticks] == (
+                [8.5, 7.5, 7.0, 6.5, 5.5, 5.0, 4.5, 3.5, 3.0, 2.5, 1.5, 1.0, 0.5],
+                ["x", "c: 1", "2", "3", "d: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3", "d: 3", "1", "2"],
+        )
+
+        # Test groupedcoefplot spacing
+        cp11 = groupedcoefplot(m3, m5; intercept=true, headers=true, term_width=4, incategory_width=2.5, offset=3, group_offset=1)
+        @test cp11[1][:yaxis][:ticks] == (
+                [58.0, 54.0, 50.0, 47.5, 45.0, 41.0, 38.5, 36.0, 32.0, 29.5, 27.0, 24.5, 22.0, 19.5, 17.0, 14.5, 12.0, 8.0, 5.5, 3.0],
+                ["(Intercept)", "x", "c: 1", "2", "3", "d: 1", "2", "3", "c & d: 1 & 1", "2 & 1", "3 & 1", "1 & 2", "2 & 2", "3 & 2", "1 & 3", "2 & 3", "3 & 3", "x & c: x & 1", "x & 2", "x & 3"],
+        )
+
+        # Test horizontal orientation
+        cp12 = coefplot(m1; orientation=:h, headers=true, term_width=4, incategory_width=1.5, offset=1)
+        @test cp12[1][:yaxis][:ticks] == :auto
+        @test cp12[1][:xaxis][:ticks] == (
+                [1.0, 5.0, 6.5, 8.0, 12.0, 13.5, 15.0],
+                ["x", "c: 1", "2", "3", "x & c: x & 1", "x & 2", "x & 3"],
+        )
+
+    end
 end
