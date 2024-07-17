@@ -1,6 +1,6 @@
 # StatsPlots
 
-[![Build Status](https://travis-ci.org/JuliaPlots/StatsPlots.jl.svg?branch=master)](https://travis-ci.org/JuliaPlots/StatsPlots.jl)
+[![Build Status](https://github.com/JuliaPlots/StatsPlots.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/JuliaPlots/StatsPlots.jl/actions/workflows/CI.yml)
 [![Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://docs.juliaplots.org/latest/generated/statsplots/)
 [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://julialang.zulipchat.com/#narrow/stream/236493-plots)
 
