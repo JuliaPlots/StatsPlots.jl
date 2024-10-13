@@ -18,13 +18,13 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
 )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
-        if step(x) == first(x) == 1
-            x = plotattributes[:series_plotindex]
+        x = if step(x) == first(x) == 1
+            plotattributes[:series_plotindex]
         else
-            x = [getindex(x, plotattributes[:series_plotindex])]
+            [getindex(x, plotattributes[:series_plotindex])]
         end
     end
-    xsegs, ysegs = Segments(), Segments()
+    xsegs, ysegs = Plots.PlotsBase.Segments(), Plots.PlotsBase.Segments()
     texts = String[]
     glabels = sort(collect(unique(x)))
     warning = false
@@ -162,7 +162,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
         )
     end
 
-    if !PlotsBase.isvertical(plotattributes)
+    if !isvertical(plotattributes)
         # We should draw the plot horizontally!
         xsegs, ysegs = ysegs, xsegs
         outliers_x, outliers_y = outliers_y, outliers_x
