@@ -1,10 +1,10 @@
-using StatsPlots
-using Test
-using StableRNGs
-using NaNMath
-using Clustering
-using Distributions
 using MultivariateStats
+using Distributions
+using StatsPlots
+using StableRNGs
+using Clustering
+using NaNMath
+using Test
 
 @testset "Grouped histogram" begin
     rng = StableRNG(1337)
