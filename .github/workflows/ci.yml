@@ -23,7 +23,6 @@ jobs:
         version:
           - '1.10'  # LTS
           - '1'  # latest stable
-          - 'nightly'
         os: [ubuntu-latest]
         arch: [x64, x86]
         include:  # spare windows/macos CI credits, run on julia-latest only
@@ -42,7 +41,20 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: julia-actions/cache@v1
+      - uses: julia-actions/cache@v2
+      - name: Develop RecipesBase, RecipesPipeline, PlotsBase, Plots
+        env:
+          JULIA_PKG_PRECOMPILE_AUTO: 0
+        run: |
+          julia -e '
+            using Pkg
+            Pkg.add([
+              (; url="https://github.com/JuliaPlots/Plots.jl", subdir="RecipesBase", rev="v2"),
+              (; url="https://github.com/JuliaPlots/Plots.jl", subdir="RecipesPipeline", rev="v2"),
+              (; url="https://github.com/JuliaPlots/Plots.jl", subdir="PlotsBase", rev="v2"),
+              (; url="https://github.com/JuliaPlots/Plots.jl", rev="v2"),
+            ])
+          '
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
       - uses: julia-actions/julia-processcoverage@latest
