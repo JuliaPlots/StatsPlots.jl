@@ -51,7 +51,7 @@ jobs:
         env:
           JULIA_PKG_PRECOMPILE_AUTO: 0
         run: |
-          julia -e '
+          julia --color=yes -e '
             using Pkg
             Pkg.add([
               (; url="https://github.com/JuliaPlots/Plots.jl", subdir="RecipesBase", rev="v2"),
@@ -59,7 +59,16 @@ jobs:
               (; url="https://github.com/JuliaPlots/Plots.jl", subdir="PlotsBase", rev="v2"),
               (; url="https://github.com/JuliaPlots/Plots.jl", rev="v2"),
             ])
+            Pkg.develop(; path=".")
           '
+      - name: Test StatsPlots
+        run: |
+          cmd=(julia --color=yes)
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            cmd=(xvfb-run ${cmd[@]})
+          fi
+          echo ${cmd[@]}
+          ${cmd[@]} -e 'using Pkg; Pkg.test("StatsPlots"; coverage=true)'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
       - uses: julia-actions/julia-processcoverage@latest
