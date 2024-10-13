@@ -4,7 +4,10 @@ using StatsPlots
 using StableRNGs
 using Clustering
 using NaNMath
+using Plots
 using Test
+
+import Plots: PlotsBase
 
 @testset "Grouped histogram" begin
     rng = StableRNG(1337)
