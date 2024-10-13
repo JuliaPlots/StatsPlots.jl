@@ -69,8 +69,6 @@ jobs:
           fi
           echo ${cmd[@]}
           ${cmd[@]} -e 'using Pkg; Pkg.test("StatsPlots"; coverage=true)'
-      - uses: julia-actions/julia-buildpkg@latest
-      - uses: julia-actions/julia-runtest@latest
       - uses: julia-actions/julia-processcoverage@latest
       - uses: codecov/codecov-action@v4
         with:
