@@ -40,15 +40,15 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:(end - 1)]
 )
     # if only y is provided, then x will be UnitRange 1:size(y,2)
     if typeof(x) <: AbstractRange
-        if step(x) == first(x) == 1
-            x = plotattributes[:series_plotindex]
+        x = if step(x) == first(x) == 1
+            plotattributes[:series_plotindex]
         else
-            x = [getindex(x, plotattributes[:series_plotindex])]
+            [getindex(x, plotattributes[:series_plotindex])]
         end
     end
-    xsegs, ysegs = Segments(), Segments()
-    qxsegs, qysegs = Segments(), Segments()
-    mxsegs, mysegs = Segments(), Segments()
+    xsegs, ysegs = Plots.PlotsBase.Segments(), Plots.PlotsBase.Segments()
+    qxsegs, qysegs = Plots.PlotsBase.Segments(), Plots.PlotsBase.Segments()
+    mxsegs, mysegs = Plots.PlotsBase.Segments(), Plots.PlotsBase.Segments()
     glabels = sort(collect(unique(x)))
     bw = plotattributes[:bar_width]
     bw == nothing && (bw = 0.8)
