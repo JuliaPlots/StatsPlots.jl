@@ -14,7 +14,7 @@ function violin_coords(
         wts === nothing ? KernelDensity.kde(y, npoints = 200, bandwidth = bandwidth) :
         KernelDensity.kde(y, weights = weights(wts), npoints = 200, bandwidth = bandwidth)
     if trim
-        xmin, xmax = Plots.ignorenan_extrema(y)
+        xmin, xmax = PlotsBase.ignorenan_extrema(y)
         inside = Bool[xmin <= x <= xmax for x in kd.x]
         return (kd.density[inside], kd.x[inside])
     end
@@ -65,10 +65,10 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:(end - 1)]
 
         # normalize
         hw = 0.5_cycle(bw, i)
-        widths = hw * widths / Plots.ignorenan_maximum(widths)
+        widths = hw * widths / PlotsBase.ignorenan_maximum(widths)
 
         # make the violin
-        xcenter = Plots.discrete_value!(plotattributes, :x, glabel)[1]
+        xcenter = PlotsBase.discrete_value!(plotattributes, :x, glabel)[1]
         xcoords = if (side === :right)
             vcat(widths, zeros(length(widths))) .+ xcenter
         elseif (side === :left)
@@ -168,7 +168,7 @@ get_quantiles(n::Int) = range(0, 1, length = n + 2)[2:(end - 1)]
     y := []
     ()
 end
-Plots.@deps violin shape
+PlotsBase.@deps violin shape
 
 # ------------------------------------------------------------------------------
 # Grouped Violin
@@ -212,4 +212,4 @@ recipetype(::Val{:groupedviolin}, args...) = GroupedViolin(args)
     x, y
 end
 
-Plots.@deps groupedviolin violin
+PlotsBase.@deps groupedviolin violin

@@ -26,7 +26,7 @@
         # filter y
         groupy = y[filter(i -> _cycle(x, i) == grouplabel, 1:length(y))]
 
-        center = Plots.discrete_value!(plotattributes, :x, grouplabel)[1]
+        center = PlotsBase.discrete_value!(plotattributes, :x, grouplabel)[1]
         halfwidth = 0.5_cycle(barwidth, i)
 
         offsets = getoffsets(halfwidth, groupy)
@@ -47,11 +47,12 @@
     ()
 end
 
-Plots.@deps dotplot scatter
-Plots.@shorthands dotplot
+PlotsBase.@deps dotplot scatter
+PlotsBase.@shorthands dotplot
 
 function violinoffsets(maxwidth, y)
-    normalizewidths(maxwidth, widths) = maxwidth * widths / Plots.ignorenan_maximum(widths)
+    normalizewidths(maxwidth, widths) =
+        maxwidth * widths / PlotsBase.ignorenan_maximum(widths)
 
     function getlocalwidths(widths, centers, y)
         upperbounds =
@@ -112,4 +113,4 @@ recipetype(::Val{:groupeddotplot}, args...) = GroupedDotplot(args)
     x, y
 end
 
-Plots.@deps groupeddotplot dotplot
+PlotsBase.@deps groupeddotplot dotplot

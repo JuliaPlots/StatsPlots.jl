@@ -51,8 +51,8 @@ end
     foreground_color_border := nothing
     margin := 1mm
     titlefont := font(11)
-    fillcolor --> Plots.fg_color(plotattributes)
-    linecolor --> Plots.fg_color(plotattributes)
+    fillcolor --> PlotsBase.fg_color(plotattributes)
+    linecolor --> PlotsBase.fg_color(plotattributes)
     markeralpha := 0.4
     grad = cgrad(get(plotattributes, :markercolor, :RdYlBu))
     indices = reshape(1:(n^2), n, n)'

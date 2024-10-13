@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [master, v2]
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    env:
+      GKS_ENCODING: "utf8"
+      GKSwstype: "nul"
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1.10'  # lower declared julia compat in `Project.toml`
+          - '1'
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        arch: [x64]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: julia-actions/cache@v2
+      - name: Develop RecipesBase, RecipesPipeline, PlotsBase, Plots
+        env:
+          JULIA_PKG_PRECOMPILE_AUTO: 0
+        run: |
+          julia --color=yes -e '
+            using Pkg
+            Pkg.add([
+              (; url="https://github.com/JuliaPlots/Plots.jl", subdir="RecipesBase", rev="v2"),
+              (; url="https://github.com/JuliaPlots/Plots.jl", subdir="RecipesPipeline", rev="v2"),
+              (; url="https://github.com/JuliaPlots/Plots.jl", subdir="PlotsBase", rev="v2"),
+              (; url="https://github.com/JuliaPlots/Plots.jl", rev="v2"),
+            ])
+            Pkg.develop(; path=".")
+          '
+      - name: Test StatsPlots
+        run: |
+          cmd=(julia --color=yes)
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            cmd=(xvfb-run ${cmd[@]})
+          fi
+          echo ${cmd[@]}
+          ${cmd[@]} -e 'using Pkg; Pkg.test("StatsPlots"; coverage=true)'
+      - uses: julia-actions/julia-processcoverage@latest
+      - uses: codecov/codecov-action@v4
+        with:
+          file: lcov.info
+  Skip:
+    if: "contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip CI 🚫
+        run: echo skip ci

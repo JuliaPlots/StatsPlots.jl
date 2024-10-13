@@ -7,7 +7,6 @@ import TableOperations
 using RecipesPipeline
 @reexport using Plots
 import Plots: _cycle
-using Plots.PlotMeasures
 using StatsBase
 using Distributions
 using LinearAlgebra: eigen, diagm

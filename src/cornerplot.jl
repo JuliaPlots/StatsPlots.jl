@@ -49,8 +49,8 @@ recipetype(::Val{:cornerplot}, args...) = CornerPlot(args)
     foreground_color_border := nothing
     margin --> 1mm
     titlefont --> font(11)
-    fillcolor --> Plots.fg_color(plotattributes)
-    linecolor --> Plots.fg_color(plotattributes)
+    fillcolor --> PlotsBase.fg_color(plotattributes)
+    linecolor --> PlotsBase.fg_color(plotattributes)
     grid --> true
     ticks := nothing
     xformatter := x -> ""

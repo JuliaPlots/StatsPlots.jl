@@ -6,9 +6,9 @@
     x, y = x[i], y[i]
     scale = get(plotattributes, :scale, :identity)
     xlims, ylims = map(
-        x -> Plots.scale_lims(
-            Plots.ignorenan_extrema(x)...,
-            Plots.default_widen_factor,
+        x -> PlotsBase.Axes.scale_lims(
+            PlotsBase.ignorenan_extrema(x)...,
+            PlotsBase.Axes.default_widen_factor,
             scale,
         ),
         (x, y),
@@ -26,8 +26,8 @@
     # main scatter2d
     @series begin
         seriestype := :scatter
-        right_margin --> 0mm
-        top_margin --> 0mm
+        right_margin --> 0PlotsBase.mm
+        top_margin --> 0PlotsBase.mm
         subplot := 2
         xlims --> xlims
         ylims --> ylims
@@ -37,8 +37,8 @@
     ticks := nothing
     xguide := ""
     yguide := ""
-    fillcolor --> Plots.fg_color(plotattributes)
-    linecolor --> Plots.fg_color(plotattributes)
+    fillcolor --> PlotsBase.fg_color(plotattributes)
+    linecolor --> PlotsBase.fg_color(plotattributes)
 
     if density
         trim := true
@@ -50,7 +50,7 @@
     # upper scatter
     @series begin
         subplot := 1
-        bottom_margin --> 0mm
+        bottom_margin --> 0PlotsBase.mm
         showaxis := :x
         x := x
         y := ones(y |> size)
@@ -63,7 +63,7 @@
         orientation := :h
         showaxis := :y
         subplot := 3
-        left_margin --> 0mm
+        left_margin --> 0PlotsBase.mm
         # bins := edges2
         y := y
         x := ones(x |> size)

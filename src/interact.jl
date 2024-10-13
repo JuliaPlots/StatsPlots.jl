@@ -16,9 +16,9 @@ function dataviewer(t; throttle = 0.1, nbins = 30, nbins_range = 1:100)
     y_toggle = Widgets.togglecontent(y, value = false, label = "Second axis")
     plot_type = Widgets.dropdown(
         OrderedDict(
-            "line"         => Plots.plot,
-            "scatter"      => Plots.scatter,
-            "bar"          => (Plots.bar, StatsPlots.groupedbar),
+            "line"         => PlotsBase.plot,
+            "scatter"      => PlotsBase.scatter,
+            "bar"          => (PlotsBase.bar, StatsPlots.groupedbar),
             "boxplot"      => (StatsPlots.boxplot, StatsPlots.groupedboxplot),
             "corrplot"     => StatsPlots.corrplot,
             "cornerplot"   => StatsPlots.cornerplot,
