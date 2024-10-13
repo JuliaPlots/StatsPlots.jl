@@ -27,9 +27,10 @@ using NaNMath
 
 export @df, dataviewer
 
-isvertical(plotattributes) = let val = get(plotattributes, :orientation, missing)
-  val === missing || val in (:vertical, :v)
-end
+isvertical(plotattributes) =
+    let val = get(plotattributes, :orientation, missing)
+        val === missing || val in (:vertical, :v)
+    end
 
 include("df.jl")
 include("interact.jl")
