@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6' # LTS
-          - '1' # latest stable
+          - '1.10'  # LTS
+          - '1'  # latest stable
           - 'nightly'
         os: [ubuntu-latest]
         arch: [x64, x86]
