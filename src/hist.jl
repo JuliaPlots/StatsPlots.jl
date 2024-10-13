@@ -12,7 +12,7 @@
 )
     newx, newy =
         violin_coords(y, trim = trim, wts = plotattributes[:weights], bandwidth = bandwidth)
-    if Plots.isvertical(plotattributes)
+    if PlotsBase.isvertical(plotattributes)
         newx, newy = newy, newx
     end
     x := newx
@@ -20,7 +20,7 @@
     seriestype := :path
     ()
 end
-Plots.@deps density path
+PlotsBase.@deps density path
 
 # ---------------------------------------------------------------------------
 # cumulative density
@@ -37,7 +37,7 @@ Plots.@deps density path
     newx, newy =
         violin_coords(y, trim = trim, wts = plotattributes[:weights], bandwidth = bandwidth)
 
-    if Plots.isvertical(plotattributes)
+    if PlotsBase.isvertical(plotattributes)
         newx, newy = newy, newx
     end
 
@@ -49,14 +49,14 @@ Plots.@deps density path
     seriestype := :path
     ()
 end
-Plots.@deps cdensity path
+PlotsBase.@deps cdensity path
 
 ea_binnumber(y, bin::AbstractVector) =
     error("You cannot specify edge locations for equal area histogram")
 ea_binnumber(y, bin::Real) =
     (floor(bin) == bin || error("Only integer or symbol values accepted by bins"); Int(bin))
 ea_binnumber(y, bin::Int) = bin
-ea_binnumber(y, bin::Symbol) = Plots._auto_binning_nbins((y,), 1, mode = bin)
+ea_binnumber(y, bin::Symbol) = PlotsBase._auto_binning_nbins((y,), 1, mode = bin)
 
 @recipe function f(::Type{Val{:ea_histogram}}, x, y, z)
     bin = ea_binnumber(y, plotattributes[:bins])
@@ -65,9 +65,9 @@ ea_binnumber(y, bin::Symbol) = Plots._auto_binning_nbins((y,), 1, mode = bin)
     seriestype := :barhist
     ()
 end
-Plots.@deps histogram barhist
+PlotsBase.@deps histogram barhist
 
-push!(Plots._histogram_like, :ea_histogram)
+push!(PlotsBase.Commons._histogram_like, :ea_histogram)
 
 @shorthands ea_histogram
 
@@ -83,7 +83,7 @@ end
 
 @userplot GroupedHist
 
-Plots.group_as_matrix(g::GroupedHist) = true
+PlotsBase.group_as_matrix(g::GroupedHist) = true
 
 @recipe function f(p::GroupedHist)
     _, v = grouped_xy(p.args...)
@@ -93,7 +93,7 @@ Plots.group_as_matrix(g::GroupedHist) = true
     weights = get(plotattributes, :weights, nothing)
 
     # compute edges from ungrouped data
-    h = Plots._make_hist((vec(copy(v)),), bins; normed = normed, weights = weights)
+    h = PlotsBase._make_hist((vec(copy(v)),), bins; normed = normed, weights = weights)
     nbins = length(h.weights)
     edges = h.edges[1]
     bar_width --> mean(map(i -> edges[i + 1] - edges[i], 1:nbins))
@@ -113,7 +113,7 @@ Plots.group_as_matrix(g::GroupedHist) = true
             groupinds = idxs[i]
             v_i = filter(x -> !isnan(x), v[:, i])
             w_i = weights == nothing ? nothing : weights[groupinds]
-            h_i = Plots._make_hist((v_i,), h.edges; normed = false, weights = w_i)
+            h_i = PlotsBase._make_hist((v_i,), h.edges; normed = false, weights = w_i)
             if normed
                 y[:, i] .= h_i.weights .* (length(v_i) / ntot / sum(h_i.weights))
             else
@@ -130,7 +130,7 @@ end
 # Ported from R code located here https://github.com/cran/KernSmooth/tree/master/R
 
 "Returns optimal histogram edge positions in accordance to Wand (1995)'s criterion'"
-Plots.wand_edges(x::AbstractVector, args...) = (binwidth = wand_bins(x, args...);
+PlotsBase.wand_edges(x::AbstractVector, args...) = (binwidth = wand_bins(x, args...);
 (minimum(x) - binwidth):binwidth:(maximum(x) + binwidth))
 
 "Returns optimal histogram bin widths in accordance to Wand (1995)'s criterion'"

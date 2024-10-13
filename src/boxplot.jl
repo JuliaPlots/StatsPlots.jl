@@ -50,7 +50,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
         end
 
         # make the shape
-        center = Plots.discrete_value!(plotattributes, :x, glabel)[1] + xshift
+        center = PlotsBase.discrete_value!(plotattributes, :x, glabel)[1] + xshift
         hw = 0.5_cycle(bw, i) # Box width
         HW = 0.5_cycle(ww, i) # Whisker width
         l, m, r = center - hw, center, center + hw
@@ -75,7 +75,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
             end
             # change q1 and q5 to show outliers
             # using maximum and minimum values inside the limits
-            q1, q5 = Plots.ignorenan_extrema(inside)
+            q1, q5 = PlotsBase.ignorenan_extrema(inside)
             q1, q5 = (min(q1, q2), max(q4, q5)) # whiskers cannot be inside the box
         end
         # Box
@@ -162,7 +162,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
         )
     end
 
-    if !Plots.isvertical(plotattributes)
+    if !PlotsBase.isvertical(plotattributes)
         # We should draw the plot horizontally!
         xsegs, ysegs = ysegs, xsegs
         outliers_x, outliers_y = outliers_y, outliers_x
@@ -203,7 +203,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
     primary := false
     seriestype := :path
     marker := false
-    if Plots.is_attr_supported(Plots.backend(), :hover)
+    if PlotsBase.is_attr_supported(PlotsBase.backend(), :hover)
         hover := texts
     end
     linewidth := 0
@@ -212,7 +212,7 @@ notch_width(q2, q4, N) = 1.58 * (q4 - q2) / sqrt(N)
     ()
 end
 
-Plots.@deps boxplot shape scatter
+PlotsBase.@deps boxplot shape scatter
 
 # ------------------------------------------------------------------------------
 # Grouped Boxplot
@@ -256,4 +256,4 @@ recipetype(::Val{:groupedboxplot}, args...) = GroupedBoxplot(args)
     x, y
 end
 
-Plots.@deps groupedboxplot boxplot
+PlotsBase.@deps groupedboxplot boxplot

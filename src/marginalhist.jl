@@ -6,11 +6,11 @@
     x, y = x[i], y[i]
     bns = get(plotattributes, :bins, :auto)
     scale = get(plotattributes, :scale, :identity)
-    edges1, edges2 = Plots._hist_edges((x, y), bns)
+    edges1, edges2 = PlotsBase._hist_edges((x, y), bns)
     xlims, ylims = map(
-        x -> Plots.scale_lims(
-            Plots.ignorenan_extrema(x)...,
-            Plots.default_widen_factor,
+        x -> PlotsBase.Axes.scale_lims(
+            PlotsBase.ignorenan_extrema(x)...,
+            PlotsBase.Axes.default_widen_factor,
             scale,
         ),
         (x, y),
@@ -28,8 +28,8 @@
     # main histogram2d
     @series begin
         seriestype := :histogram2d
-        right_margin --> 0mm
-        top_margin --> 0mm
+        right_margin --> 0PlotsBase.mm
+        top_margin --> 0PlotsBase.mm
         subplot := 2
         bins := (edges1, edges2)
         xlims --> xlims
@@ -41,8 +41,8 @@
     xguide := ""
     yguide := ""
     foreground_color_border := nothing
-    fillcolor --> Plots.fg_color(plotattributes)
-    linecolor --> Plots.fg_color(plotattributes)
+    fillcolor --> PlotsBase.fg_color(plotattributes)
+    linecolor --> PlotsBase.fg_color(plotattributes)
 
     if density
         trim := true
@@ -54,7 +54,7 @@
     # upper histogram
     @series begin
         subplot := 1
-        bottom_margin --> 0mm
+        bottom_margin --> 0PlotsBase.mm
         bins := edges1
         y := x
         xlims --> xlims
@@ -64,7 +64,7 @@
     @series begin
         orientation := :h
         subplot := 3
-        left_margin --> 0mm
+        left_margin --> 0PlotsBase.mm
         bins := edges2
         y := y
         ylims --> ylims

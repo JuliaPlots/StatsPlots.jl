@@ -2,7 +2,7 @@
 
 recipetype(::Val{:groupedbar}, args...) = GroupedBar(args)
 
-Plots.group_as_matrix(g::GroupedBar) = true
+PlotsBase.group_as_matrix(g::GroupedBar) = true
 
 grouped_xy(x::AbstractVector, y::AbstractArray) = x, y
 grouped_xy(y::AbstractArray) = 1:size(y, 1), y
