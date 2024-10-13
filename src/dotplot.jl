@@ -51,7 +51,8 @@ PlotsBase.@deps dotplot scatter
 PlotsBase.@shorthands dotplot
 
 function violinoffsets(maxwidth, y)
-    normalizewidths(maxwidth, widths) = maxwidth * widths / PlotsBase.ignorenan_maximum(widths)
+    normalizewidths(maxwidth, widths) =
+        maxwidth * widths / PlotsBase.ignorenan_maximum(widths)
 
     function getlocalwidths(widths, centers, y)
         upperbounds =
