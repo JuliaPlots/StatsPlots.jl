@@ -19,15 +19,14 @@ jobs:
     env:
       GKS_ENCODING: "utf8"
       GKSwstype: "nul"
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.version == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
         version:
-          - '1.10'  # LTS
-          - '1'  # latest stable
+          - '1.10'  # lower declared julia compat in `Project.toml`
+          - '1'
         os: [ubuntu-latest, windows-latest, macos-latest]
         arch: [x64]
 
