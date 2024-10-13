@@ -12,7 +12,7 @@
 )
     newx, newy =
         violin_coords(y, trim = trim, wts = plotattributes[:weights], bandwidth = bandwidth)
-    if PlotsBase.isvertical(plotattributes)
+    if isvertical(plotattributes)
         newx, newy = newy, newx
     end
     x := newx
@@ -37,7 +37,7 @@ PlotsBase.@deps density path
     newx, newy =
         violin_coords(y, trim = trim, wts = plotattributes[:weights], bandwidth = bandwidth)
 
-    if PlotsBase.isvertical(plotattributes)
+    if isvertical(plotattributes)
         newx, newy = newy, newx
     end
 
