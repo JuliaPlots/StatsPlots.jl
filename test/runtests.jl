@@ -184,3 +184,9 @@ end
     pl = marginalscatter(rand(rng, 100), rand(rng, 100))
     @test show(devnull, pl) isa Nothing
 end
+
+@testset "violin" begin
+    rng = StableRNG(1337)
+    pl = violin(repeat([.1, .2, .3], outer=100), randn(300), side=:right)
+    @test show(devnull, pl) isa Nothing
+end
