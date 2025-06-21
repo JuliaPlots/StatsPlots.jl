@@ -1,6 +1,4 @@
-# WARNING
-
-https://github.com/JuliaPlots/StatsPlots.jl is now integrated into https://github.com/JuliaPlots/Plots.jl for Plots v2, please make corresponding PRs there.
+# WARNING: `StatsPlots` is now integrated into https://github.com/JuliaPlots/Plots.jl for Plots v2, please make corresponding PRs there.
 
 # StatsPlots
 
