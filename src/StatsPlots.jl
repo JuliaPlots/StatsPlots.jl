@@ -19,6 +19,9 @@ import Clustering: Hclust, nnodes
 using Interpolations
 using MultivariateStats: MultivariateStats
 using AbstractFFTs: fft, ifft
+using StatsAPI
+using StatsModels
+using StatsModels: hasintercept, TableRegressionModel, kron_insideout, vectorize
 import KernelDensity
 using NaNMath
 @recipe f(k::KernelDensity.UnivariateKDE) = k.x, k.density
@@ -47,5 +50,6 @@ include("andrews.jl")
 include("ordinations.jl")
 include("covellipse.jl")
 include("errorline.jl")
+include("statsmodels.jl")
 
 end # module
